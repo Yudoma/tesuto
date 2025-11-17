@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Effekseer Sample</title>
+    <style>
+        /* 画面中央に表示するための簡易スタイル */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #333; /* 暗い背景色 */
+        }
+        canvas {
+            border: 1px solid #fff;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="efk_canvas" width="640" height="480"></canvas>
+
+    <script src="effekseer.min.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
