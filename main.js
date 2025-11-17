@@ -22,20 +22,16 @@ window.onload = function() {
         canvas.height = height;
         effekseer.resize(width, height);
 
-        // --- ▽ 2D用のカメラ設定 (ここから) ▽ ---
-        // (0, 0) を左上隅、(width, height) を右下隅とする
-        // Z深度（描画範囲）を -1000 ～ 1000 に拡大
         effekseer.setProjectionMatrix(
-            effekseer.createMatrix().ortho(0, width, height, 0, -1000, 1000) /* <-- 修正箇所 */
+            effekseer.createMatrix().ortho(0, width, height, 0, -1000, 1000)
         );
         effekseer.setViewerMatrix(
             effekseer.createMatrix().lookAt(
-                effekseer.createVector3(0, 0, 1), // 2D用の標準ビュー
+                effekseer.createVector3(0, 0, 1),
                 effekseer.createVector3(0, 0, 0),
                 effekseer.createVector3(0, 1, 0)
             )
         );
-        // --- △ 2D用のカメラ設定 (ここまで) △ ---
     }
 
     // 最初に一度、サイズを合わせる
@@ -52,15 +48,21 @@ window.onload = function() {
         
         console.log('Effect load complete. Playing effect at center.');
 
+        // --- ▽ 修正箇所 (ここから) ▽ ---
+        // スケール（拡大率）を10倍にして再生してみる
+        const scale = 10.0;
+        console.log(`Playing with scale: ${scale}`);
+
         // 読み込み完了後、画面の「中央」に再生
-        effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0);
+        effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0, scale);
 
         // 3秒ごとにもう一度再生する (確認のため)
         setInterval(() => {
-            console.log('Re-playing effect at center.');
-            // 座標を再指定して再生
-            effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0);
+            console.log(`Re-playing effect at center with scale: ${scale}`);
+            // 座標とスケールを再指定して再生
+            effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0, scale);
         }, 3000);
+        // --- △ 修正箇所 (ここまで) △ ---
 
     }, (err) => {
         console.error('Failed to load effect:', err);
@@ -71,9 +73,6 @@ window.onload = function() {
     function loop() {
         requestAnimationFrame(loop);
         effekseer.update();
-        
-        // (カメラ設定は resize 時に行うので、ここでは不要)
-
         effekseer.draw();
     }
 
