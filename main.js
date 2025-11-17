@@ -14,13 +14,27 @@ window.onload = function() {
         return;
     }
 
-    // キャンバスの解像度をウインドウサイズに合わせる関数
+    // キャンバスの解像度と2Dカメラをウインドウサイズに合わせる関数
     function handleResize() {
         const width = window.innerWidth;
         const height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
         effekseer.resize(width, height);
+
+        // --- ▽ 2D用のカメラ設定 (ここから) ▽ ---
+        // (0, 0) を左上隅、(width, height) を右下隅とする
+        effekseer.setProjectionMatrix(
+            effekseer.createMatrix().ortho(0, width, height, 0, -1, 1)
+        );
+        effekseer.setViewerMatrix(
+            effekseer.createMatrix().lookAt(
+                effekseer.createVector3(0, 0, 1), // 2D用の標準ビュー
+                effekseer.createVector3(0, 0, 0),
+                effekseer.createVector3(0, 1, 0)
+            )
+        );
+        // --- △ 2D用のカメラ設定 (ここまで) △ ---
     }
 
     // 最初に一度、サイズを合わせる
@@ -35,18 +49,18 @@ window.onload = function() {
     // エフェクトの読み込み
     const effect = effekseer.loadEffect(effectUrl, './', () => {
         
-        // --- ▽ 修正箇所 ▽ ---
-        console.log('Effect load complete. Playing effect.'); // 読み込み完了をコンソールで確認
+        console.log('Effect load complete. Playing effect at center.');
 
-        // 読み込み完了後にエフェクトを再生
-        effekseer.play(effect, 0, 0, 0);
+        // 読み込み完了後、画面の「中央」に再生
+        // (X: canvas.width / 2, Y: canvas.height / 2, Z: 0)
+        effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0);
 
         // 3秒ごとにもう一度再生する (確認のため)
         setInterval(() => {
-            console.log('Re-playing effect.');
-            effekseer.play(effect, 0, 0, 0);
+            console.log('Re-playing effect at center.');
+            // 座標を再指定して再生
+            effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0);
         }, 3000);
-        // --- △ 修正箇所 △ ---
 
     }, (err) => {
         console.error('Failed to load effect:', err);
@@ -58,23 +72,7 @@ window.onload = function() {
         requestAnimationFrame(loop);
         effekseer.update();
         
-        // 3D空間のカメラを設定
-        effekseer.setViewerMatrix(
-            effekseer.createMatrix().lookAt(
-                effekseer.createVector3(0, 5, 20),
-                effekseer.createVector3(0, 0, 0),
-                effekseer.createVector3(0, 1, 0)
-            )
-        );
-        
-        effekseer.setProjectionMatrix(
-            effekseer.createMatrix().perspective(
-                60 * Math.PI / 180,
-                canvas.width / canvas.height, // アスペクト比を動的に取得
-                1.0,
-                100.0
-            )
-        );
+        // (カメラ設定は resize 時に行うので、ここでは不要)
 
         effekseer.draw();
     }
