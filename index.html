@@ -2,30 +2,17 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Effekseer Sample with Three.js</title>
+    <title>Effekseer Effect Display</title>
     <style>
-        /* 画面中央に表示するための簡易スタイル */
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #333; /* 暗い背景色 */
-        }
-        canvas {
-            border: 1px solid #fff;
-            background-color: #000;
-        }
+        /* 画面全体にキャンバスを表示し、背景を黒にする */
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        canvas { display: block; width: 100vw; height: 100vh; }
     </style>
 </head>
 <body>
-    <canvas id="efk_canvas" width="640" height="480"></canvas>
+    <canvas id="efk_canvas"></canvas>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <script src="effekseer.min.js"></script>
+    <script src="https://effekseer.github.io/for_web/js/effekseer.min.js"></script>
     
     <script src="main.js"></script>
 </body>

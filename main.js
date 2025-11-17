@@ -1,78 +1,75 @@
-window.onload = () => {
-    // HTMLのcanvas要素を取得
+window.onload = function() {
     const canvas = document.getElementById('efk_canvas');
+    if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+    }
 
-    // 1. Three.js のセットアップ
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 1, 50);
-    // 元のEffekseerのカメラ設定に合わせておく
-    camera.position.set(0, 5, 20);
-    camera.lookAt(0, 0, 0);
+    // Effekseerの初期化 (WebGLコンテキストを取得)
+    try {
+        effekseer.init(canvas);
+    } catch (e) {
+        console.error('Failed to initialize Effekseer:', e);
+        alert('Effekseerの初期化に失敗しました。WebGLがサポートされているか確認してください。');
+        return;
+    }
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas });
-    renderer.setSize(canvas.width, canvas.height);
+    // エフェクトファイルのパス
+    // (index.html と同じ階層にある前提)
+    const effectUrl = './pipoya-saceffect_001.efkefc';
 
-    // (お好みで) Three.jsのシーンに目印となるものを追加
-    const gridHelper = new THREE.GridHelper(50, 10);
-    scene.add(gridHelper);
+    // エフェクトの読み込み
+    [cite_start]// .efkefc ファイル内で参照されているテクスチャパス [cite: 1, 3] が
+    // 'Texture/pipoya-saceffect_001_192.png' のため、
+    // 基準パス(第二引数)は './' (カレントディレクトリ) を指定します。
+    const effect = effekseer.loadEffect(effectUrl, './', () => {
+        
+        // 読み込み完了後にエフェクトを再生
+        // (0, 0, 0) の座標で再生開始
+        effekseer.play(effect, 0, 0, 0);
 
-    // 2. Effekseerの初期化
-    // ★★★ 修正点：Three.jsのレンダラーからglコンテキストを取得 ★★★
-    const gl = renderer.getContext();
-    
-    // effekseer.wasm は自動的に同じ階層から読み込まれます
-    effekseer.init(gl).then(() => {
-        console.log("Effekseer initialized.");
+    }, (err) => {
+        // ロード失敗時の処理
+        console.error('Failed to load effect:', err);
+        alert('エフェクトファイルの読み込みに失敗しました。\n' + effectUrl + '\nファイルが正しい場所にあるか確認してください。');
+    });
 
-        // エフェクトファイルの読み込み
-        // (pipoya-saceffect_001_192.png も同じ階層にある前提)
-        const effectUrl = 'pipoya-saceffect_001.efkefc';
-        const effect = effekseer.loadEffect(effectUrl, 1.0, () => {
-            // ロード完了時の処理
-            console.log("Effect loaded:", effectUrl);
+    // 描画ループを開始
+    function loop() {
+        // 次のフレームで loop を再度実行
+        requestAnimationFrame(loop);
 
-            // エフェクトの再生
-            const handle = effekseer.play(effect);
+        // Effekseerの内部状態を更新
+        effekseer.update();
+        
+        // 3D空間のカメラを設定
+        // ビュー（視点）マトリックス
+        effekseer.setViewerMatrix(
+            effekseer.createMatrix().lookAt(
+                effekseer.createVector3(0, 5, 20),  // カメラの位置 (Z軸手前)
+                effekseer.createVector3(0, 0, 0),   // 注視点 (原点)
+                effekseer.createVector3(0, 1, 0)    // カメラの上方向 (Y軸)
+            )
+        );
+        
+        // プロジェクション（投影）マトリックス
+        effekseer.setProjectionMatrix(
+            effekseer.createMatrix().perspective(
+                60 * Math.PI / 180,             // 視野角 (60度)
+                canvas.width / canvas.height,   // アスペクト比
+                1.0,                            // ニアクリップ
+                100.0                           // ファークリップ
+            )
+        );
 
-            // 再生位置をキャンバスの中央に設定
-            handle.setLocation(0, 0, 0);
+        // Effekseerの描画処理
+        effekseer.draw();
+    }
 
-        }, (error) => {
-            // ロード失敗時の処理
-            console.error("Failed to load effect:", error);
-        });
+    loop(); // 最初のループを開始
 
-        // 3. 描画ループの開始
-        const loop = () => {
-            // Effekseerの内部状態を更新
-            effekseer.update();
-
-            // ★★★ 修正点：EffekseerのカメラをThree.jsのカメラに同期 ★★★
-            // Three.jsのカメラ行列を更新 (必須)
-            camera.updateMatrixWorld();
-
-            // EffekseerにThree.jsのカメラ行列を設定
-            effekseer.setProjectionMatrix(camera.projectionMatrix.elements);
-            effekseer.setCameraMatrix(camera.matrixWorldInverse.elements);
-            
-            // ★★★ 修正点：描画順序 ★★★
-            
-            // 1. Three.jsのシーンを描画
-            renderer.render(scene, camera);
-
-            // 2. Effekseerのエフェクトを描画
-            // (Three.jsがWebGLの状態を変更するため、リセットが必要)
-            renderer.resetState(); 
-            effekseer.draw();
-
-            // 次のフレームを要求
-            requestAnimationFrame(loop);
-        };
-        loop();
-
-    }).catch((e) => {
-        // 初期化失敗
-        console.error("Failed to initialize Effekseer:", e);
-        alert('Effekseerの初期化に失敗しました。effekseer.wasm が見つからない可能性があります。');
+    // ウィンドウサイズが変更された時にキャンバスサイズを追従させる
+    window.addEventListener('resize', () => {
+        effekseer.resize(canvas.width, canvas.height);
     });
 };
