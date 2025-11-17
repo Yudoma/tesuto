@@ -10,7 +10,6 @@ window.onload = function() {
         effekseer.init(canvas);
     } catch (e) {
         console.error('Failed to initialize Effekseer:', e);
-        alert('Effekseerの初期化に失敗しました。');
         return;
     }
 
@@ -48,9 +47,8 @@ window.onload = function() {
         
         console.log('Effect load complete. Playing effect at center.');
 
-        // --- ▽ 修正箇所 (ここから) ▽ ---
-        // スケール（拡大率）を10倍にして再生してみる
-        const scale = 10.0;
+        // スケール（拡大率）を100倍にして再生
+        const scale = 100.0;
         console.log(`Playing with scale: ${scale}`);
 
         // 読み込み完了後、画面の「中央」に再生
@@ -59,10 +57,8 @@ window.onload = function() {
         // 3秒ごとにもう一度再生する (確認のため)
         setInterval(() => {
             console.log(`Re-playing effect at center with scale: ${scale}`);
-            // 座標とスケールを再指定して再生
             effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0, scale);
         }, 3000);
-        // --- △ 修正箇所 (ここまで) △ ---
 
     }, (err) => {
         console.error('Failed to load effect:', err);
