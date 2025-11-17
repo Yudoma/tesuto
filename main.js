@@ -5,28 +5,21 @@ window.onload = function() {
         return;
     }
 
-    // Effekseerの初期化 (WebGLコンテキストを取得)
+    // Effekseerの初期化
     try {
         effekseer.init(canvas);
     } catch (e) {
         console.error('Failed to initialize Effekseer:', e);
-        alert('Effekseerの初期化に失敗しました。WebGLがサポートされているか確認してください。');
+        alert('Effekseerの初期化に失敗しました。');
         return;
     }
 
-    // --- ▽ 修正箇所 (ここから) ▽ ---
-
     // キャンバスの解像度をウインドウサイズに合わせる関数
     function handleResize() {
-        // 実際のウインドウサイズを取得
         const width = window.innerWidth;
         const height = window.innerHeight;
-
-        // キャンバスの描画バッファサイズを設定
         canvas.width = width;
         canvas.height = height;
-
-        // Effekseerにリサイズを通知
         effekseer.resize(width, height);
     }
 
@@ -36,20 +29,26 @@ window.onload = function() {
     // ウィンドウサイズが変更された時にもサイズを合わせる
     window.addEventListener('resize', handleResize);
 
-    // --- △ 修正箇所 (ここまで) △ ---
-
-
     // エフェクトファイルのパス
     const effectUrl = './pipoya-saceffect_001.efkefc';
 
     // エフェクトの読み込み
     const effect = effekseer.loadEffect(effectUrl, './', () => {
         
+        // --- ▽ 修正箇所 ▽ ---
+        console.log('Effect load complete. Playing effect.'); // 読み込み完了をコンソールで確認
+
         // 読み込み完了後にエフェクトを再生
         effekseer.play(effect, 0, 0, 0);
 
+        // 3秒ごとにもう一度再生する (確認のため)
+        setInterval(() => {
+            console.log('Re-playing effect.');
+            effekseer.play(effect, 0, 0, 0);
+        }, 3000);
+        // --- △ 修正箇所 △ ---
+
     }, (err) => {
-        // ロード失敗時の処理
         console.error('Failed to load effect:', err);
         alert('エフェクトファイルの読み込みに失敗しました。\n' + effectUrl);
     });
@@ -60,7 +59,6 @@ window.onload = function() {
         effekseer.update();
         
         // 3D空間のカメラを設定
-        // (アスペクト比を canvas.width / canvas.height から取得する)
         effekseer.setViewerMatrix(
             effekseer.createMatrix().lookAt(
                 effekseer.createVector3(0, 5, 20),
@@ -72,7 +70,7 @@ window.onload = function() {
         effekseer.setProjectionMatrix(
             effekseer.createMatrix().perspective(
                 60 * Math.PI / 180,
-                canvas.width / canvas.height, // 修正後の解像度でアスペクト比を計算
+                canvas.width / canvas.height, // アスペクト比を動的に取得
                 1.0,
                 100.0
             )
