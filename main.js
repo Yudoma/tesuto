@@ -24,8 +24,9 @@ window.onload = function() {
 
         // --- ▽ 2D用のカメラ設定 (ここから) ▽ ---
         // (0, 0) を左上隅、(width, height) を右下隅とする
+        // Z深度（描画範囲）を -1000 ～ 1000 に拡大
         effekseer.setProjectionMatrix(
-            effekseer.createMatrix().ortho(0, width, height, 0, -1, 1)
+            effekseer.createMatrix().ortho(0, width, height, 0, -1000, 1000) /* <-- 修正箇所 */
         );
         effekseer.setViewerMatrix(
             effekseer.createMatrix().lookAt(
@@ -52,7 +53,6 @@ window.onload = function() {
         console.log('Effect load complete. Playing effect at center.');
 
         // 読み込み完了後、画面の「中央」に再生
-        // (X: canvas.width / 2, Y: canvas.height / 2, Z: 0)
         effekseer.play(effect, canvas.width / 2, canvas.height / 2, 0);
 
         // 3秒ごとにもう一度再生する (確認のため)
