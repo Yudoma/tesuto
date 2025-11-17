@@ -2,9 +2,13 @@ window.onload = () => {
     // HTMLのcanvas要素を取得
     const canvas = document.getElementById('efk_canvas');
 
+    // canvasからWebGLコンテキストを取得
+    const gl = canvas.getContext('webgl');
+
     // Effekseerの初期化
     // effekseer.wasm は自動的に同じ階層から読み込まれます
-    effekseer.init(canvas).then(() => {
+    // ★★★ 修正点：effekseer.init には 'canvas' ではなく 'gl' を渡します ★★★
+    effekseer.init(gl).then(() => {
         console.log("Effekseer initialized.");
 
         // エフェクトファイルの読み込み
