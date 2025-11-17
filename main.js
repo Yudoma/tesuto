@@ -2,12 +2,25 @@ window.onload = () => {
     // HTMLのcanvas要素を取得
     const canvas = document.getElementById('efk_canvas');
 
-    // canvasからWebGLコンテキストを取得
-    const gl = canvas.getContext('webgl');
+    // 1. Three.js のセットアップ
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 1, 50);
+    // 元のEffekseerのカメラ設定に合わせておく
+    camera.position.set(0, 5, 20);
+    camera.lookAt(0, 0, 0);
 
-    // Effekseerの初期化
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+    renderer.setSize(canvas.width, canvas.height);
+
+    // (お好みで) Three.jsのシーンに目印となるものを追加
+    const gridHelper = new THREE.GridHelper(50, 10);
+    scene.add(gridHelper);
+
+    // 2. Effekseerの初期化
+    // ★★★ 修正点：Three.jsのレンダラーからglコンテキストを取得 ★★★
+    const gl = renderer.getContext();
+    
     // effekseer.wasm は自動的に同じ階層から読み込まれます
-    // ★★★ 修正点：effekseer.init には 'canvas' ではなく 'gl' を渡します ★★★
     effekseer.init(gl).then(() => {
         console.log("Effekseer initialized.");
 
@@ -29,20 +42,27 @@ window.onload = () => {
             console.error("Failed to load effect:", error);
         });
 
-        // 描画ループの開始
+        // 3. 描画ループの開始
         const loop = () => {
             // Effekseerの内部状態を更新
             effekseer.update();
 
-            // 描画（ビュー・プロジェクション行列を簡易的に設定）
-            effekseer.setProjectionMatrix(effekseer.createProjectionMatrix(60, canvas.width / canvas.height, 1, 50));
-            effekseer.setCameraMatrix(effekseer.createCameraMatrix(
-                [0, 5, 20], // カメラの位置
-                [0, 0, 0],  // カメラの注視点
-                [0, 1, 0]   // カメラの上方向
-            ));
+            // ★★★ 修正点：EffekseerのカメラをThree.jsのカメラに同期 ★★★
+            // Three.jsのカメラ行列を更新 (必須)
+            camera.updateMatrixWorld();
+
+            // EffekseerにThree.jsのカメラ行列を設定
+            effekseer.setProjectionMatrix(camera.projectionMatrix.elements);
+            effekseer.setCameraMatrix(camera.matrixWorldInverse.elements);
             
-            // 描画実行
+            // ★★★ 修正点：描画順序 ★★★
+            
+            // 1. Three.jsのシーンを描画
+            renderer.render(scene, camera);
+
+            // 2. Effekseerのエフェクトを描画
+            // (Three.jsがWebGLの状態を変更するため、リセットが必要)
+            renderer.resetState(); 
             effekseer.draw();
 
             // 次のフレームを要求
