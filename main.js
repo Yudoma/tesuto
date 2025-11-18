@@ -5,9 +5,17 @@ window.onload = function() {
         return;
     }
 
+    // 💡 修正点: WebGLコンテキストを取得する (webgl または experimental-webgl)
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+        console.error('WebGL is not supported!');
+        return;
+    }
+    
     // Effekseerの初期化
     try {
-        effekseer.init(canvas);
+        // 💡 修正点: glコンテキストを渡して初期化
+        effekseer.init(gl);
     } catch (e) {
         console.error('Failed to initialize Effekseer:', e);
         return;
@@ -21,9 +29,11 @@ window.onload = function() {
         canvas.height = height;
         effekseer.resize(width, height);
 
+        // カメラ設定 (正射影)
         effekseer.setProjectionMatrix(
             effekseer.createMatrix().ortho(0, width, height, 0, -1000, 1000)
         );
+        // ビューア設定
         effekseer.setViewerMatrix(
             effekseer.createMatrix().lookAt(
                 effekseer.createVector3(0, 0, 1),
