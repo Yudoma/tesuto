@@ -2,16 +2,740 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Effekseer Effect Display</title>
-    <style>
-        /* 画面全体にキャンバスを表示し、背景をグレーにする */
-        body { margin: 0; overflow: hidden; background-color: #808080; }
-        canvas { display: block; width: 100vw; height: 100vh; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ｓ＆Ｍソリティア ver1.0</title>
+    <link rel="stylesheet" href="styles1.css">
+    <link rel="stylesheet" href="styles2.css">
+    <link rel="stylesheet" href="styles3.css">
 </head>
 <body>
-    <canvas id="efk_canvas"></canvas>
-    <script src="effekseer.min.js"></script>
+    
+    <div class="main-container"> 
+        
+        <div class="common-preview-wrapper"> 
+            
+            <div class="counter-wrapper" id="opponent-counter-wrapper">
+                
+                <div class="player-info-group" id="opponent-player-info-group">
+                    <div class="player-icon-slot opponent-text-flip">
+                        <div class="card-slot" id="opponent-icon-zone"></div>
+                        </div>
+                    <input type="text" id="opponent-player-name" class="player-name-input opponent-text-flip" value="Opponent">
+                </div>
+                
+                <div class="player-stats-group" id="opponent-player-stats-group">
+                    
+                    <div class="hand-counter-group" id="opponent-lp-counter-group">
+                        <span class="area-label opponent-text-flip">LP</span>
+                        <div class="counter-buttons simple-counter-buttons">
+                            <button class="counter-btn" data-value="-1">▼</button>
+                            <input type="number" id="opponent-counter-value" class="lp-counter-input" value="20" min="0"> 
+                            <button class="counter-btn" data-value="1">▲</button>
+                        </div>
+                    </div>
+                    <div class="hand-counter-group" id="opponent-mana-counter-group">
+                        <span class="area-label opponent-text-flip">マナ</span>
+                        <div class="counter-buttons simple-counter-buttons">
+                            <button class="counter-btn" id="opponent-mana-btn-minus" data-value="-1">▼</button>
+                            <input type="number" id="opponent-mana-counter-value" class="mana-counter-input" value="0" min="0">
+                            <button class="counter-btn" id="opponent-mana-btn-plus" data-value="1">▲</button>
+                        </div>
+                    </div>
+                    </div>
+
+            </div>
+            
+            <div class="card-preview-area" id="common-card-preview">
+                
+                <div class="preview-image-wrapper" id="preview-image-container">
+                    <p>カードにカーソルを合わせてください</p>
+                </div>
+
+                <div class="preview-info-wrapper" id="preview-info-container">
+                    
+                    <div class="preview-top-group">
+                        
+                        <div class="preview-stat-group-left">
+                            <span class="preview-stat" id="preview-attribute">属性: -</span>
+                            <span class="preview-stat" id="preview-cost">コスト: -</span>
+                        </div>
+                
+                        <div class="preview-stat-group-right">
+                            <div class="preview-text-block" id="preview-flavor-text"></div>
+                            <span class="preview-stat" id="preview-top-right-stat">BP: -</span>
+                        </div>
+                        
+                    </div>
+
+                    <div class="preview-bottom-group">
+                        
+                        <div class="preview-text-block" id="preview-effect-text"></div>
+
+                        <div class="preview-name" id="preview-card-name">
+                            -
+                        </div>
+                    </div>
+
+                </div>
+                
+            </div>
+            
+            <div class="counter-wrapper" id="player-counter-wrapper">
+                
+                <div class="player-info-group" id="player-info-group">
+                    <div class="player-icon-slot">
+                        <div class="card-slot" id="icon-zone"></div>
+                        </div>
+                    <input type="text" id="player-name" class="player-name-input" value="Player">
+                </div>
+                
+                <div class="player-stats-group" id="player-stats-group">
+                    
+                    <div class="hand-counter-group" id="lp-counter-group">
+                        <span class="area-label">LP</span>
+                        <div class="counter-buttons simple-counter-buttons">
+                            <button class="counter-btn" data-value="-1">▼</button>
+                            <input type="number" id="counter-value" class="lp-counter-input" value="20" min="0"> 
+                            <button class="counter-btn" data-value="1">▲</button>
+                        </div>
+                    </div>
+                    <div class="hand-counter-group" id="mana-counter-group">
+                        <span class="area-label">マナ</span>
+                        <div class="counter-buttons simple-counter-buttons">
+                            <button class="counter-btn" id="mana-btn-minus" data-value="-1">▼</button>
+                            <input type="number" id="mana-counter-value" class="mana-counter-input" value="0" min="0">
+                            <button class="counter-btn" id="mana-btn-plus" data-value="1">▲</button>
+                        </div>
+                    </div>
+                    </div>
+                
+            </div>
+
+        </div> 
+        
+        <div class="game-area-container">
+
+            <div class="opponent-wrapper">
+                
+                <div class="board-and-hand-wrapper" id="opponent-board-and-hand-wrapper">
+                    
+                    <div class="game-board" id="opponent-game-board">
+                        <div class="zone mana-zone" id="opponent-mana-left">
+                            <div class="zone-header opponent-text-flip">マナエリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone grave-zone" id="opponent-grave">
+                            <div class="zone-header opponent-text-flip">墓地エリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone special-zone-1" id="opponent-special1">
+                            <div class="zone-header opponent-text-flip">特殊エリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone battle-zone" id="opponent-battle">
+                            <div class="zone-header opponent-text-flip">バトルエリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone spell-zone" id="opponent-spell">
+                            <div class="zone-header opponent-text-flip">スペルエリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone special-zone-2" id="opponent-special2">
+                            <div class="zone-header opponent-text-flip">特殊エリア2</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone exclude-zone" id="opponent-exclude">
+                            <div class="zone-header opponent-text-flip">除外エリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone mana-zone" id="opponent-mana-right">
+                            <div class="zone-header opponent-text-flip">マナエリア2</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hand-area-container" id="opponent-hand-area-container">
+                        
+                        <div class="hand-controls-top-wrapper" id="opponent-hand-controls-top-wrapper">
+                            
+                            <div class="zone deck-zone side-deck-zone" id="opponent-side-deck">
+                                <div class="zone-header opponent-text-flip">EXデッキ</div>
+                                <div class="slot-container">
+                                    <div class="card-slot"></div>
+                                </div>
+                            </div>
+                            <div class="hand-controls-frame" id="opponent-hand-controls-frame">
+                                <div class="hand-zone-wrapper" id="opponent-hand-zone-wrapper">
+                                    <div class="zone-header opponent-text-flip">手札</div>
+                                    <div class="hand-zone-slots" id="opponent-hand-zone">
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+
+
+                                    </div>
+                                </div>
+                            
+                                <div class="hand-buttons" id="opponent-hand-buttons"> 
+                                    <button class="draw-btn" id="opponent-draw-card">1ドロー</button>
+                                    <button class="draw-btn" id="opponent-draw-5-card">5ドロー</button> 
+                                    <button class="draw-btn" id="opponent-sm-toggle-btn" data-mode="sadist">サディスト</button>
+                                    <button class="draw-btn" id="opponent-surrender-btn">降参</button>
+                                </div>
+                            </div>
+                            
+                            <div class="zone deck-zone" id="opponent-deck">
+                                <div class="zone-header opponent-text-flip">デッキ</div>
+                                <div class="slot-container">
+                                    <div class="card-slot"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+            <div class="center-controls-wrapper">
+                
+                <button class="drawer-toggle" id="common-drawer-toggle">共通</button>
+                <div class="drawer-wrapper" id="common-drawer">
+                    <div class="drawer-header" id="common-drawer-header">
+                        <span>共通メニュー</span>
+                        <span class="drawer-close-hint">✕</span>
+                    </div>
+                    <div class="drawer-content">
+                        
+                        <div class="drawer-tabs">
+                            <button class="drawer-tab-btn active" data-target="common-general-panel">全般</button>
+                            <button class="drawer-tab-btn" data-target="common-player-panel">自分(P)</button>
+                            <button class="drawer-tab-btn" data-target="common-opponent-panel">相手(O)</button>
+                            <button class="drawer-tab-btn" data-target="common-spec-panel">仕様説明</button>
+                            <button class="drawer-tab-btn" data-target="common-about-panel">S＆Mとは</button>
+                        </div>
+
+                        <div class="drawer-main-area">
+                            <div class="drawer-tab-content">
+                                <div class="drawer-panels">
+
+                                    <div class="drawer-panel active" id="common-general-panel">
+                                        <div class="drawer-common-controls">
+                                            
+                                            <div class="common-control-group">
+                                                <span class="area-label">表示・システム</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="common-flip-board-btn">盤面反転</button>
+                                                    <button class="draw-btn" id="common-decoration-mode-btn">装飾モード</button>
+                                                    <button class="draw-btn" id="common-toggle-nav-btn">ナビ切替</button>
+                                                    <button class="draw-btn" id="common-save-board-btn">盤面保存</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="hand-counter-group" id="random-group">
+                                                <span class="area-label">ランダム</span>
+                                                <div class="random-result-display" id="random-result">...</div>
+                                                <div class="random-buttons">
+                                                    <button class="counter-btn" id="dice-roll-btn">ダイス</button>
+                                                    <button class="counter-btn" id="coin-toss-btn">コイン</button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="drawer-panel" id="common-player-panel">
+                                        <div class="drawer-common-controls">
+                                            
+                                            <div class="common-control-group">
+                                                <span class="area-label">自動減少(P)</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="counter-btn" id="lp-auto-decrease-btn">LP自動減少</button>
+                                                    <button class="counter-btn" id="mana-auto-decrease-btn">マナ自動減少</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="common-control-group">
+                                                <span class="area-label">全体操作(P)</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="shuffle-deck">シャッフル</button>
+                                                    <button class="draw-btn" id="reset-and-draw">リセット</button>
+                                                    <button class="draw-btn" id="delete-deck-btn">デッキ削除</button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="drawer-panel" id="common-opponent-panel">
+                                        <div class="drawer-common-controls">
+                                            
+                                            <div class="common-control-group">
+                                                <span class="area-label">自動減少(O)</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="counter-btn" id="opponent-lp-auto-decrease-btn">LP自動減少</button>
+                                                    <button class="counter-btn" id="opponent-mana-auto-decrease-btn">マナ自動減少</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="common-control-group">
+                                                <span class="area-label">全体操作(O)</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="opponent-shuffle-deck">シャッフル</button>
+                                                    <button class="draw-btn" id="opponent-reset-and-draw">リセット</button>
+                                                    <button class="draw-btn" id="opponent-delete-deck-btn">デッキ削除</button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="drawer-panel" id="common-spec-panel">
+                                        <div class="text-content-area" id="spec-text-content">読み込み中...</div>
+                                    </div>
+                                    
+                                    <div class="drawer-panel" id="common-about-panel">
+                                        <div class="text-content-area" id="about-text-content">読み込み中...</div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="resize-handle"></div>
+                </div>
+                <div class="common-turn-counter" id="common-turn-counter">
+                    <div class="turn-display-group">
+                        <select class="turn-select" id="turn-player-select">
+                            <option value="first">先行</option>
+                            <option value="second">後攻</option>
+                        </select>
+                        <input type="number" class="turn-input" id="common-turn-value" value="1" min="1">
+                        <span class="turn-label">ターン目</span>
+                    </div>
+                    <div class="turn-controls">
+                        <button class="turn-btn" id="common-turn-prev" data-value="-1">◀</button>
+                        <button class="turn-btn" id="common-turn-next" data-value="1">▶</button>
+                    </div>
+                </div>
+
+                <div class="step-navigation">
+                    <button class="step-btn active" id="step-start">①ターン開始</button>
+                    <button class="step-btn" id="step-draw">②ドロー</button>
+                    <button class="step-btn" id="step-mana">③マナ</button>
+                    <button class="step-btn" id="step-main">④メイン</button>
+                    <button class="step-btn" id="step-attack">⑤攻撃</button>
+                    <button class="step-btn" id="step-end">⑥ターン終了</button>
+                </div>
+            
+            </div> <div class="player-wrapper">
+                
+                <div class="board-and-hand-wrapper">
+                    
+                    <div class="game-board">
+                        <div class="zone mana-zone" id="mana-left">
+                            <div class="zone-header">マナエリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone grave-zone" id="grave">
+                            <div class="zone-header">墓地エリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone special-zone-1" id="special1">
+                            <div class="zone-header">特殊エリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone battle-zone" id="battle">
+                            <div class="zone-header">バトルエリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone spell-zone" id="spell">
+                            <div class="zone-header">スペルエリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone special-zone-2" id="special2">
+                            <div class="zone-header">特殊エリア2</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone exclude-zone" id="exclude">
+                            <div class="zone-header">除外エリア</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="zone mana-zone" id="mana-right">
+                            <div class="zone-header">マナエリア2</div>
+                            <div class="slot-container">
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hand-area-container">
+                        
+                        <div class="hand-controls-top-wrapper">
+                            
+                            <div class="zone deck-zone side-deck-zone" id="side-deck">
+                                <div class="zone-header">EXデッキ</div>
+                                <div class="slot-container">
+                                    <div class="card-slot"></div>
+                                </div>
+                            </div>
+                            <div class="hand-controls-frame">
+                                <div class="hand-zone-wrapper">
+                                    <div class="zone-header">手札</div>
+                                    <div class="hand-zone-slots" id="hand-zone">
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+                                        <div class="card-slot"></div>
+
+
+                                    </div>
+                                </div>
+                            
+                     　   <div class="hand-buttons"> 
+                            <button class="draw-btn" id="draw-card">1ドロー</button>
+                            <button class="draw-btn" id="draw-5-card">5ドロー</button> 
+                            <button class="draw-btn" id="sm-toggle-btn" data-mode="masochist">マゾヒスト</button>
+                            <button class="draw-btn" id="surrender-btn">降参</button>
+                            </div>
+                        </div>
+                            
+                            <div class="zone deck-zone" id="deck">
+                                <div class="zone-header">デッキ</div>
+                                <div class="slot-container">
+                                    <div class="card-slot"></div>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        
+        </div> 
+        
+    </div> 
+    <script src="state.js"></script>
+    <script src="script1.js"></script>
+    <script src="ui.js"></script>
+    <script src="card.js"></script>
+    <script src="zone.js"></script>
+    <script src="board.js"></script>
     <script src="main.js"></script>
+
+    <div id="custom-context-menu" class="custom-context-menu">
+        <ul>
+            <li id="context-menu-action">効果発動</li>
+            <li id="context-menu-target">対象に取る</li>
+            <li id="context-menu-to-grave">墓地へ送る</li>
+            <li id="context-menu-to-exclude">除外する</li>
+            <li id="context-menu-to-hand">手札に戻す</li>
+            <li id="context-menu-to-deck">デッキに戻す</li>
+            <li id="context-menu-to-side-deck">EXデッキに戻す</li>
+            <li id="context-menu-flip">カードを反転させる</li>
+            <li id="context-menu-add-counter">カウンターを一つ置く</li>
+            <li id="context-menu-remove-counter">カウンターを一つ取り除く</li>
+            <li id="context-menu-memo">メモ編集</li>
+            <li id="context-menu-add-flavor">フレーバーイラストを追加</li>
+            <li id="context-menu-delete">削除</li>
+            </ul>
+    </div>
+    
+    <div id="memo-editor" class="memo-editor-modal">
+        <div class="memo-editor-header">メモ編集</div>
+        <textarea id="memo-editor-textarea" rows="5" placeholder="カードメモ..."></textarea>
+        <div class="memo-editor-buttons">
+            <button id="memo-editor-cancel">キャンセル</button>
+            <button id="memo-editor-save">保存</button>
+        </div>
+    </div>
+    
+    <div id="flavor-editor" class="flavor-editor-modal">
+        <div class="flavor-editor-header" id="flavor-editor-header">フレーバーイラスト設定</div>
+        <div class="flavor-editor-content">
+            <div class="flavor-slot-container">
+                <div class="flavor-image-slot" id="flavor-slot-1">
+                    <span class="flavor-slot-label">フレーバーイラスト ①</span>
+                    <div class="flavor-image-preview" id="flavor-preview-1"></div>
+                    <div class="flavor-controls">
+                        <button class="flavor-upload-btn" id="flavor-upload-1">アップロード</button>
+                        <button class="flavor-delete-btn" id="flavor-delete-1">削除</button>
+                    </div>
+                    <div class="flavor-drop-zone" id="flavor-drop-zone-1">
+                        ここに①の画像をD&D<br>またはクリック
+                    </div>
+                </div>
+                <div class="flavor-image-slot" id="flavor-slot-2">
+                    <span class="flavor-slot-label">フレーバーイラスト ②</span>
+                    <div class="flavor-image-preview" id="flavor-preview-2"></div>
+                    <div class="flavor-controls">
+                        <button class="flavor-upload-btn" id="flavor-upload-2">アップロード</button>
+                        <button class="flavor-delete-btn" id="flavor-delete-2">削除</button>
+                    </div>
+                    <div class="flavor-drop-zone" id="flavor-drop-zone-2">
+                        ここに②の画像をD&D<br>またはクリック
+                    </div>
+                </div>
+            </div>
+            </div>
+        <div class="flavor-editor-buttons">
+            <button id="flavor-editor-cancel">閉じる</button>
+        </div>
+    </div>
+    <div id="memo-tooltip" class="memo-tooltip"></div>
+    
+    <div id="lightbox-overlay" class="lightbox-overlay">
+        <div id="lightbox-content" class="lightbox-content">
+            </div>
+    </div>
+    
+
+    <button class="drawer-toggle" id="player-drawer-toggle">P-Navi</button>
+    <div class="drawer-wrapper" id="player-drawer">
+        <div class="drawer-content">
+            
+            <div class="drawer-tabs">
+                <button class="drawer-tab-btn active" data-target="deck-back-slots">デッキ</button>
+                <button class="drawer-tab-btn" data-target="grave-back-slots">墓地</button>
+                <button class="drawer-tab-btn" data-target="exclude-back-slots">除外</button>
+                <button class="drawer-tab-btn" data-target="side-deck-back-slots">EX</button>
+            </div>
+            
+            <div class="drawer-main-area">
+                
+                <div class="drawer-tab-content"> 
+                    <div class="drawer-panels">
+                        
+                        <div class="sidebar-slot-area drawer-panel active" id="deck-back-slots">
+                            <span class="area-label bottom-deck-label">デッキ内</span>
+                            <div class="deck-back-slot-container">
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            </div>
+                            <div class="sidebar-button-container">
+                                <button class="draw-btn" id="export-deck-btn">エクスポート</button>
+                                <button class="draw-btn" id="import-deck-btn">インポート</button>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-slot-area drawer-panel" id="grave-back-slots">
+                            <span class="area-label bottom-deck-label">墓地内</span>
+                            <div class="deck-back-slot-container">
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> 
+                                <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="sidebar-slot-area drawer-panel" id="exclude-back-slots">
+                            <span class="area-label bottom-deck-label">除外内</span>
+                            <div class="deck-back-slot-container">
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                </div>
+                        </div>
+
+                        <div class="sidebar-slot-area drawer-panel" id="side-deck-back-slots">
+                            <span class="area-label bottom-deck-label">EXデッキ内</span>
+                            <div class="deck-back-slot-container">
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            </div>
+                            </div>
+                        
+                    </div> 
+                </div> 
+                <div class="drawer-free-space" id="free-space-slots"> 
+                    <span class="area-label bottom-deck-label">フリースペース</span>
+                    <div class="free-space-slot-container">
+                        <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                    </div>
+                </div> 
+                
+            </div> 
+            
+        </div> 
+    </div> 
+    
+    <button class="drawer-toggle" id="opponent-drawer-toggle">O-Navi</button>
+    <div class="drawer-wrapper" id="opponent-drawer">
+        <div class="drawer-content">
+            
+            <div class="drawer-tabs">
+                <button class="drawer-tab-btn active" data-target="opponent-deck-back-slots">デッキ</button>
+                <button class="drawer-tab-btn" data-target="opponent-grave-back-slots">墓地</button>
+                <button class="drawer-tab-btn" data-target="opponent-exclude-back-slots">除外</button>
+                <button class="drawer-tab-btn" data-target="opponent-side-deck-back-slots">EX</button>
+            </div>
+
+            <div class="drawer-main-area">
+                
+                <div class="drawer-tab-content">
+                    <div class="drawer-panels">
+
+                    <div class="sidebar-slot-area drawer-panel active" id="opponent-deck-back-slots">
+                        <span class="area-label bottom-deck-label">デッキ内</span>
+                        <div class="deck-back-slot-container">
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        </div>
+                        <div class="sidebar-button-container">
+                            <button class="draw-btn" id="opponent-export-deck-btn">エクスポート</button>
+                            <button class="draw-btn" id="opponent-import-deck-btn">インポート</button>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-slot-area drawer-panel" id="opponent-grave-back-slots">
+                        <span class="area-label bottom-deck-label">墓地内</span>
+                        <div class="deck-back-slot-container">
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        </div>
+                        </div>
+                    
+                    <div class="sidebar-slot-area drawer-panel" id="opponent-exclude-back-slots">
+                        <span class="area-label bottom-deck-label">除外内</span>
+                        <div class="deck-back-slot-container">
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        </div>
+                        </div>
+
+                    <div class="sidebar-slot-area drawer-panel" id="opponent-side-deck-back-slots">
+                        <span class="area-label bottom-deck-label">EXデッキ内</span>
+                        <div class="deck-back-slot-container">
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        </div>
+                        </div>
+
+                </div> 
+                </div> 
+                <div class="drawer-free-space" id="opponent-free-space-slots"> 
+                    <span class="area-label bottom-deck-label">フリースペース</span> 
+                    <div class="free-space-slot-container"> 
+                        <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                        </div>
+                </div> 
+                
+            </div> 
+            
+        </div> 
+    </div> 
 </body>
 </html>

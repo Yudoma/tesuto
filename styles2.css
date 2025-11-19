@@ -1,0 +1,988 @@
+.counter-wrapper {
+    display: flex;
+    gap: 0px; 
+    align-items: center; 
+     
+    width: 322.56px; 
+    justify-content: space-between;
+    flex-shrink: 0;
+    
+    flex-wrap: nowrap; 
+}
+
+.player-info-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 160px;  
+    flex-shrink: 0;
+}
+
+.player-icon-slot {
+    width: 160px;   
+    height: 190px;  
+    background-color: #444;  
+    border: 2px solid #555;  
+    border-radius: 5px;
+    box-sizing: border-box;
+
+    background-color: #2a2a4e;
+    border: 3px solid #5a5a9a;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.player-icon-slot .card-slot {
+    width: 100%;
+    height: 100%;
+
+    border: none; 
+    background-color: transparent; 
+    box-shadow: none;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-name-input {
+    width: 100%;
+    padding: 4px;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    font-family: 'Georgia', serif;
+
+    background-color: #3a3a5e;
+    border: 1px solid #5a5a9a;
+    color: #e0e0e0;
+    
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.player-stats-group {
+    display: flex;
+    flex-direction: column;  
+    gap: 5px;
+    justify-content: center;  
+    align-items: flex-end;  
+    flex-grow: 1;  
+}
+
+.hand-counter-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;  
+    padding: 26px 8px;
+    
+    border: 2px solid #555;
+    background-color: #333;
+    
+    border-radius: 5px;
+    flex-shrink: 0;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.lp-counter-input, .mana-counter-input {
+    width: 55px;  
+    text-align: center;
+    padding: 4px; 
+    font-size: 1.2em;  
+    font-weight: bold;
+    
+    background-color: #444;
+    border: 1px solid #666;
+    color: #ccc;
+    
+    border-radius: 5px;
+    -moz-appearance: textfield; 
+    margin: 0;  
+}
+
+.lp-counter-input::-webkit-outer-spin-button,
+.lp-counter-input::-webkit-inner-spin-button,
+.mana-counter-input::-webkit-outer-spin-button,
+.mana-counter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#turn-counter-value,
+#opponent-turn-counter-value {
+    width: 40px;  
+}
+
+.counter-buttons {
+    display: flex;
+    align-items: center;
+    gap: 1px;  
+}
+
+.simple-counter-buttons {
+    justify-content: center;  
+    width: auto;  
+    gap: 5px;  
+}
+
+.simple-counter-buttons button {
+    padding: 4px 8px; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    
+    border: 1px solid #ccc;
+    
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.simple-counter-buttons button:hover {
+    background-color: #d0d0d0;
+}
+
+.counter-btn,
+.card-rotate-btn,
+.simple-counter-buttons button {
+    padding: 4px 8px; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+
+.counter-btn:active,
+.card-rotate-btn:active,
+.simple-counter-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+.hand-area-container {
+    width: 100%; 
+    height: auto;
+    flex-shrink: 0;
+    display: flex; 
+    flex-direction: column;
+}
+
+.hand-controls-top-wrapper {
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between; 
+    align-items: stretch; 
+    gap: 10px; 
+    width: 100%; 
+}
+
+.hand-controls-frame {
+    border: 1px solid #555;
+    background-color: #333;
+
+    padding: 5px 10px 10px 10px; 
+    border-radius: 5px;
+    display: flex;
+
+    flex-grow: 1; 
+    flex-shrink: 1;
+    
+    align-items: flex-start; 
+
+    height: 100%;
+    gap: 5px; 
+    padding-top: 5px; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.hand-controls-top-wrapper > .deck-zone {
+    flex-shrink: 0; 
+    width: var(--side-zone-width); 
+    height: auto; 
+
+    padding: 1px;
+    box-sizing: border-box;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hand-area-bottom {
+    border: 1px dashed #888;
+    background-color: #555;
+    
+    padding: 5px; 
+    border-radius: 5px;
+    
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 20px; 
+    
+    flex-wrap: wrap; 
+}
+
+.area-label {
+    font-size: 1.2em;  
+    font-weight: bold;
+    
+    color: #ccc; 
+    
+    z-index: 12;
+    transition: color 0.3s, text-shadow 0.3s;
+
+    position: static;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+    white-space: normal;
+    background-color: transparent;
+    padding: 2px 0;
+    border-radius: 0;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.hand-zone-wrapper {
+    flex-grow: 1; 
+    padding: 0; 
+    position: relative; 
+}
+
+.hand-zone-slots {
+    display: flex;
+    gap: 3px;
+    min-height: calc(var(--card-height) + 10px); 
+    
+    border: 1px solid #555; 
+    background-color: #222; 
+    
+    padding: 5px;
+    border-radius: 5px;
+    
+    flex-wrap: nowrap; 
+    overflow-x: auto; 
+    
+    margin-top: 0; 
+    
+    flex-grow: 1; 
+    
+    align-items: center; 
+    
+    justify-content: center; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.hand-buttons {
+    display: flex;
+    flex-direction: column;  
+    flex-wrap: nowrap;  
+    gap: 5px;
+    margin-left: 10px;
+    padding-top: 0; 
+     
+    width: 110px;  
+     
+    justify-content: flex-start;  
+}
+
+.opponent-wrapper .hand-buttons {
+    flex-direction: column;
+    flex-wrap: nowrap;  
+}
+
+.draw-btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    cursor: pointer;
+    border: 1px solid #555;
+    background-color: #ddd;
+    border-radius: 3px;
+    line-height: 1.2;
+}
+
+.draw-btn {
+    padding: 3px 12px;
+    font-size: 1em;
+    font-weight: bold;
+    
+    color: #333;
+    background-color: #ffcc00; 
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 3px #997a00; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.draw-btn:hover {
+    background-color: #ffdb4d;
+}
+
+.draw-btn:active {
+    box-shadow: 0 0 #997a00;
+    transform: translateY(3px);
+}
+
+.draw-btn[data-mode="sadist"] {
+    background-color: #cc0000; 
+    box-shadow: 0 3px #800000;
+    color: white; 
+}
+.draw-btn[data-mode="sadist"]:hover {
+    background-color: #e60000;
+}
+.draw-btn[data-mode="sadist"]:active {
+    box-shadow: 0 0 #800000;
+    transform: translateY(3px);
+}
+
+.draw-btn[data-mode="masochist"] {
+    background-color: #007bff; 
+    box-shadow: 0 3px #0056b3; 
+    color: white;
+}
+.draw-btn[data-mode="masochist"]:hover {
+    background-color: #0094ff;
+}
+.draw-btn[data-mode="masochist"]:active {
+    box-shadow: 0 0 #0056b3;
+    transform: translateY(3px);
+}
+
+.hand-controls-top-wrapper > .hand-buttons .draw-btn {
+    width: 100%;  
+    flex-basis: auto;  
+    flex-grow: 0;  
+}
+
+.card-slot img.zone-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    display: none; 
+    pointer-events: none;
+}
+
+.card-slot .count-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 10;
+    user-select: none;
+    pointer-events: none; 
+    display: none; 
+}
+
+.card-slot[data-has-card="false"] {
+    background-color: #444; 
+}
+.card-slot:has(.thumbnail) {
+    background-color: transparent;
+    border: 1px dashed transparent;
+    box-shadow: none;
+}
+
+.player-wrapper .deck-zone .card-slot,
+.player-wrapper .side-deck-zone .card-slot,
+.player-wrapper .grave-zone .card-slot,
+.player-wrapper .exclude-zone .card-slot,
+.opponent-wrapper .deck-zone .card-slot,
+.opponent-wrapper .side-deck-zone .card-slot,
+.opponent-wrapper .grave-zone .card-slot,
+.opponent-wrapper .exclude-zone .card-slot {
+    cursor: pointer;
+    transition: background-color 0.2s;  
+}
+
+body:not(.common-decoration-mode-active) .player-wrapper .deck-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .side-deck-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .grave-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .exclude-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .mana-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .battle-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .spell-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .special-zone-1 .card-slot:hover,
+body:not(.common-decoration-mode-active) .player-wrapper .special-zone-2 .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .deck-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .side-deck-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .grave-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .exclude-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .mana-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .battle-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .spell-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .special-zone-1 .card-slot:hover,
+body:not(.common-decoration-mode-active) .opponent-wrapper .special-zone-2 .card-slot:hover,
+body:not(.common-decoration-mode-active) .hand-zone-slots .card-slot:hover,
+body:not(.common-decoration-mode-active) #opponent-hand-zone .card-slot:hover,
+body:not(.common-decoration-mode-active) .drawer-panel .deck-back-slot-container .card-slot:hover,
+body:not(.common-decoration-mode-active) .drawer-free-space .free-space-slot-container .card-slot:hover {
+    background-color: #666;  
+}
+
+body.common-decoration-mode-active .player-wrapper .deck-zone .card-slot,
+body.common-decoration-mode-active .player-wrapper .side-deck-zone .card-slot,
+body.common-decoration-mode-active .player-wrapper .grave-zone .card-slot,
+body.common-decoration-mode-active .player-wrapper .exclude-zone .card-slot,
+body.common-decoration-mode-active .opponent-wrapper .deck-zone .card-slot,
+body.common-decoration-mode-active .opponent-wrapper .side-deck-zone .card-slot,
+body.common-decoration-mode-active .opponent-wrapper .grave-zone .card-slot,
+body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
+    cursor: crosshair;  
+}
+
+.player-wrapper .exclude-zone .zone-header:hover,
+.player-wrapper .grave-zone .zone-header:hover,
+.player-wrapper .side-deck-zone .zone-header:hover,
+.player-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:hover,
+.opponent-wrapper .exclude-zone .zone-header:hover,
+.opponent-wrapper .grave-zone .zone-header:hover,
+.opponent-wrapper .side-deck-zone .zone-header:hover,
+.opponent-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:hover {
+    background-color: #ffdb4d;
+}
+
+.player-wrapper .exclude-zone .zone-header:active,
+.player-wrapper .grave-zone .zone-header:active,
+.player-wrapper .side-deck-zone .zone-header:active,
+.player-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:active,
+.opponent-wrapper .exclude-zone .zone-header:active,
+.opponent-wrapper .grave-zone .zone-header:active,
+.opponent-wrapper .side-deck-zone .zone-header:active,
+.opponent-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:active {
+    box-shadow: 0 0 #997a00; 
+    transform: translateY(2px); 
+}
+
+.card-slot.stacked {
+    overflow: visible;
+}
+
+.card-slot.stacked .thumbnail {
+    transition: transform 0.2s ease-out, z-index 0s 0.2s, opacity 0.2s, box-shadow 0.2s ease-out;
+    
+    pointer-events: auto; 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 3px; 
+    box-sizing: border-box; 
+}
+
+.card-slot.stacked .thumbnail:last-child {
+    transform: translateY(0);
+    z-index: 10; 
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(2) {
+    transform: translateY(6%); 
+    z-index: 9;
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(3) {
+    transform: translateY(12%); 
+    z-index: 8;
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(4) {
+    transform: translateY(18%);
+    z-index: 7;
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(n+5) {
+    transform: translateY(24%);
+    z-index: 6;
+}
+
+.card-slot.stacked .thumbnail:hover {
+    z-index: 11; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+}
+
+.card-slot.stacked .thumbnail:last-child:hover {
+    transform: translateY(0) scale(1.05);
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(2):hover {
+    transform: translateY(6%) scale(1.01); 
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(3):hover {
+    transform: translateY(12%) scale(1.01); 
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(4):hover {
+    transform: translateY(28%) scale(1.01); 
+}
+
+.card-slot.stacked .thumbnail:nth-last-child(n+5):hover {
+    transform: translateY(24%) scale(1.01); 
+}
+
+.card-slot.stacked:hover .thumbnail:not(:hover) {
+    opacity: 0.7;
+}
+
+.thumbnail .card-counter-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    font-size: 2.5em; 
+    font-weight: bold;
+    color: white; 
+    
+    text-shadow: 
+        -2px -2px 0 #000,  
+         2px -2px 0 #000,
+        -2px  2px 0 #000,
+         2px  2px 0 #000,
+        -2px  0   0 #000,
+         2px  0   0 #000,
+         0   -2px 0 #000,
+         0    2px 0 #000;
+         
+    background-color: rgba(0, 0, 0, 0.0); 
+    padding: 5px;
+    border-radius: 50%; 
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    z-index: 15; 
+    user-select: none;
+    pointer-events: none; 
+    
+    display: none; 
+}
+
+.random-result-display {
+    width: 100%;
+    min-height: 50px; 
+    padding: 5px;
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 1em; 
+    font-weight: bold;
+    line-height: 1.2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    background-color: #444;
+    border: 1px solid #666;
+    color: #ccc;
+    
+    border-radius: 5px;
+    margin-top: 2px; 
+    margin-bottom: 5px; 
+}
+
+.random-buttons {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+
+.random-buttons .counter-btn {
+    flex-grow: 1;
+    width: 50%;
+    padding: 4px 6px; 
+    font-size: 1em; 
+}
+
+.deck-zone .thumbnail,
+.grave-zone .thumbnail,
+.exclude-zone .thumbnail,
+.side-deck-zone .thumbnail {
+    cursor: pointer;
+}
+
+#common-drawer-toggle {
+    position: relative;  
+    right: auto;
+    top: auto;
+    bottom: auto;
+    z-index: 501;
+    
+    writing-mode: horizontal-tb;  
+    text-orientation: mixed;
+    
+    padding: 4px 10px;  
+
+    background-color: #f0f0f0; 
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px #b0b0b0; 
+    font-size: 0.9em;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+#common-drawer-toggle:hover {
+    background-color: #d0d0d0;
+}
+#common-drawer-toggle:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px);  
+}
+
+#common-drawer .draw-btn,
+#common-drawer .counter-btn {
+    padding: 4px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px #b0b0b0;
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s;
+    white-space: nowrap;  
+}
+
+#common-drawer .draw-btn:hover,
+#common-drawer .counter-btn:hover {
+    background-color: #d0d0d0;
+}
+
+#common-drawer .draw-btn:active,
+#common-drawer .counter-btn:active {
+    box-shadow: 0 0 #b0b0b0;
+    transform: translateY(2px);
+}
+
+#common-drawer #common-decoration-mode-btn {
+    background-color: #ffcc00;
+    box-shadow: 0 2px #997a00;
+}
+#common-drawer #common-decoration-mode-btn:hover {
+    background-color: #ffdb4d;
+}
+#common-drawer #common-decoration-mode-btn:active {
+    box-shadow: 0 0 #997a00;
+}
+
+#common-drawer #common-decoration-mode-btn[data-active="true"] {
+     background-color: #cc0000;
+     box-shadow: 0 2px #800000; 
+     color: white;
+}
+
+#common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"] {
+     background-color: #cc0000;
+     box-shadow: 0 2px #800000; 
+     color: white;
+}
+
+#common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"]:active {
+     box-shadow: 0 0 #800000;
+}
+
+.flavor-editor-modal {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;  
+    max-width: 90vw;
+    z-index: 1001; 
+
+    background-color: #3a3a5e; 
+    border: 1px solid #5a5a9a; 
+    color: #e0e0e0;
+    
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    overflow: hidden; 
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.flavor-editor-header {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 10px 15px;
+    
+    background-color: #2a2a4e; 
+    border-bottom: 1px solid #5a5a9a;
+    color: #a0a0e0; 
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.flavor-editor-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.flavor-slot-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;  
+    gap: 15px;
+}
+
+.flavor-image-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 45%;
+}
+
+.flavor-slot-label {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #a0a0e0;
+    transition: color 0.3s;
+}
+
+.flavor-image-preview {
+    width: 100%;
+    height: 200px;  
+    
+    background-color: #4a4a6e;
+    border: 2px dashed #7a7aa0;
+    border-radius: 5px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.flavor-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-height: 100%;
+}
+
+.flavor-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+}
+
+.flavor-upload-btn {
+     
+    padding: 4px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #ffcc00;  
+    color: #333;
+    box-shadow: 0 2px #997a00; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-upload-btn:hover {
+    background-color: #ffdb4d;
+}
+.flavor-upload-btn:active {
+    box-shadow: 0 0 #997a00; 
+    transform: translateY(2px); 
+}
+
+.flavor-delete-btn {
+     
+    padding: 4px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-delete-btn:hover {
+    background-color: #d0d0d0;
+}
+.flavor-delete-btn:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+ 
+.flavor-delete-btn {
+    background-color: #cc0000;
+    box-shadow: 0 2px #800000;
+    color: white;
+}
+.flavor-delete-btn:hover {
+    background-color: #e60000;
+}
+.flavor-delete-btn:active {
+    box-shadow: 0 0 #800000;
+}
+
+.flavor-drop-zone {
+    width: 100%;
+    height: 80px;  
+    box-sizing: border-box;
+    
+    background-color: #4a4a6e;
+    border: 2px dashed #7a7aa0;
+    border-radius: 5px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 0.9em;
+    color: #a0a0e0;
+    cursor: pointer;
+    
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.flavor-drop-zone.drag-over {
+    background-color: #5a5a7e;
+    border-color: #8a8acc;
+}
+
+.flavor-editor-buttons {
+     
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 15px;
+    
+    background-color: #3a3a5e; 
+    border-top: 1px solid #2a2a4e;  
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.flavor-editor-buttons button {
+     
+    padding: 8px 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-editor-buttons button:hover {
+    background-color: #d0d0d0;
+}
+.flavor-editor-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+body.sm-mode-active .flavor-editor-modal {
+    background-color: #FFF0F5; 
+    border-color: #FF69B4; 
+    color: #333;
+}
+body.sm-mode-active .flavor-editor-header {
+    background-color: #FFECF5; 
+    border-bottom-color: #FFB6C1; 
+    color: #8B008B; 
+}
+ 
+body.sm-mode-active .flavor-slot-label {
+    color: #C71585;
+}
+body.sm-mode-active .flavor-image-preview {
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+}
+body.sm-mode-active .flavor-drop-zone {
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+    color: #C71585;
+}
+body.sm-mode-active .flavor-drop-zone.drag-over {
+    background-color: #FFECF5;
+    border-color: #FF69B4;
+}
+body.sm-mode-active .flavor-editor-buttons {
+    background-color: #FFF0F5; 
+    border-top-color: #FFECF5;
+}
+
+body.sm-mode-active .flavor-editor-buttons button,
+ 
+body.sm-mode-active .flavor-delete-btn,
+body.sm-mode-active .flavor-upload-btn {  
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+}
+body.sm-mode-active .flavor-editor-buttons button:hover,
+ 
+body.sm-mode-active .flavor-delete-btn:hover,
+body.sm-mode-active .flavor-upload-btn:hover {  
+    background-color: #d0d0d0;
+}
+body.sm-mode-active .flavor-editor-buttons button:active,
+ 
+body.sm-mode-active .flavor-delete-btn:active,
+body.sm-mode-active .flavor-upload-btn:active {  
+    box-shadow: 0 0 #b0b0b0; 
+}
+
+body.sm-mode-active .flavor-upload-btn {
+    background-color: #ffcc00;
+    box-shadow: 0 2px #997a00;
+}
+body.sm-mode-active .flavor-upload-btn:hover {
+    background-color: #ffdb4d;
+}
+body.sm-mode-active .flavor-upload-btn:active {
+    box-shadow: 0 0 #997a00;
+}
+
+body.sm-mode-active .flavor-delete-btn {
+    background-color: #cc0000;
+    box-shadow: 0 2px #800000;
+    color: white;
+}
+body.sm-mode-active .flavor-delete-btn:hover {
+    background-color: #e60000;
+}
+body.sm-mode-active .flavor-delete-btn:active {
+    box-shadow: 0 0 #800000;
+}

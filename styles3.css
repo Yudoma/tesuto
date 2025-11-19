@@ -1,0 +1,1252 @@
+body.common-decoration-mode-active .opponent-wrapper .game-board .special-zone-1,
+body.common-decoration-mode-active .opponent-wrapper .game-board .battle-zone,
+body.common-decoration-mode-active .opponent-wrapper .game-board .special-zone-2,
+body.common-decoration-mode-active .opponent-wrapper .game-board .spell-zone,
+body.common-decoration-mode-active .opponent-wrapper .game-board .mana-zone,
+body.common-decoration-mode-active .opponent-wrapper .hand-area-container .hand-zone-wrapper,
+body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-draw-card,
+body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-draw-5-card,  
+body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-sm-toggle-btn,
+body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-surrender-btn,  
+body.common-decoration-mode-active .player-wrapper .game-board .special-zone-1,
+body.common-decoration-mode-active .player-wrapper .game-board .battle-zone,
+body.common-decoration-mode-active .player-wrapper .game-board .special-zone-2,
+body.common-decoration-mode-active .player-wrapper .game-board .spell-zone,
+body.common-decoration-mode-active .player-wrapper .game-board .mana-zone,
+body.common-decoration-mode-active .player-wrapper .hand-area-container .hand-zone-wrapper,
+body.common-decoration-mode-active .player-wrapper .hand-area-container #draw-card,
+body.common-decoration-mode-active .player-wrapper .hand-area-container #draw-5-card,  
+body.common-decoration-mode-active .player-wrapper .hand-area-container #sm-toggle-btn,
+body.common-decoration-mode-active .player-wrapper .hand-area-container #surrender-btn {  
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.opponent-wrapper .counter-btn:active,
+.opponent-wrapper .card-rotate-btn:active,
+.opponent-wrapper .simple-counter-buttons button:active {
+    transform: translateY(-2px) scaleY(-1); 
+}
+
+.opponent-wrapper .exclude-zone .zone-header:active,
+.opponent-wrapper .grave-zone .zone-header:active,
+.opponent-wrapper .side-deck-zone .zone-header:active,
+.opponent-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:active {
+    transform: translateY(-2px) scaleY(-1); 
+}
+
+.opponent-wrapper .draw-btn:active {
+    box-shadow: 0 0; 
+    transform: translateY(-3px); 
+}
+
+.opponent-wrapper .count-overlay {
+    transform: translate(-50%, -50%) scaleY(-1) translateZ(0); 
+    z-index: 20; 
+}
+
+.common-preview-wrapper #opponent-counter-wrapper .counter-btn:active,
+.common-preview-wrapper #opponent-counter-wrapper .simple-counter-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+body:not(.board-flipped) .common-preview-wrapper #opponent-counter-wrapper .opponent-text-flip {
+    transform: scaleY(1); 
+}
+
+body.board-flipped .game-area-container {
+    flex-direction: column-reverse;
+}
+
+body.board-flipped .common-preview-wrapper {
+    flex-direction: column-reverse;
+}
+
+body.board-flipped .opponent-wrapper {
+    transform: scaleY(1);
+    margin-bottom: 0;
+}
+
+body.board-flipped .common-preview-wrapper #opponent-counter-wrapper {
+    transform: scaleY(1);
+     
+}
+
+body.board-flipped .opponent-wrapper .counter-btn:active,
+body.board-flipped .opponent-wrapper .card-rotate-btn:active,
+body.board-flipped .opponent-wrapper .simple-counter-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+body.board-flipped .opponent-wrapper .exclude-zone .zone-header:active,
+body.board-flipped .opponent-wrapper .grave-zone .zone-header:active,
+body.board-flipped .opponent-wrapper .side-deck-zone .zone-header:active,
+body.board-flipped .opponent-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:active {
+    box-shadow: 0 0 #997a00;
+    transform: translateY(2px); 
+}
+
+body.board-flipped .opponent-wrapper .draw-btn:active {
+    box-shadow: 0 0; 
+    transform: translateY(3px);
+}
+
+body.board-flipped .opponent-wrapper .count-overlay {
+    transform: translate(-50%, -50%); 
+}
+
+
+
+body.board-flipped .player-wrapper {
+    transform: scaleY(-1);
+    margin-bottom: -10px;  
+}
+
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .area-label,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .lp-counter-input,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .mana-counter-input,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-icon-slot,  
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-name-input,  
+body.board-flipped .common-preview-wrapper #common-card-preview p,
+
+body.board-flipped .player-wrapper .draw-btn,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .counter-btn,
+body.board-flipped .player-wrapper .card-rotate-btn,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .simple-counter-buttons button {
+    z-index: 20; 
+}
+
+body.board-flipped .player-wrapper .count-overlay {
+    transform: translate(-50%, -50%) scaleY(-1);
+    z-index: 20;
+}
+
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .area-label,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .lp-counter-input,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .mana-counter-input,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-icon-slot,  
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-name-input,  
+body.board-flipped .common-preview-wrapper #common-card-preview p {
+
+    transform: scaleY(1); 
+}
+
+body.board-flipped .player-wrapper .counter-btn:active,
+body.board-flipped .player-wrapper .card-rotate-btn:active,
+body.board-flipped .player-wrapper .simple-counter-buttons button:active {
+    transform: translateY(-2px) scaleY(-1); 
+}
+
+body.board-flipped .player-wrapper .exclude-zone .zone-header:active,
+body.board-flipped .player-wrapper .grave-zone .zone-header:active,
+body.board-flipped .player-wrapper .side-deck-zone .zone-header:active,
+body.board-flipped .player-wrapper .hand-controls-top-wrapper > .deck-zone .zone-header:active {
+    transform: translateY(-2px) scaleY(-1); 
+}
+
+body.board-flipped .player-wrapper .draw-btn:active {
+    box-shadow: 0 0; 
+    transform: translateY(-3px) scaleY(-1); 
+}
+
+body.board-flipped .player-wrapper .hand-buttons {
+    flex-direction: column;  
+    flex-wrap: nowrap;  
+}
+
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .counter-btn:active,
+body.board-flipped .common-preview-wrapper #player-counter-wrapper .simple-counter-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px) scaleY(1);  
+}
+
+body.board-flipped #player-drawer {
+    top: auto;
+    bottom: 10px;
+}
+body.board-flipped #opponent-drawer {
+    bottom: auto;
+    top: 10px;
+}
+ 
+body.board-flipped #player-drawer-toggle {
+    top: auto;
+    bottom: 60px;  
+}
+body.board-flipped #player-drawer-toggle:active {
+    transform: translateY(2px);
+}
+body.board-flipped #opponent-drawer-toggle {
+    bottom: auto;
+    top: 60px;  
+    transform: scaleY(1);  
+}
+body.board-flipped #opponent-drawer-toggle:active {
+    transform: translateY(2px);  
+}
+
+body.board-flipped .opponent-wrapper .zone-header,
+body.board-flipped .opponent-wrapper .hand-zone-wrapper .zone-header {
+    transform: translate(-50%, -50%) scaleY(1);
+    z-index: 20;
+}
+
+body.board-flipped .player-wrapper .zone-header,
+body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
+    transform: translate(-50%, -50%) scaleY(-1);
+    z-index: 20; 
+}
+
+.player-wrapper,
+.opponent-wrapper {
+
+    font-family: 'Georgia', serif; 
+
+    padding: 0px;
+
+}
+
+.common-preview-wrapper .card-preview-area {
+    background-color: #2a2a4e;
+    border: 3px solid #5a5a9a;
+}
+.common-preview-wrapper .card-preview-area p {
+    color: #e0e0e0;
+}
+
+.common-preview-wrapper .card-preview-area .preview-info-wrapper {
+       
+}
+.common-preview-wrapper .card-preview-area .preview-stat {
+    color: #e0e0e0;
+    background-color: #555;  
+}
+.common-preview-wrapper .card-preview-area .preview-name {
+    color: #e0e0e0;
+    background-color: #555;  
+}
+
+.common-preview-wrapper .card-preview-area .preview-text-block {
+    color: #e0e0e0;
+    background-color: rgba(85, 85, 85, 0.7) !important;  
+}
+.common-preview-wrapper .card-preview-area #preview-flavor-text {
+    background-color: #555;  
+    color: #fff;  
+}
+
+.player-wrapper .game-board,
+.opponent-wrapper .game-board {
+    border: 4px solid #4a4a88; 
+    box-shadow: 0 4px 15px rgba(120, 120, 200, 0.2); 
+    background-color: #2a2a4e; 
+}
+
+.player-wrapper .zone,
+.opponent-wrapper .zone {
+    border: 2px solid #5a5a9a; 
+    background-color: #3a3a5e; 
+}
+
+.player-wrapper .zone-header,
+.opponent-wrapper .zone-header {
+    background-color: #2a2a4e;
+    color: #e0e0e0; 
+}
+
+.player-wrapper .card-slot,
+.opponent-wrapper .card-slot {
+    background-color: #4a4a6e; 
+    border: 1px dashed #7a7aa0; 
+    box-shadow: 0 0 0 1px #6a6a9a inset; 
+}
+.player-wrapper .card-slot[data-has-card="false"],
+.opponent-wrapper .card-slot[data-has-card="false"] {
+    background-color: #3a3a5e; 
+}
+
+.player-wrapper .drag-over,
+.opponent-wrapper .drag-over {
+    background-color: #5a5a7e;
+}
+.player-wrapper .card-slot.drag-over,
+.opponent-wrapper .card-slot.drag-over {
+    background-color: #4a4a88;
+    border: 2px solid #8a8acc;
+}
+
+.player-wrapper .hand-controls-frame,
+.opponent-wrapper .hand-controls-frame {
+    border: 1px solid #5a5a9a;
+    background-color: #2a2a4e;
+}
+
+.player-wrapper .area-label,
+.opponent-wrapper .area-label,
+.common-preview-wrapper .area-label,
+ 
+#common-drawer .area-label {
+    color: #a0a0e0; 
+}
+
+.player-wrapper .hand-zone-slots,
+.opponent-wrapper .hand-zone-slots {
+    border: 1px solid #5a5a9a; 
+    background-color: #1a1a2e; 
+}
+
+.player-wrapper .hand-counter-group,
+.opponent-wrapper .hand-counter-group,
+.common-preview-wrapper .hand-counter-group,
+
+#common-drawer .hand-counter-group {
+    border: 2px solid #888;
+    background-color: #555;
+}
+
+.player-wrapper .simple-counter-buttons input[type="number"],
+.opponent-wrapper .simple-counter-buttons input[type="number"],
+.common-preview-wrapper .simple-counter-buttons input[type="number"],
+.common-preview-wrapper .lp-counter-input,
+.common-preview-wrapper .mana-counter-input {
+    background-color: #3a3a5e;
+    border: 1px solid #5a5a9a;
+    color: #e0e0e0;
+}
+
+.player-wrapper .random-result-display,
+.opponent-wrapper .random-result-display,
+.common-preview-wrapper .random-result-display,
+ 
+#common-drawer .random-result-display {
+    background-color: #3a3a5e; 
+    border-color: #5a5a9a; 
+    color: #e0e0e0;
+}
+
+.player-sadist-mode,
+.opponent-sadist-mode {
+    font-family: 'Georgia', serif;
+
+    background-color: transparent; 
+    color: #333; 
+
+    border-radius: 5px; 
+     
+    box-sizing: border-box;
+}
+
+.player-sadist-mode .game-board,
+.opponent-sadist-mode .game-board {
+    background-color: #FFF0F5; 
+    border-color: #C71585; 
+    box-shadow: 0 4px 10px rgba(199, 21, 133, 0.4); 
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.player-sadist-mode .zone,
+.opponent-sadist-mode .zone {
+    background-color: #FFECF5; 
+    border-color: #FF69B4; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.player-sadist-mode .card-slot,
+.opponent-sadist-mode .card-slot {
+    background-color: #FFF5FA; 
+    border: 1px dashed #FF69B4; 
+    box-shadow: 0 0 0 1px #C71585 inset; 
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.player-sadist-mode .card-slot[data-has-card="false"],
+.opponent-sadist-mode .card-slot[data-has-card="false"] {
+    background-color: #FFD9EC; 
+}
+
+.player-sadist-mode .zone-header,
+.opponent-sadist-mode .zone-header {
+    background-color: #FFB6C1; 
+    color: #8B008B; 
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.player-sadist-mode .hand-controls-frame,
+.opponent-sadist-mode .hand-controls-frame {
+    background-color: #FFF0F5; 
+    border-color: #FF69B4; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.player-sadist-mode .hand-zone-slots,
+.opponent-sadist-mode .hand-zone-slots {
+    background-color: #C71585; 
+    border-color: #8B008B; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.player-sadist-mode .area-label,
+.opponent-sadist-mode .area-label {
+    color: #C71585; 
+    text-shadow: 1px 1px 2px #FFB6C1; 
+    transition: color 0.3s, text-shadow 0.3s;
+}
+
+.counter-wrapper.sadist-ui-active .area-label {
+    color: #C71585; 
+    text-shadow: 1px 1px 2px #FFB6C1; 
+    transition: color 0.3s, text-shadow 0.3s;
+}
+
+.counter-wrapper.sadist-ui-active .hand-counter-group {
+    background-color: #FFF0F5; 
+    border-color: #FF69B4; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.counter-wrapper.sadist-ui-active .player-icon-slot {
+    background-color: #FFF0F5; 
+    border-color: #C71585; 
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.counter-wrapper.sadist-ui-active .player-name-input {
+    color: #C71585;
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+}
+
+.counter-wrapper.sadist-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.sadist-ui-active .lp-counter-input,
+.counter-wrapper.sadist-ui-active .mana-counter-input {
+    color: #C71585;
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+}
+
+.counter-wrapper.masochist-ui-active .area-label {
+    color: #00008B;  
+    text-shadow: 1px 1px 2px #B0C4DE;  
+    transition: color 0.3s, text-shadow 0.3s;
+}
+
+.counter-wrapper.masochist-ui-active .hand-counter-group {
+    background-color: #F0F8FF;  
+    border-color: #4169E1;  
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.counter-wrapper.masochist-ui-active .player-icon-slot {
+    background-color: #F0F8FF;  
+    border-color: #00008B;  
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.counter-wrapper.masochist-ui-active .player-name-input {
+    color: #00008B;  
+    background-color: #F0F8FF;  
+    border-color: #B0C4DE;  
+}
+
+.counter-wrapper.masochist-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.masochist-ui-active .lp-counter-input,
+.counter-wrapper.masochist-ui-active .mana-counter-input {
+    color: #00008B;  
+    background-color: #F0F8FF;  
+    border-color: #B0C4DE;  
+}
+
+body.player-sadist-active #player-drawer,
+body.opponent-sadist-active #opponent-drawer {
+    background-color: #FFF0F5; 
+    border-color: #C71585;
+    color: #333;
+}
+ 
+body.player-sadist-active #player-drawer .drawer-free-space,
+body.opponent-sadist-active #opponent-drawer .drawer-free-space {
+    border-left-color: #FF69B4; 
+}
+
+body.player-sadist-active #player-drawer-toggle,
+body.opponent-sadist-active #opponent-drawer-toggle {
+    background-color: #ffcc00; 
+    color: #333;
+    box-shadow: 0 2px #997a00;
+}
+body.player-sadist-active #player-drawer-toggle:active,
+body.opponent-sadist-active #opponent-drawer-toggle:active {
+    box-shadow: 0 0 #997a00;
+}
+body.player-sadist-active #player-drawer .drawer-tabs,
+body.opponent-sadist-active #opponent-drawer .drawer-tabs {
+    background-color: #FFECF5;
+    border-bottom-color: #FF69B4;
+}
+body.player-sadist-active #player-drawer .drawer-tab-btn,
+body.opponent-sadist-active #opponent-drawer .drawer-tab-btn {
+    color: #C71585;
+    border-right-color: #FFB6C1;
+}
+body.player-sadist-active #player-drawer .drawer-tab-btn:hover,
+body.opponent-sadist-active #opponent-drawer .drawer-tab-btn:hover {
+    background-color: #FFF5FA;
+}
+body.player-sadist-active #player-drawer .drawer-tab-btn.active,
+body.opponent-sadist-active #opponent-drawer .drawer-tab-btn.active {
+    background-color: #FF69B4;
+    color: #FFF0F5;
+}
+
+body.player-sadist-active #player-drawer .drawer-panel .area-label,
+body.player-sadist-active #player-drawer .drawer-free-space .area-label,
+body.opponent-sadist-active #opponent-drawer .drawer-panel .area-label,
+body.opponent-sadist-active #opponent-drawer .drawer-free-space .area-label {
+    color: #C71585; 
+    text-shadow: 1px 1px 2px #FFB6C1; 
+}
+ 
+body.player-sadist-active #player-drawer .drawer-panel .deck-back-slot-container,
+body.player-sadist-active #player-drawer .drawer-free-space .free-space-slot-container,
+body.opponent-sadist-active #opponent-drawer .drawer-panel .deck-back-slot-container,
+body.opponent-sadist-active #opponent-drawer .drawer-free-space .free-space-slot-container {
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+}
+
+.player-sadist-mode .simple-counter-buttons button,
+.opponent-sadist-mode .simple-counter-buttons button,
+.player-sadist-mode .counter-btn,
+.opponent-sadist-mode .counter-btn {
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0;
+    border-color: #ccc;
+}
+
+.player-sadist-mode .simple-counter-buttons button:hover,
+.opponent-sadist-mode .simple-counter-buttons button:hover {
+    background-color: #d0d0d0;
+}
+
+.player-sadist-mode .counter-btn:active,
+.opponent-sadist-mode .counter-btn:active {
+    box-shadow: 0 0 #b0b0b0; 
+}
+
+.player-sadist-mode .draw-btn,
+.opponent-sadist-mode .draw-btn {
+    background-color: #ffcc00; 
+    color: #333;
+    box-shadow: 0 3px #997a00;
+}
+.player-sadist-mode .draw-btn:hover,
+.opponent-sadist-mode .draw-btn:hover {
+    background-color: #ffdb4d;
+}
+.player-sadist-mode .draw-btn:active,
+.opponent-sadist-mode .draw-btn:active {
+    box-shadow: 0 0 #997a00;
+}
+
+.player-sadist-mode .draw-btn[data-mode="masochist"],
+.opponent-sadist-mode .draw-btn[data-mode="masochist"] {
+    background-color: #007bff;
+    box-shadow: 0 3px #0056b3;
+    color: white;
+}
+.player-sadist-mode .draw-btn[data-mode="masochist"]:hover,
+.opponent-sadist-mode .draw-btn[data-mode="masochist"]:hover {
+    background-color: #0094ff;
+}
+.player-sadist-mode .draw-btn[data-mode="masochist"]:active,
+.opponent-sadist-mode .draw-btn[data-mode="masochist"]:active {
+    box-shadow: 0 0 #0056b3;
+}
+
+.player-sadist-mode .draw-btn[data-mode="sadist"],
+.opponent-sadist-mode .draw-btn[data-mode="sadist"] {
+    background-color: #cc0000; 
+    box-shadow: 0 3px #800000;
+    color: white; 
+}
+.player-sadist-mode .draw-btn[data-mode="sadist"]:hover,
+.opponent-sadist-mode .draw-btn[data-mode="sadist"]:hover {
+    background-color: #e60000;
+}
+.player-sadist-mode .draw-btn[data-mode="sadist"]:active,
+.opponent-sadist-mode .draw-btn[data-mode="sadist"]:active {
+    box-shadow: 0 0 #800000;
+}
+
+body.player-sadist-active #player-drawer .sidebar-button-container .draw-btn,
+body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn {
+    background-color: #ffcc00; 
+    color: #333;
+    box-shadow: 0 2px #997a00;
+}
+body.player-sadist-active #player-drawer .sidebar-button-container .draw-btn:hover,
+body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn:hover {
+    background-color: #ffdb4d;
+}
+body.player-sadist-active #player-drawer .sidebar-button-container .draw-btn:active,
+body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn:active {
+    box-shadow: 0 0 #997a00;
+}
+
+.custom-context-menu {
+    display: none;
+    position: absolute; 
+
+    width: 210px; 
+    font-size: 15px; 
+    
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333; 
+    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 5px;
+    overflow: hidden;
+    
+    font-family: 'Georgia', serif; 
+}
+.custom-context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.custom-context-menu li {
+    padding: 0px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;  
+}
+
+.custom-context-menu li:hover {
+    background-color: #007bff; 
+    color: white;
+}
+
+.memo-editor-modal {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    max-width: 90vw;
+    z-index: 1001; 
+    
+    background-color: #3a3a5e; 
+    border: 1px solid #5a5a9a; 
+    color: #e0e0e0;
+    
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    overflow: hidden; 
+}
+
+.memo-editor-header {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 10px 15px;
+    
+    background-color: #2a2a4e; 
+    border-bottom: 1px solid #5a5a9a;
+    color: #a0a0e0; 
+}
+
+.memo-editor-modal textarea {
+    width: 100%;
+    box-sizing: border-box; 
+    padding: 10px 15px;
+    border: none;
+    resize: vertical; 
+    min-height: 80px;
+    font-family: 'Georgia', serif;
+    font-size: 1em;
+    
+    background-color: #4a4a6e; 
+    color: #e0e0e0;
+    border-bottom: 1px solid #2a2a4e;
+}
+
+.memo-editor-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 15px;
+    
+    background-color: #3a3a5e; 
+}
+
+.memo-editor-buttons button {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.memo-editor-buttons button:hover {
+    background-color: #d0d0d0;
+}
+.memo-editor-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+.memo-editor-buttons button#memo-editor-save {
+    background-color: #ffcc00; 
+    box-shadow: 0 2px #997a00; 
+}
+.memo-editor-buttons button#memo-editor-save:hover {
+    background-color: #ffdb4d;
+}
+.memo-editor-buttons button#memo-editor-save:active {
+    box-shadow: 0 0 #997a00;
+}
+
+.memo-tooltip {
+    display: none; 
+    position: absolute;
+    z-index: 1002; 
+    
+    background-color: #3a3a5e; 
+    color: #e0e0e0;
+    border: 1px solid #5a5a9a; 
+    
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    font-family: 'Georgia', serif;
+    font-size: 0.9em;
+    max-width: 250px;
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    pointer-events: none; 
+}
+
+body.sm-mode-active .memo-editor-modal {
+    background-color: #FFF0F5; 
+    border-color: #FF69B4; 
+    color: #333;
+    font-family: 'Georgia', serif;
+}
+body.sm-mode-active .memo-editor-header {
+    background-color: #FFECF5; 
+    border-bottom-color: #FFB6C1; 
+    color: #8B008B; 
+}
+body.sm-mode-active .memo-editor-modal textarea {
+    background-color: #FFF5FA; 
+    color: #333;
+    border-bottom-color: #FFECF5;
+    font-family: 'Georgia', serif;
+}
+body.sm-mode-active .memo-editor-buttons {
+    background-color: #FFF0F5; 
+}
+
+body.sm-mode-active .memo-editor-buttons button {
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+}
+body.sm-mode-active .memo-editor-buttons button:hover {
+    background-color: #d0d0d0;
+}
+body.sm-mode-active .memo-editor-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+}
+body.sm-mode-active .memo-editor-buttons button#memo-editor-save {
+    background-color: #ffcc00;
+    box-shadow: 0 2px #997a00;
+}
+body.sm-mode-active .memo-editor-buttons button#memo-editor-save:hover {
+    background-color: #ffdb4d;
+}
+body.sm-mode-active .memo-editor-buttons button#memo-editor-save:active {
+    box-shadow: 0 0 #997a00;
+}
+
+body.sm-mode-active .memo-tooltip {
+    background-color: #FFF0F5; 
+    color: #8B008B; 
+    border-color: #FF69B4; 
+    font-family: 'Georgia', serif;
+}
+
+.lightbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    z-index: 2000;
+    cursor: pointer;
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.lightbox-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lightbox-content {
+    display: flex;
+    flex-direction: row;  
+    justify-content: center;
+    align-items: center;
+    gap: 10px;  
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    cursor: default; 
+}
+
+.lightbox-content img {
+    max-width: 100%;  
+    max-height: 100%;  
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+}
+
+.opponent-wrapper .thumbnail .card-counter-overlay {
+    transform: translate(-50%, -50%) scaleY(-1) translateZ(0);
+    z-index: 20; 
+}
+
+body.board-flipped .opponent-wrapper .thumbnail .card-counter-overlay {
+    transform: translate(-50%, -50%); 
+}
+body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
+    transform: translate(-50%, -50%) scaleY(-1) translateZ(0);
+    z-index: 20;
+}
+
+.center-controls-wrapper {
+    position: relative;  
+}
+
+#common-drawer-toggle {
+    position: relative;  
+    right: auto;
+    top: auto;
+    bottom: auto;
+    z-index: 501;
+    
+    writing-mode: horizontal-tb;  
+    text-orientation: mixed;
+    
+    padding: 4px 10px;  
+
+    background-color: #f0f0f0; 
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 2px #b0b0b0; 
+    font-size: 0.9em;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+#common-drawer-toggle:hover {
+    background-color: #d0d0d0;
+}
+#common-drawer-toggle:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px);  
+}
+
+#common-drawer .draw-btn,
+#common-drawer .counter-btn {
+    padding: 4px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px #b0b0b0;
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s;
+    white-space: nowrap;  
+}
+
+#common-drawer .draw-btn:hover,
+#common-drawer .counter-btn:hover {
+    background-color: #d0d0d0;
+}
+
+#common-drawer .draw-btn:active,
+#common-drawer .counter-btn:active {
+    box-shadow: 0 0 #b0b0b0;
+    transform: translateY(2px);
+}
+
+#common-drawer #common-decoration-mode-btn {
+    background-color: #ffcc00;
+    box-shadow: 0 2px #997a00;
+}
+#common-drawer #common-decoration-mode-btn:hover {
+    background-color: #ffdb4d;
+}
+#common-drawer #common-decoration-mode-btn:active {
+    box-shadow: 0 0 #997a00;
+}
+
+#common-drawer #common-decoration-mode-btn[data-active="true"] {
+     background-color: #cc0000;
+     box-shadow: 0 2px #800000; 
+     color: white;
+}
+
+#common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"] {
+     background-color: #cc0000;
+     box-shadow: 0 2px #800000; 
+     color: white;
+}
+
+.drawer-common-controls {
+    display: flex;
+    flex-direction: column;  
+    gap: 10px;
+    padding: 10px;
+}
+
+.common-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+.common-control-group .area-label {
+    margin-bottom: 0;  
+}
+
+.common-control-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;  
+}
+
+#common-drawer .hand-counter-group {
+    width: 200px;  
+}
+
+.flavor-editor-modal {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;  
+    max-width: 90vw;
+    z-index: 1001; 
+
+    background-color: #3a3a5e; 
+    border: 1px solid #5a5a9a; 
+    color: #e0e0e0;
+    
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    overflow: hidden; 
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.flavor-editor-header {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 10px 15px;
+    
+    background-color: #2a2a4e; 
+    border-bottom: 1px solid #5a5a9a;
+    color: #a0a0e0; 
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.flavor-editor-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.flavor-slot-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;  
+    gap: 15px;
+}
+
+.flavor-image-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 45%;
+}
+
+.flavor-slot-label {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #a0a0e0;
+    transition: color 0.3s;
+}
+
+.flavor-image-preview {
+    width: 100%;
+    height: 200px;  
+    
+    background-color: #4a4a6e;
+    border: 2px dashed #7a7aa0;
+    border-radius: 5px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.flavor-image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-height: 100%;
+}
+
+.flavor-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+}
+
+.flavor-upload-btn {
+     
+    padding: 4px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #ffcc00;  
+    color: #333;
+    box-shadow: 0 2px #997a00; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-upload-btn:hover {
+    background-color: #ffdb4d;
+}
+.flavor-upload-btn:active {
+    box-shadow: 0 0 #997a00; 
+    transform: translateY(2px); 
+}
+
+.flavor-delete-btn {
+     
+    padding: 4px 10px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-delete-btn:hover {
+    background-color: #d0d0d0;
+}
+.flavor-delete-btn:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+ 
+.flavor-delete-btn {
+    background-color: #cc0000;
+    box-shadow: 0 2px #800000;
+    color: white;
+}
+.flavor-delete-btn:hover {
+    background-color: #e60000;
+}
+.flavor-delete-btn:active {
+    box-shadow: 0 0 #800000;
+}
+
+.flavor-drop-zone {
+    width: 100%;
+    height: 80px;  
+    box-sizing: border-box;
+    
+    background-color: #4a4a6e;
+    border: 2px dashed #7a7aa0;
+    border-radius: 5px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 0.9em;
+    color: #a0a0e0;
+    cursor: pointer;
+    
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+
+.flavor-drop-zone.drag-over {
+    background-color: #5a5a7e;
+    border-color: #8a8acc;
+}
+
+.flavor-editor-buttons {
+     
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 15px;
+    
+    background-color: #3a3a5e; 
+    border-top: 1px solid #2a2a4e;  
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.flavor-editor-buttons button {
+     
+    padding: 8px 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-editor-buttons button:hover {
+    background-color: #d0d0d0;
+}
+.flavor-editor-buttons button:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+body.sm-mode-active .flavor-editor-modal {
+    background-color: #FFF0F5; 
+    border-color: #FF69B4; 
+    color: #333;
+}
+body.sm-mode-active .flavor-editor-header {
+    background-color: #FFECF5; 
+    border-bottom-color: #FFB6C1; 
+    color: #8B008B; 
+}
+ 
+body.sm-mode-active .flavor-slot-label {
+    color: #C71585;
+}
+body.sm-mode-active .flavor-image-preview {
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+}
+body.sm-mode-active .flavor-drop-zone {
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
+    color: #C71585;
+}
+body.sm-mode-active .flavor-drop-zone.drag-over {
+    background-color: #FFECF5;
+    border-color: #FF69B4;
+}
+body.sm-mode-active .flavor-editor-buttons {
+    background-color: #FFF0F5; 
+    border-top-color: #FFECF5;
+}
+
+body.sm-mode-active .flavor-editor-buttons button,
+ 
+body.sm-mode-active .flavor-delete-btn,
+body.sm-mode-active .flavor-upload-btn {  
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+}
+body.sm-mode-active .flavor-editor-buttons button:hover,
+ 
+body.sm-mode-active .flavor-delete-btn:hover,
+body.sm-mode-active .flavor-upload-btn:hover {  
+    background-color: #d0d0d0;
+}
+body.sm-mode-active .flavor-editor-buttons button:active,
+ 
+body.sm-mode-active .flavor-delete-btn:active,
+body.sm-mode-active .flavor-upload-btn:active {  
+    box-shadow: 0 0 #b0b0b0; 
+}
+
+body.sm-mode-active .flavor-upload-btn {
+    background-color: #ffcc00;
+    box-shadow: 0 2px #997a00;
+}
+body.sm-mode-active .flavor-upload-btn:hover {
+    background-color: #ffdb4d;
+}
+body.sm-mode-active .flavor-upload-btn:active {
+    box-shadow: 0 0 #997a00;
+}
+
+body.sm-mode-active .flavor-delete-btn {
+    background-color: #cc0000;
+    box-shadow: 0 2px #800000;
+    color: white;
+}
+body.sm-mode-active .flavor-delete-btn:hover {
+    background-color: #e60000;
+}
+body.sm-mode-active .flavor-delete-btn:active {
+    box-shadow: 0 0 #800000;
+}
