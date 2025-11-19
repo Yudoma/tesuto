@@ -125,43 +125,6 @@ function setupCounters(idPrefix) {
     const lpCounter = document.getElementById(idPrefix + 'counter-value');
     const manaCounter = document.getElementById(idPrefix + 'mana-counter-value');
 
-    const setupAutoDecrease = (btnId, timer, counter, interval, seName) => {
-        const btn = document.getElementById(btnId);
-        if(!btn) return null;
-        
-        if (!btn.dataset.originalText) {
-            btn.dataset.originalText = btn.textContent;
-        }
-        
-        btn.addEventListener('click', () => {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-                btn.textContent = btn.dataset.originalText;
-                btn.style.backgroundColor = '';
-                btn.style.boxShadow = '';
-                stopSe(seName);
-                playSe('ボタン共通.mp3');
-            } else {
-                if (btn.textContent !== '停止') {
-                     btn.dataset.originalText = btn.textContent;
-                }
-                btn.textContent = '停止';
-                btn.style.backgroundColor = '#cc0000';
-                btn.style.boxShadow = '0 2px #800000';
-                playSe(seName, true);
-                timer = setInterval(() => {
-                    counter.value = Math.max(0, (parseInt(counter.value) || 0) - 1);
-                }, interval);
-            }
-        });
-        return timer; // Note: timer reference needs to be managed by caller or object in real app, but here we return new ID
-    };
-
-    // タイマー変数の参照管理のため、少し実装を変更（クロージャ内の変数を更新できないため）
-    // ここでは簡易的にイベントリスナー内でグローバル変数を操作する形はとれないため、
-    // setupAutoDecreaseを少し書き換えて、クリックイベントを直接定義します。
-
     const attachAutoDecreaseLogic = (btnId, counter, interval) => {
         const btn = document.getElementById(btnId);
         if (!btn) return;
@@ -303,6 +266,19 @@ function deleteDeck(idPrefix) {
      ['deck', 'grave', 'exclude'].forEach(zone => syncMainZoneImage(zone, idPrefix));
 }
 
+function clearAllBoard(idPrefix) {
+    const wrapperSelector = idPrefix ? '.opponent-wrapper' : '.player-wrapper';
+    const drawerId = idPrefix ? 'opponent-drawer' : 'player-drawer';
+    const allSlots = document.querySelectorAll(`${wrapperSelector} .card-slot, #${drawerId} .card-slot`);
+    
+    allSlots.forEach(slot => {
+        slot.querySelectorAll('.thumbnail').forEach(t => slot.removeChild(t));
+        resetSlotToDefault(slot);
+        slot.classList.remove('stacked');
+    });
+    ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => syncMainZoneImage(zone, idPrefix));
+}
+
 
 function updateSmTheme(idPrefix, forceDefault = false) {
     const wrapperElement = document.querySelector(idPrefix ? '.opponent-wrapper' : '.player-wrapper');
@@ -384,6 +360,7 @@ function importDeck(idPrefix) {
         reader.onload = (event) => {
             try {
                 const importData = JSON.parse(event.target.result);
+                
                 clearZoneData(idPrefix + 'deck-back-slots');
                 clearZoneData(idPrefix + 'side-deck-back-slots');
                 clearZoneData(idPrefix + 'free-space-slots');
@@ -407,12 +384,157 @@ function importDeck(idPrefix) {
     fileInput.click();
 }
 
+function exportAllBoardData() {
+    try {
+        const state = getAllBoardState();
+        const jsonData = JSON.stringify(state, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
+        a.download = `sm_solitaire_board_${dateStr}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error("Full Board Export failed:", error);
+    }
+}
+
+function importAllBoardData() {
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json, application/json';
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const importData = JSON.parse(event.target.result);
+                restoreAllBoardState(importData);
+            } catch (error) {
+                console.error("Full Board Import failed:", error);
+                alert("盤面データの読み込みに失敗しました。");
+            }
+        };
+        reader.readAsText(file);
+    };
+    fileInput.click();
+}
+
+function getAllBoardState() {
+    const getSideState = (idPrefix) => {
+        const zones = [
+            'deck', 'grave', 'exclude', 'side-deck', 'icon-zone',
+            'deck-back-slots', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots',
+            'free-space-slots', 'hand-zone',
+            'mana-left', 'mana-right', 'battle', 'spell', 'special1', 'special2'
+        ];
+        
+        const state = {};
+        zones.forEach(zoneId => {
+            const fullId = idPrefix + zoneId;
+            // デコレーションとカード両方を保存するため、singleSlot=falseで配列として取得するが、
+            // decorationについては個別に扱う必要がある場合も、ここでは全て配列として保存し復元時に任せる
+            state[zoneId] = extractZoneData(fullId);
+            
+            // icon-zoneなど、通常カードではないデコレーション専用ゾーンもextractZoneDataで取れるように修正済み
+        });
+
+        const smBtn = document.getElementById(idPrefix + 'sm-toggle-btn');
+        const lpVal = document.getElementById(idPrefix + 'counter-value')?.value;
+        const manaVal = document.getElementById(idPrefix + 'mana-counter-value')?.value;
+        const nameVal = document.getElementById(idPrefix + (idPrefix ? 'player-name' : 'player-name'))?.value; // idPrefix is opponent- or empty. name id is opponent-player-name or player-name
+
+        state.meta = {
+            smMode: smBtn ? smBtn.dataset.mode : 'masochist',
+            lp: lpVal,
+            mana: manaVal,
+            name: nameVal
+        };
+
+        return state;
+    };
+
+    return {
+        player: getSideState(''),
+        opponent: getSideState('opponent-'),
+        common: {
+            turnValue: document.getElementById('common-turn-value')?.value || 1,
+            turnPlayer: document.getElementById('turn-player-select')?.value || 'first',
+            isBoardFlipped: document.body.classList.contains('board-flipped')
+        },
+        timestamp: Date.now()
+    };
+}
+
+function restoreAllBoardState(state) {
+    if (!state || !state.player || !state.opponent) return;
+
+    clearAllBoard('');
+    clearAllBoard('opponent-');
+
+    const restoreSide = (idPrefix, sideState) => {
+        Object.keys(sideState).forEach(zoneId => {
+            if (zoneId === 'meta') return;
+            const fullId = idPrefix + zoneId;
+            const zoneData = sideState[zoneId];
+            if (zoneData && Array.isArray(zoneData)) {
+                applyDataToZone(fullId, zoneData);
+            }
+        });
+
+        if (sideState.meta) {
+            const smBtn = document.getElementById(idPrefix + 'sm-toggle-btn');
+            if (smBtn) {
+                smBtn.dataset.mode = sideState.meta.smMode || 'masochist';
+                updateSmTheme(idPrefix);
+            }
+            const lpInput = document.getElementById(idPrefix + 'counter-value');
+            if (lpInput) lpInput.value = sideState.meta.lp || 20;
+            
+            const manaInput = document.getElementById(idPrefix + 'mana-counter-value');
+            if (manaInput) manaInput.value = sideState.meta.mana || 0;
+
+            const nameInput = document.getElementById(idPrefix + (idPrefix ? 'player-name' : 'player-name'));
+            if (nameInput) nameInput.value = sideState.meta.name || (idPrefix ? 'Opponent' : 'Player');
+        }
+        
+        ['deck', 'side-deck', 'grave', 'exclude'].forEach(zone => syncMainZoneImage(zone, idPrefix));
+    };
+
+    restoreSide('', state.player);
+    restoreSide('opponent-', state.opponent);
+
+    if (state.common) {
+        const turnInput = document.getElementById('common-turn-value');
+        if(turnInput) turnInput.value = state.common.turnValue || 1;
+        
+        const turnSelect = document.getElementById('turn-player-select');
+        if(turnSelect) turnSelect.value = state.common.turnPlayer || 'first';
+        
+        if (state.common.isBoardFlipped) {
+            document.body.classList.add('board-flipped');
+        } else {
+            document.body.classList.remove('board-flipped');
+        }
+    }
+}
 
 function extractZoneData(containerId, singleSlot = false) {
     const container = document.getElementById(containerId);
     if (!container) return null;
-    const slots = container.querySelectorAll('.card-slot');
-    const data = Array.from(slots).map(slot => {
+    
+    // ゾーン自体がcard-slotの場合（icon-zoneなど）と、コンテナ内に複数のcard-slotがある場合を考慮
+    let slots = [];
+    if (container.classList.contains('card-slot')) {
+        slots = [container];
+    } else {
+        slots = Array.from(container.querySelectorAll('.card-slot'));
+    }
+    
+    const data = slots.map(slot => {
         const thumbnails = slot.querySelectorAll('.thumbnail');
         if (thumbnails.length === 0) return null;
         return Array.from(thumbnails).map(thumb => ({
@@ -424,15 +546,32 @@ function extractZoneData(containerId, singleSlot = false) {
             memo: thumb.dataset.memo || '',
             flavor1: thumb.dataset.flavor1 || '',
             flavor2: thumb.dataset.flavor2 || '',
+            rotation: parseInt(thumb.querySelector('.card-image').dataset.rotation) || 0,
+            isMasturbating: thumb.dataset.isMasturbating === 'true',
+            ownerPrefix: thumb.dataset.ownerPrefix || ''
         }));
     });
-    return singleSlot ? (data[0] ? data[0] : null) : data.filter(d => d);
+    
+    // singleSlot要求があっても、常に配列構造（スロット毎のカード配列の配列）で返す方が統一性があるが、
+    // 既存のexportDeckとの互換性を保つため、singleSlot引数がtrueなら最初の有効なスロットのデータを返す
+    if (singleSlot) {
+        const validData = data.filter(d => d);
+        return validData.length > 0 ? validData[0][0] : null; // 特定のカード単体データを返す既存挙動
+    }
+    
+    // 通常は [[card1, card2], null, [card3]] のような構造（nullは空スロット）
+    // 空スロットも含めるか、フィルタするか。import側はindex順に埋めるため、nullも含めておくべきか？
+    // 既存のapplyDataToZoneは forEach((cardsInSlot, i) => ...) で実装されているので、nullを含めるのが正しい。
+    return data;
 }
 
 function clearZoneData(containerId, clearDecorations = false) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.querySelectorAll('.card-slot').forEach(slot => {
+    
+    const slots = container.classList.contains('card-slot') ? [container] : container.querySelectorAll('.card-slot');
+    
+    slots.forEach(slot => {
         slot.querySelectorAll('.thumbnail').forEach(thumb => {
             if (clearDecorations || thumb.dataset.isDecoration !== 'true') {
                 slot.removeChild(thumb);
@@ -446,12 +585,51 @@ function clearZoneData(containerId, clearDecorations = false) {
 function applyDataToZone(containerId, zoneData) {
     const container = document.getElementById(containerId);
     if (!container || !zoneData) return;
-    const slots = container.querySelectorAll('.card-slot');
-    zoneData.forEach((cardsInSlot, i) => {
+    
+    const slots = container.classList.contains('card-slot') ? [container] : container.querySelectorAll('.card-slot');
+    
+    // zoneDataは [[card, card], null, [card]] のような配列を想定
+    // または、単一カードオブジェクトの配列（デコレーション復元時など）の場合もあるため柔軟に対応
+    
+    // もしzoneDataが単一オブジェクト（exportDeckのdecorationsのような形式）なら配列にラップ
+    const dataArray = Array.isArray(zoneData) ? zoneData : [zoneData];
+
+    dataArray.forEach((cardsInSlot, i) => {
         if (slots[i] && cardsInSlot) {
-            cardsInSlot.forEach(cardData => createCardThumbnail(cardData, slots[i], cardData.isDecoration, false, cardData.ownerPrefix));
+            // cardsInSlotも配列であることを期待。もし単一オブジェクトなら配列化
+            const cards = Array.isArray(cardsInSlot) ? cardsInSlot : [cardsInSlot];
+            
+            cards.forEach(cardData => {
+                const thumb = createCardThumbnail(cardData, slots[i], cardData.isDecoration, false, cardData.ownerPrefix);
+                
+                // 回転の適用
+                if (cardData.rotation) {
+                    const img = thumb.querySelector('.card-image');
+                    if (img) {
+                        img.dataset.rotation = cardData.rotation;
+                        // スロットの回転クラス制御
+                        if (Math.abs(cardData.rotation) % 180 !== 0) {
+                            slots[i].classList.add('rotated-90');
+                             const { width, height } = getCardDimensions();
+                             const scaleFactor = height / width;
+                             img.style.transform = `rotate(${cardData.rotation}deg) scale(${scaleFactor})`;
+                        } else {
+                            slots[i].classList.remove('rotated-90');
+                            img.style.transform = `rotate(${cardData.rotation}deg)`;
+                        }
+                    }
+                }
+                
+                // オナニー状態の適用
+                if (cardData.isMasturbating) {
+                    thumb.dataset.isMasturbating = 'true';
+                }
+            });
+            
+            updateSlotStackState(slots[i]);
         }
     });
+    
     if(containerId.endsWith('-back-slots') || containerId.includes('free-space')) {
         arrangeSlots(containerId);
     }

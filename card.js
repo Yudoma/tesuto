@@ -1,5 +1,5 @@
 function createCardThumbnail(cardData, slotElement, isDecoration = false, insertAtBottom = false, ownerPrefix = '') {
-    let imageSrc, isFlipped, originalSrc, counter, memo, flavor1, flavor2;
+    let imageSrc, isFlipped, originalSrc, counter, memo, flavor1, flavor2, rotation, isMasturbating;
 
     if (typeof cardData === 'string') {
         imageSrc = cardData;
@@ -9,16 +9,20 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
         memo = '';
         flavor1 = '';
         flavor2 = '';
-    } else { // cardData is an object
+        rotation = 0;
+        isMasturbating = false;
+    } else { 
         imageSrc = cardData.src;
-        isDecoration = cardData.isDecoration || isDecoration; // 引数とcardDataの情報を統合
+        isDecoration = cardData.isDecoration || isDecoration; 
         isFlipped = cardData.isFlipped || false;
         originalSrc = cardData.originalSrc || null;
         counter = cardData.counter || 0;
         memo = cardData.memo || '';
         flavor1 = cardData.flavor1 || '';
         flavor2 = cardData.flavor2 || '';
-        ownerPrefix = cardData.ownerPrefix || ownerPrefix; // 引数とcardDataの情報を統合
+        ownerPrefix = cardData.ownerPrefix || ownerPrefix;
+        rotation = cardData.rotation || 0;
+        isMasturbating = cardData.isMasturbating || false;
     }
 
     const thumbnailElement = document.createElement('div');
@@ -28,10 +32,16 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
     if (isDecoration) {
         thumbnailElement.dataset.isDecoration = 'true';
     }
+    
+    if (isMasturbating) {
+        thumbnailElement.dataset.isMasturbating = 'true';
+    }
 
     const imgElement = document.createElement('img');
     imgElement.classList.add('card-image');
-    imgElement.dataset.rotation = 0;
+    imgElement.dataset.rotation = rotation; 
+    // 注意: 実際のtransform適用はboard.jsのapplyDataToZoneで行われるか、
+    // 新規作成時は0度スタートが基本だが、復元時などはここでdatasetに入れておくことが重要
 
     if (isFlipped && originalSrc) {
         thumbnailElement.dataset.isFlipped = 'true';
@@ -67,7 +77,6 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
         slotElement.appendChild(thumbnailElement);
     }
 
-    // --- Event Listeners ---
     addCardEventListeners(thumbnailElement);
 
     return thumbnailElement;
@@ -89,26 +98,20 @@ function handleCardClick(e) {
     const parentZoneId = getParentZoneId(slotElement);
     const baseParentZoneId = getBaseId(parentZoneId);
 
-    // Handle clicks during decoration mode for decoration zones
     if (isDecorationMode && decorationZones.includes(baseParentZoneId)) {
         openDecorationImageDialog(slotElement);
         e.stopPropagation();
         return;
     }
 
-    // In normal mode, if a decoration card is clicked, let the parent slot's listener handle it
     if (thumbnailElement.dataset.isDecoration === 'true') {
         return;
     }
     
-    // Stop if any modal is open
     if (contextMenu.style.display === 'block' || memoEditorModal.style.display === 'block' || flavorEditorModal.style.display === 'block' || draggedItem) {
         return;
     }
 
-    // --- Normal card click logic (rotation) ---
-
-    // Only rotate the top card in a stack
     if (getExistingThumbnail(slotElement) !== thumbnailElement) {
         e.stopPropagation();
         return;
@@ -117,7 +120,6 @@ function handleCardClick(e) {
     const imgElement = thumbnailElement.querySelector('.card-image');
     if (!imgElement) return;
 
-    // Do not rotate in non-rotatable zones
     if (nonRotatableZones.includes(baseParentZoneId) || baseParentZoneId === 'free-space-slots') {
         e.stopPropagation();
         return;
@@ -138,8 +140,19 @@ function handleCardClick(e) {
             if (manaCounterValueElement) {
                 const currentValue = parseInt(manaCounterValueElement.value) || 0;
                 manaCounterValueElement.value = currentValue + 1;
+                
+                if (isRecording && typeof recordAction === 'function') {
+                    recordAction({
+                        type: 'counterChange',
+                        inputId: idPrefix + 'mana-counter-value',
+                        change: 1
+                    });
+                }
             }
             playSe('マナ増加.mp3');
+        } else {
+            // マナエリア以外で横向き（タップ）にした場合
+            playSe('タップ.mp3');
         }
     } else {
         currentRotation = 0;
@@ -147,6 +160,16 @@ function handleCardClick(e) {
         imgElement.style.transform = `rotate(${currentRotation}deg)`;
     }
     imgElement.dataset.rotation = currentRotation;
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'rotate',
+            zoneId: parentZoneId,
+            slotIndex: Array.from(slotElement.parentNode.children).indexOf(slotElement),
+            rotation: currentRotation
+        });
+    }
+    
     e.stopPropagation();
 }
 
@@ -168,8 +191,6 @@ function handleDragEnd(e) {
     thumbnailElement.style.visibility = 'visible';
     draggedItem = null;
 }
-
-
 
 function handleCardContextMenu(e) {
     if (isDecorationMode) {
@@ -193,17 +214,34 @@ function handleCardContextMenu(e) {
     if (!isIconZone && thumbnailElement.dataset.isDecoration === 'true' && !isDecorationMode) {
         return;
     }
+    
+    // スロットのインデックスを取得（記録用）
+    const slotIndex = Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode);
 
-    // --- Set up context menu handlers ---
-    currentActionHandler = () => console.log(`[${idPrefix}] 効果発動（未実装）`);
-    currentTargetHandler = () => console.log(`[${idPrefix}] 対象に取る（未実装）`);
+    currentActionHandler = () => {
+        console.log(`[${idPrefix}] 効果発動（未実装）`);
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({ type: 'effectAction', zoneId: sourceZoneId, slotIndex: slotIndex });
+        }
+    };
+    
+    currentTargetHandler = () => {
+        console.log(`[${idPrefix}] 対象に取る（未実装）`);
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({ type: 'target', zoneId: sourceZoneId, slotIndex: slotIndex });
+        }
+    };
+
     currentAddFlavorHandler = () => openFlavorEditor(thumbnailElement);
     currentDeleteHandler = () => deleteCard(thumbnailElement);
+    
+    // moveCardToMultiZone内ですでに記録処理が入っているため、ここでは呼び出しのみ
     currentMoveToGraveHandler = () => moveCardToMultiZone(thumbnailElement, 'grave');
     currentMoveToExcludeHandler = () => moveCardToMultiZone(thumbnailElement, 'exclude');
     currentMoveToHandHandler = () => moveCardToMultiZone(thumbnailElement, 'hand');
     currentMoveToDeckHandler = () => moveCardToMultiZone(thumbnailElement, 'deck');
     currentMoveToSideDeckHandler = () => moveCardToMultiZone(thumbnailElement, 'side-deck');
+    
     currentAddCounterHandler = () => addCounterToCard(thumbnailElement);
     currentRemoveCounterHandler = () => removeCounterFromCard(thumbnailElement);
     currentMemoHandler = () => {
@@ -214,8 +252,35 @@ function handleCardContextMenu(e) {
     };
     currentFlipHandler = () => flipCard(thumbnailElement, idPrefix);
 
-    // --- Show/Hide menu items ---
-    // Hide all move/flip actions for icon zone
+    if (masturbateMenuItem) {
+        const isOpponentSadist = document.body.classList.contains('opponent-sadist-active');
+        const isOpponentCard = idPrefix === 'opponent-'; 
+
+        if (isOpponentSadist && isOpponentCard) {
+            masturbateMenuItem.style.display = 'block';
+            
+            const isMasturbating = thumbnailElement.dataset.isMasturbating === 'true';
+            masturbateMenuItem.textContent = isMasturbating ? 'オナニーを止める' : 'オナニーする';
+
+            currentMasturbateHandler = () => {
+                const newState = !isMasturbating;
+                thumbnailElement.dataset.isMasturbating = newState;
+                
+                if (isRecording && typeof recordAction === 'function') {
+                    recordAction({ 
+                        type: 'masturbate', 
+                        zoneId: sourceZoneId, 
+                        slotIndex: slotIndex, 
+                        isMasturbating: newState 
+                    });
+                }
+            };
+        } else {
+            masturbateMenuItem.style.display = 'none';
+            currentMasturbateHandler = null;
+        }
+    }
+
     const hideForIcon = isIconZone;
     toGraveMenuItem.style.display = hideForIcon ? 'none' : 'block';
     toExcludeMenuItem.style.display = hideForIcon ? 'none' : 'block';
@@ -224,18 +289,15 @@ function handleCardContextMenu(e) {
     toSideDeckMenuItem.style.display = hideForIcon ? 'none' : 'block';
     flipMenuItem.style.display = hideForIcon ? 'none' : 'block';
 
-    // Show other items for icon zone as well
     actionMenuItem.style.display = 'block';
     targetMenuItem.style.display = 'block';
     addCounterMenuItem.style.display = 'block';
     removeCounterMenuItem.style.display = 'block';
     memoMenuItem.style.display = 'block';
     addFlavorMenuItem.style.display = 'block';
-    deleteMenuItem.style.display = 'block'; // Always show delete, except for maybe specific logic below
+    deleteMenuItem.style.display = 'block'; 
 
-    // Specific logic for non-icon decoration cards
     if (!isIconZone && thumbnailElement.dataset.isDecoration === 'true') {
-        // Hide most actions for decoration cards
         actionMenuItem.style.display = 'none';
         targetMenuItem.style.display = 'none';
         addCounterMenuItem.style.display = 'none';
@@ -243,20 +305,15 @@ function handleCardContextMenu(e) {
         memoMenuItem.style.display = 'none';
         addFlavorMenuItem.style.display = 'none';
         flipMenuItem.style.display = 'none';
-        // Only show delete if in decoration mode
         deleteMenuItem.style.display = isDecorationMode ? 'block' : 'none';
     } else if (isIconZone) {
-        // For icon zone, never show move/flip, but allow delete.
-        // This is handled by the initial hideForIcon check.
-        // We might want to prevent deleting the icon though. For now, we allow it.
+        
     } else {
-        // Normal card, check for stackable zones for counters
         if (!stackableZones.includes(sourceBaseId)) {
             addCounterMenuItem.style.display = 'none';
             removeCounterMenuItem.style.display = 'none';
         }
     }
-
 
     contextMenu.style.visibility = 'hidden';
     contextMenu.style.display = 'block';
@@ -284,7 +341,6 @@ function handleCardMouseOver(e) {
     const previewImg = document.createElement('img');
     previewImg.src = thumbnailElement.dataset.isFlipped === 'true' ? (thumbnailElement.dataset.originalSrc || imgElement.src) : imgElement.src;
     
-    // 修正: プレビュー画像の読み込み失敗時に画像を削除する処理を追加
     previewImg.onerror = () => previewImg.remove();
 
     previewImageContainer.appendChild(previewImg);
@@ -349,10 +405,17 @@ function deleteCard(thumbnailElement) {
 
     const parentZoneId = getParentZoneId(slotElement);
     const baseParentZoneId = getBaseId(parentZoneId);
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'delete',
+            zoneId: parentZoneId,
+            slotIndex: Array.from(slotElement.parentNode.children).indexOf(slotElement)
+        });
+    }
 
     slotElement.removeChild(thumbnailElement);
     
-    // Clear preview
     const commonPreviewArea = document.getElementById('common-card-preview');
     const previewImageContainer = commonPreviewArea.querySelector('#preview-image-container');
     previewImageContainer.innerHTML = '<p>カードにカーソルを合わせてください</p>';
@@ -387,6 +450,15 @@ function addCounterToCard(thumbnailElement) {
     counterOverlay.dataset.counter = count;
     counterOverlay.textContent = count;
     counterOverlay.style.display = 'flex';
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'cardCounter',
+            zoneId: getParentZoneId(thumbnailElement.parentNode),
+            slotIndex: Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode),
+            counter: count
+        });
+    }
 }
 
 function removeCounterFromCard(thumbnailElement) {
@@ -397,6 +469,15 @@ function removeCounterFromCard(thumbnailElement) {
     counterOverlay.dataset.counter = count;
     counterOverlay.textContent = count;
     if (count === 0) counterOverlay.style.display = 'none';
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'cardCounter',
+            zoneId: getParentZoneId(thumbnailElement.parentNode),
+            slotIndex: Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode),
+            counter: count
+        });
+    }
 }
 
 function flipCard(thumbnailElement, idPrefix) {
@@ -420,6 +501,15 @@ function flipCard(thumbnailElement, idPrefix) {
         thumbnailElement.dataset.originalSrc = imgElement.src;
         imgElement.src = deckImgSrc;
         thumbnailElement.dataset.isFlipped = 'true';
+    }
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'flip',
+            zoneId: getParentZoneId(thumbnailElement.parentNode),
+            slotIndex: Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode),
+            isFlipped: !isFlipped
+        });
     }
 
     const slotElement = thumbnailElement.parentNode;

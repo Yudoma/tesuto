@@ -1,9 +1,9 @@
-let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem;
+let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem, masturbateMenuItem;
 let actionMenuItem, targetMenuItem, addFlavorMenuItem;
 let memoEditorModal, memoTextarea, memoSaveBtn, memoCancelBtn, memoTooltip;
 let lightboxOverlay, lightboxContent;
 let commonDrawer, commonDrawerToggle;
-let commonFlipBoardBtn, commonDecorationModeBtn;
+let commonFlipBoardBtn, commonDecorationModeBtn, commonToggleSeBtn;
 let diceRollBtn, coinTossBtn, randomResultDisplay;
 let commonToggleNavBtn;
 let flavorEditorModal, flavorEditorHeader, flavorPreview1, flavorPreview2;
@@ -11,7 +11,11 @@ let flavorDelete1, flavorDelete2, flavorCancelBtn;
 let flavorUpload1, flavorUpload2;
 let flavorDropZone1, flavorDropZone2;
 
-// リサイズ中判定用のフラグを追加
+// 新規追加ボタン
+let commonExportBoardBtn, commonImportBoardBtn;
+let recordStartBtn, recordStopBtn, replayPlayBtn, saveReplayBtn, loadReplayBtn;
+
+// リサイズ中判定用のフラグ
 let isResizingDrawer = false;
 
 let stepButtons = [];
@@ -44,6 +48,9 @@ function closeContextMenu() {
     currentActionHandler = null;
     currentTargetHandler = null;
     currentAddFlavorHandler = null;
+    currentMemoTarget = null;
+    currentFlavorTarget = null;
+    currentMasturbateHandler = null;
 }
 
 function performMemoSave() {
@@ -53,6 +60,15 @@ function performMemoSave() {
             currentMemoTarget.dataset.memo = newMemo;
         } else {
             delete currentMemoTarget.dataset.memo;
+        }
+        // メモ変更の記録
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({
+                type: 'memoChange',
+                zoneId: getParentZoneId(currentMemoTarget.parentNode),
+                cardIndex: Array.from(currentMemoTarget.parentNode.parentNode.children).indexOf(currentMemoTarget.parentNode),
+                memo: newMemo
+            });
         }
     }
     memoEditorModal.style.display = 'none';
@@ -98,6 +114,15 @@ function deleteFlavorImage(slotNumber) {
         delete currentFlavorTarget.dataset.flavor2;
         updateFlavorPreview(2, null);
     }
+    // フレーバー削除の記録
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'flavorDelete',
+            zoneId: getParentZoneId(currentFlavorTarget.parentNode),
+            cardIndex: Array.from(currentFlavorTarget.parentNode.parentNode.children).indexOf(currentFlavorTarget.parentNode),
+            slotNumber: slotNumber
+        });
+    }
 }
 
 function handleFlavorFile(file, slotNumber) {
@@ -115,6 +140,17 @@ function handleFlavorFile(file, slotNumber) {
         } else if (slotNumber === 2) {
             currentFlavorTarget.dataset.flavor2 = imgSrc;
             updateFlavorPreview(2, imgSrc);
+        }
+        
+        // フレーバー更新の記録
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({
+                type: 'flavorUpdate',
+                zoneId: getParentZoneId(currentFlavorTarget.parentNode),
+                cardIndex: Array.from(currentFlavorTarget.parentNode.parentNode.children).indexOf(currentFlavorTarget.parentNode),
+                slotNumber: slotNumber,
+                imgSrc: imgSrc
+            });
         }
     };
     reader.readAsDataURL(file);
@@ -168,6 +204,10 @@ function setupStepButtons() {
                     currentStepIndex = index;
                     updateStepUI();
 
+                    if (isRecording && typeof recordAction === 'function') {
+                        recordAction({ type: 'stepChange', index: index });
+                    }
+
                     if (button.id === 'step-start' && currentStepIndex === 0) {
                          const turnPlayerSelect = document.getElementById('turn-player-select');
                          const turnInput = document.getElementById('common-turn-value');
@@ -177,6 +217,15 @@ function setupStepButtons() {
                              let currentValue = parseInt(turnInput.value) || 1;
                              turnInput.value = currentValue + 1;
                              turnPlayerSelect.value = 'first';
+                         }
+                         
+                         // ターン自動更新の記録
+                         if (isRecording && typeof recordAction === 'function') {
+                             recordAction({ 
+                                 type: 'turnAutoUpdate', 
+                                 turnValue: turnInput.value, 
+                                 turnPlayer: turnPlayerSelect.value 
+                             });
                          }
                     }
                 }
@@ -208,6 +257,7 @@ function setupUI() {
     addCounterMenuItem = document.getElementById('context-menu-add-counter');
     removeCounterMenuItem = document.getElementById('context-menu-remove-counter');
     addFlavorMenuItem = document.getElementById('context-menu-add-flavor');
+    masturbateMenuItem = document.getElementById('context-menu-masturbate');
 
     memoEditorModal = document.getElementById('memo-editor');
     memoTextarea = document.getElementById('memo-editor-textarea');
@@ -225,6 +275,15 @@ function setupUI() {
     commonFlipBoardBtn = document.getElementById('common-flip-board-btn');
     commonDecorationModeBtn = document.getElementById('common-decoration-mode-btn');
     commonToggleNavBtn = document.getElementById('common-toggle-nav-btn');
+    commonToggleSeBtn = document.getElementById('common-toggle-se-btn');
+
+    commonExportBoardBtn = document.getElementById('common-export-board-btn');
+    commonImportBoardBtn = document.getElementById('common-import-board-btn');
+    recordStartBtn = document.getElementById('record-start-btn');
+    recordStopBtn = document.getElementById('record-stop-btn');
+    replayPlayBtn = document.getElementById('replay-play-btn');
+    saveReplayBtn = document.getElementById('save-replay-btn');
+    loadReplayBtn = document.getElementById('load-replay-btn');
 
     diceRollBtn = document.getElementById('dice-roll-btn');
     coinTossBtn = document.getElementById('coin-toss-btn');
@@ -243,10 +302,11 @@ function setupUI() {
     flavorCancelBtn = document.getElementById('flavor-editor-cancel');
 
     if (!contextMenu || !deleteMenuItem || !toGraveMenuItem || !toExcludeMenuItem || !toHandMenuItem || !toDeckMenuItem || !toSideDeckMenuItem || !flipMenuItem || !addCounterMenuItem || !removeCounterMenuItem
-        || !actionMenuItem || !targetMenuItem || !addFlavorMenuItem
+        || !actionMenuItem || !targetMenuItem || !addFlavorMenuItem || !masturbateMenuItem
         || !memoMenuItem || !memoEditorModal || !memoTextarea || !memoSaveBtn || !memoCancelBtn || !memoTooltip
         || !lightboxOverlay || !lightboxContent || !commonPreviewArea
-        || !commonDrawer || !commonDrawerToggle || !commonFlipBoardBtn || !commonDecorationModeBtn || !commonToggleNavBtn
+        || !commonDrawer || !commonDrawerToggle || !commonFlipBoardBtn || !commonDecorationModeBtn || !commonToggleNavBtn || !commonToggleSeBtn
+        || !commonExportBoardBtn || !commonImportBoardBtn || !recordStartBtn || !recordStopBtn || !replayPlayBtn || !saveReplayBtn || !loadReplayBtn
         || !diceRollBtn || !coinTossBtn || !randomResultDisplay
         || !flavorEditorModal || !flavorEditorHeader || !flavorPreview1 || !flavorPreview2 || !flavorDelete1 || !flavorDelete2
         || !flavorDropZone1 || !flavorDropZone2 || !flavorUpload1 || !flavorUpload2
@@ -306,12 +366,12 @@ function setupUI() {
     
     // Context Menu Actions
     actionMenuItem.addEventListener('click', () => { 
-        playSe('ボタン共通.mp3');
+        playSe('効果発動.mp3');
         if (typeof currentActionHandler === 'function') currentActionHandler(); 
         closeContextMenu(); 
     });
     targetMenuItem.addEventListener('click', () => { 
-        playSe('ボタン共通.mp3');
+        playSe('対象に取る.mp3');
         if (typeof currentTargetHandler === 'function') currentTargetHandler(); 
         closeContextMenu(); 
     });
@@ -368,6 +428,15 @@ function setupUI() {
     addFlavorMenuItem.addEventListener('click', () => { 
         playSe('ボタン共通.mp3');
         if (typeof currentAddFlavorHandler === 'function') currentAddFlavorHandler(); 
+        closeContextMenu(); 
+    });
+    masturbateMenuItem.addEventListener('click', () => { 
+        if (masturbateMenuItem.textContent === 'オナニーする') {
+            playSe('O.mp3', true);
+        } else {
+            stopSe('O.mp3');
+        }
+        if (typeof currentMasturbateHandler === 'function') currentMasturbateHandler(); 
         closeContextMenu(); 
     });
 
@@ -435,9 +504,22 @@ function setupUI() {
             let currentValue = parseInt(turnInput.value) || 1;
             currentValue = Math.max(1, currentValue + change);
             turnInput.value = currentValue;
+            
+            if (isRecording && typeof recordAction === 'function') {
+                recordAction({ type: 'turnChange', value: currentValue });
+            }
         };
         turnPrevBtn.addEventListener('click', () => updateTurnValue(-1));
         turnNextBtn.addEventListener('click', () => updateTurnValue(1));
+    }
+    
+    const turnPlayerSelect = document.getElementById('turn-player-select');
+    if (turnPlayerSelect) {
+        turnPlayerSelect.addEventListener('change', () => {
+             if (isRecording && typeof recordAction === 'function') {
+                recordAction({ type: 'turnPlayerChange', value: turnPlayerSelect.value });
+            }
+        });
     }
 
     commonDrawerToggle.addEventListener('click', () => {
@@ -449,6 +531,10 @@ function setupUI() {
         document.body.classList.toggle('board-flipped');
         document.getElementById('player-drawer')?.classList.remove('open');
         document.getElementById('opponent-drawer')?.classList.remove('open');
+        
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({ type: 'boardFlip', isFlipped: document.body.classList.contains('board-flipped') });
+        }
     });
 
     commonDecorationModeBtn.addEventListener('click', () => {
@@ -467,16 +553,60 @@ function setupUI() {
         });
     });
 
+    commonToggleSeBtn.addEventListener('click', () => {
+        const isMuted = toggleSeMute();
+        commonToggleSeBtn.textContent = isMuted ? '効果音再開' : '効果音停止';
+        if (!isMuted) playSe('ボタン共通.mp3');
+    });
+
+    // Board I/O
+    commonExportBoardBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof exportAllBoardData === 'function') exportAllBoardData();
+    });
+    commonImportBoardBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof importAllBoardData === 'function') importAllBoardData();
+    });
+
+    // Replay Controls
+    recordStartBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof startReplayRecording === 'function') startReplayRecording();
+    });
+    recordStopBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof stopReplayRecording === 'function') stopReplayRecording();
+    });
+    replayPlayBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof playReplay === 'function') playReplay();
+    });
+    saveReplayBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof exportReplayData === 'function') exportReplayData();
+    });
+    loadReplayBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof importReplayData === 'function') importReplayData();
+    });
+
     diceRollBtn.addEventListener('click', () => {
         playSe('サイコロ.mp3');
         const result = Math.floor(Math.random() * 6) + 1;
         randomResultDisplay.textContent = `ダイス: ${result}`;
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({ type: 'dice', result: result });
+        }
     });
 
     coinTossBtn.addEventListener('click', () => {
-        playSe('ボタン共通.mp3');
+        playSe('コイントス.mp3');
         const result = Math.random() < 0.5 ? 'ウラ' : 'オモテ';
         randomResultDisplay.textContent = `コイン: ${result}`;
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({ type: 'coin', result: result });
+        }
     });
 
     commonToggleNavBtn.addEventListener('click', () => {
@@ -587,6 +717,41 @@ function setupUI() {
             });
         }
     }
+    
+    // カウンター操作の記録（board.jsで生成されるボタンへの委譲）
+    document.body.addEventListener('click', (e) => {
+        if (!isRecording) return;
+        const btn = e.target.closest('.counter-btn');
+        if (!btn) return;
+        
+        // ダイス・コインは個別に処理済み
+        if (btn.id === 'dice-roll-btn' || btn.id === 'coin-toss-btn') return; 
+        
+        // 自動減少ボタン
+        if (btn.id && btn.id.includes('auto-decrease')) {
+             if (typeof recordAction === 'function') {
+                 recordAction({ type: 'autoDecreaseToggle', id: btn.id });
+             }
+             return;
+        }
+
+        // 手動増減ボタン
+        if (btn.dataset.value) {
+            const group = btn.closest('.hand-counter-group');
+            if (group) {
+                const input = group.querySelector('input');
+                if (input) {
+                     if (typeof recordAction === 'function') {
+                         recordAction({ 
+                             type: 'counterChange', 
+                             inputId: input.id, 
+                             change: parseInt(btn.dataset.value) 
+                         });
+                     }
+                }
+            }
+        }
+    });
 }
 
 function activateDrawerTab(targetId, drawerElement) {

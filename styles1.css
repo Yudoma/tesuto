@@ -592,9 +592,10 @@ body.nav-hidden .zone-header {
     
     padding: 10px 5px;
 
-    background-color: #ffcc00;
+    /* 変更: デフォルトを白系に */
+    background-color: #f0f0f0;
     color: #333;
-    box-shadow: 0 2px #997a00; 
+    box-shadow: 0 2px #b0b0b0;
     
     border: none;
     border-radius: 8px;  
@@ -606,6 +607,8 @@ body.nav-hidden .zone-header {
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s;
 }
 .drawer-toggle:active {
+    /* 変更: 押下時を黄色に */
+    background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
     transform: translateY(2px);
 }
@@ -618,8 +621,9 @@ body.nav-hidden .zone-header {
     bottom: 60px;  
 }
 #opponent-drawer-toggle:active {
-    box-shadow: 0 0 #997a00;
     transform: translateY(2px);  
+    background-color: #ffcc00;
+    box-shadow: 0 0 #997a00;
 }
 
 .drawer-content {
@@ -828,7 +832,8 @@ body.nav-hidden .zone-header {
 }
 
 .step-btn:active {
-    box-shadow: 0 0 #b0b0b0; 
+    background-color: #ffcc00;
+    box-shadow: 0 0 #997a00;
     transform: translateY(2px); 
 }
 
@@ -963,17 +968,18 @@ body.sm-mode-active .common-turn-counter .turn-input {
     background-color: #d0d0d0;
 }
 .turn-btn:active {
-    box-shadow: 0 0 #b0b0b0; 
+    background-color: #ffcc00;
+    box-shadow: 0 0 #997a00;
     transform: translateY(2px); 
 }
 
 html body #common-drawer-toggle {
     background-color: #f0f0f0;
-    box-shadow: 0 2px #bbb;
+    box-shadow: 0 2px #b0b0b0;
     color: #333;
 }
 html body #common-drawer-toggle:hover {
-    background-color: #fff;
+    background-color: #d0d0d0;
 }
 html body #common-drawer-toggle:active {
     background-color: #ffcc00;
@@ -994,11 +1000,11 @@ html body #common-drawer .draw-btn,
 html body #common-drawer .counter-btn {
     background-color: #f0f0f0;
     color: #333;
-    box-shadow: 0 2px #bbb;
+    box-shadow: 0 2px #b0b0b0;
 }
 html body #common-drawer .draw-btn:hover,
 html body #common-drawer .counter-btn:hover {
-    background-color: #fff;
+    background-color: #d0d0d0;
 }
 html body #common-drawer .draw-btn:active,
 html body #common-drawer .counter-btn:active {
@@ -1239,4 +1245,33 @@ body.sm-mode-active .drawer-close-hint {
 
 body.sm-mode-active .resize-handle {
     background: linear-gradient(135deg, transparent 50%, #FF69B4 50%);
+}
+
+/* ナビ非表示中のボタン（「ナビ再表示」） */
+body.nav-hidden #common-toggle-nav-btn {
+    background-color: #ffcc00;
+    box-shadow: 0 2px #997a00;
+    color: #333;
+}
+body.nav-hidden #common-toggle-nav-btn:hover {
+    background-color: #ffdb4d;
+}
+body.nav-hidden #common-toggle-nav-btn:active {
+    box-shadow: 0 0 #997a00;
+    transform: translateY(3px);
+}
+
+/* ナビ表示中のボタン（「ナビ非表示」） */
+body:not(.nav-hidden) #common-toggle-nav-btn {
+    background-color: #f0f0f0;
+    color: #333;
+    box-shadow: 0 2px #b0b0b0;
+}
+body:not(.nav-hidden) #common-toggle-nav-btn:hover {
+    background-color: #d0d0d0;
+}
+body:not(.nav-hidden) #common-toggle-nav-btn:active {
+    background-color: #ffcc00;
+    box-shadow: 0 0 #997a00;
+    transform: translateY(3px);
 }

@@ -55,9 +55,19 @@ function handleSlotClick(e) {
                 const reader = new FileReader();
                 reader.onload = (readEvent) => {
                     const idPrefix = getPrefixFromZoneId(getParentZoneId(slot));
-                    createCardThumbnail(readEvent.target.result, slot, false, false, idPrefix);
+                    const imageData = readEvent.target.result;
+                    createCardThumbnail(imageData, slot, false, false, idPrefix);
                     updateSlotStackState(slot);
                     playSe('カードを配置する.mp3');
+
+                    if (isRecording && typeof recordAction === 'function') {
+                        recordAction({
+                            type: 'newCard',
+                            zoneId: getParentZoneId(slot),
+                            slotIndex: Array.from(slot.parentNode.children).indexOf(slot),
+                            cardData: imageData
+                        });
+                    }
                 };
                 reader.readAsDataURL(file);
             } catch (error) {
@@ -121,9 +131,6 @@ function handleFileDrop(e, targetSlot, idPrefix) {
     const targetParentZoneId = getParentZoneId(targetSlot);
     const targetParentBaseId = getBaseId(targetParentZoneId);
 
-    // Guard clause: Only allow drops on decoration zones if in decoration mode.
-    // Note: If not in decoration mode, we allow dropping on pile zones (deck, grave etc) to add cards.
-    
     // Decoration mode logic
     if (isDecorationMode && decorationZones.includes(targetParentBaseId)) {
         const file = files[0];
@@ -141,6 +148,14 @@ function handleFileDrop(e, targetSlot, idPrefix) {
             }
             syncMainZoneImage(targetParentBaseId, idPrefix);
             playSe('カードを配置する.mp3');
+
+            if (isRecording && typeof recordAction === 'function') {
+                recordAction({
+                    type: 'updateDecoration',
+                    zoneId: targetParentZoneId,
+                    imageData: imageData
+                });
+            }
         };
         reader.readAsDataURL(file);
         return;
@@ -149,15 +164,13 @@ function handleFileDrop(e, targetSlot, idPrefix) {
     const pileZones = ['deck', 'grave', 'exclude', 'side-deck'];
     const isPileZone = pileZones.includes(targetParentBaseId);
 
-    // Determine if it's a direct single-card slot (battle, spell, mana, special, etc.)
-    // Pile zones (even the top slot) should be treated as "add to list" in normal mode, not "replace single card".
     const isDirectBoardSlot = !targetParentBaseId.endsWith('-back-slots') 
                               && targetParentBaseId !== 'hand-zone' 
                               && targetParentBaseId !== 'free-space-slots'
                               && !isPileZone;
 
     if (isDirectBoardSlot) {
-        const file = files[0]; // Take only the first file
+        const file = files[0]; 
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
@@ -169,30 +182,54 @@ function handleFileDrop(e, targetSlot, idPrefix) {
                     resetSlotToDefault(targetSlot);
                 }
                 
-                createCardThumbnail(event.target.result, targetSlot, false, false, idPrefix);
+                const imageData = event.target.result;
+                createCardThumbnail(imageData, targetSlot, false, false, idPrefix);
                 
                 if (isTargetStackable) {
                     updateSlotStackState(targetSlot);
                 }
                 playSe('カードを配置する.mp3');
+
+                if (isRecording && typeof recordAction === 'function') {
+                    recordAction({
+                        type: 'newCard',
+                        zoneId: targetParentZoneId,
+                        slotIndex: Array.from(targetSlot.parentNode.children).indexOf(targetSlot),
+                        cardData: imageData
+                    });
+                }
             };
             reader.readAsDataURL(file);
         }
     } else {
-        // Multi-file handling for Hand, Deck, Grave, Exclude, Side-Deck, Free Space
+        // Multi-file handling
         
-        // Helper to process files into a specific container
         const addFilesToContainer = (fileList, containerId) => {
             const container = document.getElementById(containerId);
             if (!container) return;
             
             let slotsContainer = container.querySelector('.deck-back-slot-container, .free-space-slot-container') || container;
-            const availableSlots = Array.from(slotsContainer.querySelectorAll('.card-slot')).filter(s => !s.querySelector('.thumbnail'));
+            const allSlots = Array.from(slotsContainer.querySelectorAll('.card-slot'));
+            const availableSlots = allSlots.filter(s => !s.querySelector('.thumbnail'));
             
             fileList.forEach((file, index) => {
                 if (availableSlots[index]) {
                     const reader = new FileReader();
-                    reader.onload = (event) => createCardThumbnail(event.target.result, availableSlots[index], false, false, idPrefix);
+                    reader.onload = (event) => {
+                        const imageData = event.target.result;
+                        createCardThumbnail(imageData, availableSlots[index], false, false, idPrefix);
+                        
+                        if (isRecording && typeof recordAction === 'function') {
+                            // Find the current index of the slot we are dropping into
+                            const slotIndex = allSlots.indexOf(availableSlots[index]);
+                            recordAction({
+                                type: 'newCard',
+                                zoneId: containerId,
+                                slotIndex: slotIndex,
+                                cardData: imageData
+                            });
+                        }
+                    };
                     reader.readAsDataURL(file);
                 }
             });
@@ -227,7 +264,6 @@ function handleFileDrop(e, targetSlot, idPrefix) {
             }
             
         } else {
-            // Target is Deck, Grave, Exclude, Side-Deck, Free Space, or their back-slots
             let destinationId;
             
             if (isPileZone) {
@@ -235,7 +271,7 @@ function handleFileDrop(e, targetSlot, idPrefix) {
             } else if (targetParentBaseId.endsWith('-back-slots') || targetParentBaseId === 'free-space-slots') {
                 destinationId = targetParentZoneId;
             } else {
-                destinationId = idPrefix + 'deck-back-slots'; // Fallback
+                destinationId = idPrefix + 'deck-back-slots'; 
             }
             
             addFilesToContainer(files, destinationId);
@@ -253,45 +289,85 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
     const targetZoneId = getParentZoneId(targetSlot);
     const targetBaseZoneId = getBaseId(targetZoneId);
 
+    if (sourceSlot === targetSlot) return;
+
+    // 記録用に移動前の情報を取得
+    const fromZoneId = sourceZoneId;
+    const fromSlotIndex = Array.from(sourceSlot.parentNode.children).indexOf(sourceSlot);
+
+    // --- SE Playback Logic ---
+    const isGrave = targetBaseZoneId === 'grave' || targetBaseZoneId === 'grave-back-slots';
+    const isExclude = targetBaseZoneId === 'exclude' || targetBaseZoneId === 'exclude-back-slots';
+    
+    if (isGrave) {
+        playSe('墓地に送る.mp3');
+    } else if (isExclude) {
+        playSe('除外する.mp3');
+    } else {
+        playSe('カードを配置する.mp3');
+    }
+
     // --- Logic for moving between different zones ---
     const isTargetStackable = stackableZones.includes(targetBaseZoneId);
     const existingThumbnail = getExistingThumbnail(targetSlot);
 
-    if (sourceSlot === targetSlot) return;
-
     // Moving to a multi-card zone (deck, grave, etc.)
     if (targetBaseZoneId.endsWith('-back-slots') || ['deck', 'grave', 'exclude', 'side-deck'].includes(targetBaseZoneId)) {
-        if (targetBaseZoneId === 'grave' || targetBaseZoneId === 'grave-back-slots') {
-            playSe('墓地に送る.mp3');
-        } else if (targetBaseZoneId === 'exclude' || targetBaseZoneId === 'exclude-back-slots') {
-            playSe('除外する.mp3');
-        }
-
         let multiZoneId = targetZoneId;
         if(['deck', 'grave', 'exclude', 'side-deck'].includes(targetBaseZoneId)) {
             multiZoneId = idPrefix + targetBaseZoneId + '-back-slots';
         }
+        // moveCardToMultiZone内で記録を行うため、ここでは呼び出すだけ
         moveCardToMultiZone(draggedItem, getBaseId(multiZoneId).replace('-back-slots',''));
         return;
     }
-
 
     // Moving to a stackable zone
     if (isTargetStackable && !isDecorationMode) {
         sourceSlot.removeChild(draggedItem);
         targetSlot.insertBefore(draggedItem, targetSlot.firstChild);
+        
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({
+                type: 'move',
+                fromZone: fromZoneId,
+                fromSlotIndex: fromSlotIndex,
+                toZone: targetZoneId,
+                toSlotIndex: Array.from(targetSlot.parentNode.children).indexOf(targetSlot)
+            });
+        }
     }
     // Swapping cards
     else if (existingThumbnail && sourceSlot !== targetSlot) {
         sourceSlot.appendChild(existingThumbnail);
         targetSlot.appendChild(draggedItem);
+        
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({
+                type: 'move', // Swapもmoveとして記録し、再生側ロジックで「移動先にカードがあればSwap」として扱う
+                fromZone: fromZoneId,
+                fromSlotIndex: fromSlotIndex,
+                toZone: targetZoneId,
+                toSlotIndex: Array.from(targetSlot.parentNode.children).indexOf(targetSlot)
+            });
+        }
     }
     // Moving to an empty slot
     else if (!existingThumbnail) {
         sourceSlot.removeChild(draggedItem);
         targetSlot.appendChild(draggedItem);
+        
+        if (isRecording && typeof recordAction === 'function') {
+            recordAction({
+                type: 'move',
+                fromZone: fromZoneId,
+                fromSlotIndex: fromSlotIndex,
+                toZone: targetZoneId,
+                toSlotIndex: Array.from(targetSlot.parentNode.children).indexOf(targetSlot)
+            });
+        }
     } else {
-        return; // Do nothing if dropping on a non-stackable, occupied slot
+        return; 
     }
 
     // --- Cleanup and update ---
@@ -303,8 +379,6 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
         if(decorationZones.includes(getBaseId(zoneId))) syncMainZoneImage(getBaseId(zoneId), getPrefixFromZoneId(zoneId));
     });
 }
-
-
 
 
 function updateSlotStackState(slotElement) {
@@ -401,6 +475,10 @@ function moveCardToMultiZone(thumbnailElement, targetBaseZoneId) {
 
     if (sourceSlot === destinationMultiZoneId || sourceSlot.id === destinationMultiZoneId) return;
 
+    // 記録用：移動前の情報
+    const fromZoneId = getParentZoneId(sourceSlot);
+    const fromSlotIndex = Array.from(sourceSlot.parentNode.children).indexOf(sourceSlot);
+
     const destinationContainer = document.getElementById(destinationMultiZoneId);
     if (!destinationContainer) return;
 
@@ -414,6 +492,17 @@ function moveCardToMultiZone(thumbnailElement, targetBaseZoneId) {
 
     sourceSlot.removeChild(thumbnailElement);
     emptySlot.appendChild(thumbnailElement);
+
+    // 記録用：移動後の情報
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'move',
+            fromZone: fromZoneId,
+            fromSlotIndex: fromSlotIndex,
+            toZone: destinationMultiZoneId,
+            toSlotIndex: Array.from(emptySlot.parentNode.children).indexOf(emptySlot)
+        });
+    }
 
     resetCardFlipState(thumbnailElement);
     resetSlotToDefault(emptySlot);

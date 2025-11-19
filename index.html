@@ -268,8 +268,27 @@
                                                 <div class="common-control-buttons">
                                                     <button class="draw-btn" id="common-flip-board-btn">盤面反転</button>
                                                     <button class="draw-btn" id="common-decoration-mode-btn">装飾モード</button>
-                                                    <button class="draw-btn" id="common-toggle-nav-btn">ナビ切替</button>
-                                                    <button class="draw-btn" id="common-save-board-btn">盤面保存</button>
+                                                    <button class="draw-btn" id="common-toggle-nav-btn">ナビ非表示</button>
+                                                    <button class="draw-btn" id="common-toggle-se-btn">効果音停止</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="common-control-group">
+                                                <span class="area-label">盤面全データ</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="common-export-board-btn">全保存</button>
+                                                    <button class="draw-btn" id="common-import-board-btn">全読込</button>
+                                                </div>
+                                            </div>
+
+                                            <div class="common-control-group">
+                                                <span class="area-label">リプレイ</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="record-start-btn">記録開始</button>
+                                                    <button class="draw-btn" id="record-stop-btn">記録終了</button>
+                                                    <button class="draw-btn" id="replay-play-btn">再生</button>
+                                                    <button class="draw-btn" id="save-replay-btn">保存</button>
+                                                    <button class="draw-btn" id="load-replay-btn">読込</button>
                                                 </div>
                                             </div>
 
@@ -304,6 +323,14 @@
                                                     <button class="draw-btn" id="delete-deck-btn">デッキ削除</button>
                                                 </div>
                                             </div>
+                                            
+                                            <div class="common-control-group">
+                                                <span class="area-label">デッキI/O (P)</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="export-deck-btn">エクスポート</button>
+                                                    <button class="draw-btn" id="import-deck-btn">インポート</button>
+                                                </div>
+                                            </div>
 
                                         </div>
                                     </div>
@@ -325,6 +352,14 @@
                                                     <button class="draw-btn" id="opponent-shuffle-deck">シャッフル</button>
                                                     <button class="draw-btn" id="opponent-reset-and-draw">リセット</button>
                                                     <button class="draw-btn" id="opponent-delete-deck-btn">デッキ削除</button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="common-control-group">
+                                                <span class="area-label">デッキI/O (O)</span>
+                                                <div class="common-control-buttons">
+                                                    <button class="draw-btn" id="opponent-export-deck-btn">エクスポート</button>
+                                                    <button class="draw-btn" id="opponent-import-deck-btn">インポート</button>
                                                 </div>
                                             </div>
 
@@ -505,6 +540,7 @@
 
     <div id="custom-context-menu" class="custom-context-menu">
         <ul>
+            <li id="context-menu-masturbate" style="display:none;">オナニーする</li>
             <li id="context-menu-action">効果発動</li>
             <li id="context-menu-target">対象に取る</li>
             <li id="context-menu-to-grave">墓地へ送る</li>
@@ -597,10 +633,6 @@
                                 <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                                 <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                             </div>
-                            <div class="sidebar-button-container">
-                                <button class="draw-btn" id="export-deck-btn">エクスポート</button>
-                                <button class="draw-btn" id="import-deck-btn">インポート</button>
-                            </div>
                         </div>
                         
                         <div class="sidebar-slot-area drawer-panel" id="grave-back-slots">
@@ -625,8 +657,8 @@
                                 <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                                 <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                                 <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                                </div>
+                                <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
+                            </div>
                         </div>
 
                         <div class="sidebar-slot-area drawer-panel" id="side-deck-back-slots">
@@ -683,10 +715,6 @@
                             <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                             <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                             <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                        </div>
-                        <div class="sidebar-button-container">
-                            <button class="draw-btn" id="opponent-export-deck-btn">エクスポート</button>
-                            <button class="draw-btn" id="opponent-import-deck-btn">インポート</button>
                         </div>
                     </div>
                     

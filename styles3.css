@@ -703,18 +703,33 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     background-color: #d0d0d0;
 }
 .memo-editor-buttons button:active {
-    box-shadow: 0 0 #b0b0b0; 
+    background-color: #ffcc00;
+    box-shadow: 0 0 #997a00;
     transform: translateY(2px); 
 }
 
+/* キャンセルボタンのオーバーライド: 赤色 */
+.memo-editor-buttons button#memo-editor-cancel {
+    background-color: #cc0000;
+    color: white;
+    box-shadow: 0 2px #800000;
+}
+.memo-editor-buttons button#memo-editor-cancel:hover {
+    background-color: #e60000;
+}
+.memo-editor-buttons button#memo-editor-cancel:active {
+    box-shadow: 0 0 #800000; 
+}
+
 .memo-editor-buttons button#memo-editor-save {
-    background-color: #ffcc00; 
-    box-shadow: 0 2px #997a00; 
+    background-color: #f0f0f0; 
+    box-shadow: 0 2px #b0b0b0; 
 }
 .memo-editor-buttons button#memo-editor-save:hover {
-    background-color: #ffdb4d;
+    background-color: #d0d0d0;
 }
 .memo-editor-buttons button#memo-editor-save:active {
+    background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
 }
 
@@ -769,15 +784,31 @@ body.sm-mode-active .memo-editor-buttons button:hover {
 }
 body.sm-mode-active .memo-editor-buttons button:active {
     box-shadow: 0 0 #b0b0b0; 
-}
-body.sm-mode-active .memo-editor-buttons button#memo-editor-save {
     background-color: #ffcc00;
-    box-shadow: 0 2px #997a00;
+    box-shadow: 0 0 #997a00;
+}
+
+body.sm-mode-active .memo-editor-buttons button#memo-editor-cancel {
+    background-color: #cc0000;
+    box-shadow: 0 2px #800000;
+    color: white;
+}
+body.sm-mode-active .memo-editor-buttons button#memo-editor-cancel:hover {
+    background-color: #e60000;
+}
+body.sm-mode-active .memo-editor-buttons button#memo-editor-cancel:active {
+    box-shadow: 0 0 #800000;
+}
+
+body.sm-mode-active .memo-editor-buttons button#memo-editor-save {
+    background-color: #f0f0f0;
+    box-shadow: 0 2px #b0b0b0;
 }
 body.sm-mode-active .memo-editor-buttons button#memo-editor-save:hover {
-    background-color: #ffdb4d;
+    background-color: #d0d0d0;
 }
 body.sm-mode-active .memo-editor-buttons button#memo-editor-save:active {
+    background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
 }
 
