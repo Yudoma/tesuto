@@ -287,7 +287,7 @@
                                                     読込中: <span id="replay-file-name-text"></span>
                                                 </div>
                                                 <div style="margin-bottom: 5px; color: #ccc; font-size: 0.9em;">
-                                                    待機時間: <input type="number" id="replay-wait-time-input" class="lp-counter-input" style="width: 50px; font-size: 0.9em; padding: 2px;" min="0" step="0.1"> 秒 <br>(空欄:記録通り)
+                                                    待機時間: <input type="number" id="replay-wait-time-input" class="lp-counter-input" style="width: 50px; font-size: 0.9em; padding: 2px;" min="0" step="0.1" value="2"> 秒 <br>(空欄:記録通り)
                                                 </div>
                                                 <div class="common-control-buttons">
                                                     <button class="draw-btn" id="record-start-btn">記録開始</button>
@@ -377,33 +377,56 @@
 
                                     <div class="drawer-panel" id="common-settings-panel">
                                         <div class="drawer-common-controls">
-                                            <div class="common-control-group">
-                                                <span class="area-label">BGM設定</span>
-                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                                                    <select id="bgm-select" class="bgm-select" style="width: 100%; max-width: 250px; padding: 5px;">
-                                                        <option value="">-- BGM選択 --</option>
-                                                    </select>
-                                                    
-                                                    <div class="common-control-buttons">
-                                                        <button class="draw-btn" id="bgm-play-btn">再生</button>
-                                                        <button class="draw-btn" id="bgm-pause-btn" style="display:none;">一時停止</button>
-                                                        <button class="draw-btn" id="bgm-stop-btn" style="display:none;">停止</button>
-                                                    </div>
+                                            
+                                            <div class="audio-settings-row">
+                                                <div class="common-control-group">
+                                                    <span class="area-label">BGM設定</span>
+                                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                        <select id="bgm-select" class="bgm-select" style="width: 100%; max-width: 150px; padding: 5px;">
+                                                            <option value="">-- BGM選択 --</option>
+                                                        </select>
+                                                        
+                                                        <div class="common-control-buttons">
+                                                            <button class="draw-btn" id="bgm-play-btn">再生</button>
+                                                            <button class="draw-btn" id="bgm-pause-btn" style="display:none;">一時停止</button>
+                                                            <button class="draw-btn" id="bgm-stop-btn" style="display:none;">停止</button>
+                                                        </div>
 
-                                                    <div style="display: flex; align-items: center; gap: 5px; color: #ccc; margin-top: 5px;">
+                                                        <div style="display: flex; align-items: center; gap: 5px; color: #ccc; margin-top: 5px;">
+                                                            <span>音量:</span>
+                                                            <input type="range" id="bgm-volume-slider" min="0" max="10" value="5" style="width: 100px;">
+                                                            <span id="bgm-volume-val">5</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="common-control-group">
+                                                    <span class="area-label">SE設定</span>
+                                                    <div style="display: flex; align-items: center; gap: 5px; color: #ccc; margin-top: 20px;">
                                                         <span>音量:</span>
-                                                        <input type="range" id="bgm-volume-slider" min="0" max="10" value="5">
-                                                        <span id="bgm-volume-val">5</span>
+                                                        <input type="range" id="se-volume-slider" min="0" max="10" value="5" style="width: 100px;">
+                                                        <span id="se-volume-val">5</span>
                                                     </div>
                                                 </div>
                                             </div>
+                                            
                                             <div class="common-control-group">
-                                                <span class="area-label">SE設定</span>
-                                                <div style="display: flex; align-items: center; gap: 5px; color: #ccc;">
-                                                    <span>音量:</span>
-                                                    <input type="range" id="se-volume-slider" min="0" max="10" value="5">
-                                                    <span id="se-volume-val">5</span>
+                                                <span class="area-label">SE個別設定</span>
+                                                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                                                    <button class="draw-btn" id="se-check-all">全選択</button>
+                                                    <button class="draw-btn" id="se-uncheck-all">全解除</button>
                                                 </div>
+                                                <div id="se-settings-container" class="settings-checkbox-list">
+                                                    </div>
+                                            </div>
+
+                                            <div class="common-control-group">
+                                                <span class="area-label">エフェクト個別設定</span>
+                                                <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                                                    <button class="draw-btn" id="effect-check-all">全選択</button>
+                                                    <button class="draw-btn" id="effect-uncheck-all">全解除</button>
+                                                </div>
+                                                <div id="effect-settings-container" class="settings-checkbox-list">
+                                                    </div>
                                             </div>
                                         </div>
                                     </div>
@@ -727,83 +750,6 @@
                         <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                         <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
                     </div>
-                </div> 
-                
-            </div> 
-            
-        </div> 
-    </div> 
-    
-    <button class="drawer-toggle" id="opponent-drawer-toggle">O-Navi</button>
-    <div class="drawer-wrapper" id="opponent-drawer">
-        <div class="drawer-content">
-            
-            <div class="drawer-tabs">
-                <button class="drawer-tab-btn active" data-target="opponent-deck-back-slots">デッキ</button>
-                <button class="drawer-tab-btn" data-target="opponent-grave-back-slots">墓地</button>
-                <button class="drawer-tab-btn" data-target="opponent-exclude-back-slots">除外</button>
-                <button class="drawer-tab-btn" data-target="opponent-side-deck-back-slots">EX</button>
-            </div>
-
-            <div class="drawer-main-area">
-                
-                <div class="drawer-tab-content">
-                    <div class="drawer-panels">
-
-                    <div class="sidebar-slot-area drawer-panel active" id="opponent-deck-back-slots">
-                        <span class="area-label bottom-deck-label">デッキ内</span>
-                        <div class="deck-back-slot-container">
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="sidebar-slot-area drawer-panel" id="opponent-grave-back-slots">
-                        <span class="area-label bottom-deck-label">墓地内</span>
-                        <div class="deck-back-slot-container">
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                        </div>
-                        </div>
-                    
-                    <div class="sidebar-slot-area drawer-panel" id="opponent-exclude-back-slots">
-                        <span class="area-label bottom-deck-label">除外内</span>
-                        <div class="deck-back-slot-container">
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                        </div>
-                        </div>
-
-                    <div class="sidebar-slot-area drawer-panel" id="opponent-side-deck-back-slots">
-                        <span class="area-label bottom-deck-label">EXデッキ内</span>
-                        <div class="deck-back-slot-container">
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                            <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                        </div>
-                        </div>
-
-                </div> 
-                </div> 
-                <div class="drawer-free-space" id="opponent-free-space-slots"> 
-                    <span class="area-label bottom-deck-label">フリースペース</span> 
-                    <div class="free-space-slot-container"> 
-                        <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div> <div class="card-slot"></div>
-                        </div>
                 </div> 
                 
             </div> 

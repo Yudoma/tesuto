@@ -237,7 +237,6 @@ function handleCardContextMenu(e) {
     if (attackMenuItem) {
         currentAttackHandler = () => {
             triggerEffect(thumbnailElement, 'attack');
-            // SEはui.js側でアタック.mp3を再生
         };
     }
 
@@ -254,6 +253,7 @@ function handleCardContextMenu(e) {
     // 常時発動
     if (permanentMenuItem) {
         const isPermanent = thumbnailElement.dataset.isPermanent === 'true';
+        // 修正: 属性がtrueなら「発動停止」と表示
         permanentMenuItem.textContent = isPermanent ? '発動停止' : '常時発動';
         
         currentPermanentHandler = () => {
@@ -301,6 +301,7 @@ function handleCardContextMenu(e) {
     if (masturbateMenuItem) {
         masturbateMenuItem.style.display = 'block';
         const isMasturbating = thumbnailElement.dataset.isMasturbating === 'true';
+        // 修正: 属性がtrueなら「オナニーを止める」と表示
         masturbateMenuItem.textContent = isMasturbating ? 'オナニーを止める' : 'オナニーする';
 
         currentMasturbateHandler = () => {
@@ -328,24 +329,38 @@ function handleCardContextMenu(e) {
         };
     }
 
-    const hideForIcon = isIconZone;
-    toGraveMenuItem.style.display = hideForIcon ? 'none' : 'block';
-    toExcludeMenuItem.style.display = hideForIcon ? 'none' : 'block';
-    toHandMenuItem.style.display = hideForIcon ? 'none' : 'block';
-    toDeckMenuItem.style.display = hideForIcon ? 'none' : 'block';
-    toSideDeckMenuItem.style.display = hideForIcon ? 'none' : 'block';
-    flipMenuItem.style.display = hideForIcon ? 'none' : 'block';
+    const hideMoveFlip = isIconZone;
+    // アイコンの場合は移動・反転系を隠す
+    toGraveMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
+    toExcludeMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
+    toHandMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
+    toDeckMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
+    toSideDeckMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
+    flipMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
 
+    // アイコンでも表示するメニュー
     if (attackMenuItem) attackMenuItem.style.display = 'block';
     actionMenuItem.style.display = 'block';
     if (permanentMenuItem) permanentMenuItem.style.display = 'block'; 
     targetMenuItem.style.display = 'block';
-    addCounterMenuItem.style.display = 'block';
-    removeCounterMenuItem.style.display = 'block';
+    blockerMenuItem.style.display = 'block';
+
+    // メモ・フレーバーは共通
     memoMenuItem.style.display = 'block';
     addFlavorMenuItem.style.display = 'block';
-    deleteMenuItem.style.display = 'block'; 
+    
+    // カウンターは特定のゾーンのみ（アイコンは stackableZones に含まれないため非表示）
+    if (!stackableZones.includes(sourceBaseId)) {
+        addCounterMenuItem.style.display = 'none';
+        removeCounterMenuItem.style.display = 'none';
+    } else {
+        addCounterMenuItem.style.display = 'block';
+        removeCounterMenuItem.style.display = 'block';
+    }
 
+    deleteMenuItem.style.display = 'block';
+
+    // デコレーションカードの特殊制御
     if (!isIconZone && thumbnailElement.dataset.isDecoration === 'true') {
         if (attackMenuItem) attackMenuItem.style.display = 'none';
         actionMenuItem.style.display = 'none';
@@ -358,15 +373,6 @@ function handleCardContextMenu(e) {
         addFlavorMenuItem.style.display = 'none';
         flipMenuItem.style.display = 'none';
         deleteMenuItem.style.display = isDecorationMode ? 'block' : 'none';
-    } else if (isIconZone) {
-        if (attackMenuItem) attackMenuItem.style.display = 'none';
-        blockerMenuItem.style.display = 'none';
-        if (permanentMenuItem) permanentMenuItem.style.display = 'none'; 
-    } else {
-        if (!stackableZones.includes(sourceBaseId)) {
-            addCounterMenuItem.style.display = 'none';
-            removeCounterMenuItem.style.display = 'none';
-        }
     }
 
     contextMenu.style.visibility = 'hidden';
@@ -609,10 +615,8 @@ function toggleBlocker(thumbnailElement) {
     
     if (newState) {
         addBlockerOverlay(thumbnailElement);
-        playSe('ブロッカー.mp3');
     } else {
         removeBlockerOverlay(thumbnailElement);
-        playSe('ボタン共通.mp3');
     }
     
     if (isRecording && typeof recordAction === 'function') {
@@ -650,15 +654,36 @@ function removeBlockerOverlay(thumbnailElement) {
 
 function triggerEffect(thumbnailElement, type) {
     // type: 'effect' or 'target' or 'attack'
+    
+    // エフェクト個別設定のチェック (無効なら表示しない)
+    if (typeof effectConfig !== 'undefined' && effectConfig[type] === false) return;
+
+    // 永続エフェクトの状態を一時的に保存
+    const wasPermanentActive = thumbnailElement.dataset.isPermanent === 'true';
+    const wasMasturbatingActive = thumbnailElement.dataset.isMasturbating === 'true';
+
+    // 一時停止
+    if (wasPermanentActive) thumbnailElement.dataset.isPermanent = 'false';
+    if (wasMasturbatingActive) thumbnailElement.dataset.isMasturbating = 'false';
+    
     let className = 'effect-active';
     if (type === 'target') className = 'target-active';
     else if (type === 'attack') className = 'attack-active';
 
     thumbnailElement.classList.add(className);
     
-    // CSSアニメーション終了後にクラス削除
+    // CSSアニメーション終了後にクラス削除 & 継続エフェクト復帰
     setTimeout(() => {
         thumbnailElement.classList.remove(className);
+        
+        // 永続エフェクトの再開（設定がtrueであれば復帰させる）
+        if (wasPermanentActive && effectConfig.permanent !== false) {
+             thumbnailElement.dataset.isPermanent = 'true';
+        }
+        if (wasMasturbatingActive && effectConfig.masturbate !== false) {
+             thumbnailElement.dataset.isMasturbating = 'true';
+        }
+
     }, 1000); 
     
     if (isRecording && typeof recordAction === 'function') {

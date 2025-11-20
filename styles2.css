@@ -959,31 +959,31 @@ body.sm-mode-active .flavor-delete-btn:active {
     box-shadow: 0 0 #800000;
 }
 
-/* アニメーション定義 */
+/* アニメーション定義 - 画像自体を輝かせる */
+
+/* オナニー (ピンク系) */
 @keyframes masturbate-glow {
-    0% { box-shadow: 0 0 5px #ff69b4; }
-    50% { box-shadow: 0 0 20px #ff1493, 0 0 10px #ff69b4 inset; }
-    100% { box-shadow: 0 0 5px #ff69b4; }
+    0% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
+    50% { filter: brightness(1.2) drop-shadow(0 0 10px #ff1493); }
+    100% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
 }
 
 .thumbnail[data-is-masturbating="true"] .card-image {
     animation: masturbate-glow 2s infinite ease-in-out;
-    border-radius: 4px;
 }
 
-/* 常時発動アニメーション（シアン系） */
+/* 常時発動 (シアン系) */
 @keyframes permanent-glow {
-    0% { box-shadow: 0 0 5px #00ffff; }
-    50% { box-shadow: 0 0 20px #00ced1, 0 0 10px #00ffff inset; }
-    100% { box-shadow: 0 0 5px #00ffff; }
+    0% { filter: brightness(1) drop-shadow(0 0 2px #00ffff); }
+    50% { filter: brightness(1.2) drop-shadow(0 0 10px #00ced1); }
+    100% { filter: brightness(1) drop-shadow(0 0 2px #00ffff); }
 }
 
 .thumbnail[data-is-permanent="true"] .card-image {
     animation: permanent-glow 2s infinite ease-in-out;
-    border-radius: 4px;
 }
 
-/* 効果発動アニメーション（輝き） */
+/* 効果発動 (ゴールド/白金系 - 差別化のため維持) */
 @keyframes effect-flash {
     0% { filter: brightness(1); }
     25% { filter: brightness(2) drop-shadow(0 0 15px gold); }
@@ -994,11 +994,11 @@ body.sm-mode-active .flavor-delete-btn:active {
     animation: effect-flash 0.6s ease-out;
 }
 
-/* アタックアニメーション（攻撃的なオレンジ・黄色系） */
+/* アタック (攻撃的なオレンジ・黄色系 - 修正: 効果発動と差別化) */
 @keyframes attack-flash {
-    0% { box-shadow: 0 0 0 rgba(255, 165, 0, 0); filter: sepia(0); }
-    50% { box-shadow: 0 0 20px orange; filter: sepia(1) hue-rotate(-30deg) saturate(5) brightness(1.2); } 
-    100% { box-shadow: 0 0 0 rgba(255, 165, 0, 0); filter: sepia(0); }
+    0% { filter: brightness(1); }
+    25% { filter: brightness(1.7) drop-shadow(0 0 15px #FF4500); } /* OrangeRed系の強い発光 */
+    100% { filter: brightness(1); }
 }
 
 .attack-active .card-image {
@@ -1006,7 +1006,7 @@ body.sm-mode-active .flavor-delete-btn:active {
     z-index: 20;
 }
 
-/* 対象選択アニメーション（赤） */
+/* 対象選択 (既存: 赤系) */
 @keyframes target-lock {
     0% { box-shadow: 0 0 0 rgba(255, 0, 0, 0); filter: sepia(0); }
     50% { box-shadow: 0 0 15px red; filter: sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -1015,6 +1015,13 @@ body.sm-mode-active .flavor-delete-btn:active {
 
 .target-active .card-image {
     animation: target-lock 0.8s ease-in-out;
+}
+
+/* 自動減少中の盤面エフェクト (全体を包むラッパーに適用) */
+.player-wrapper.auto-decrease-active,
+.opponent-wrapper.auto-decrease-active {
+    box-shadow: 0 0 15px #ff1493, inset 0 0 15px #ff1493;
+    transition: box-shadow 0.5s ease-in-out;
 }
 
 .blocker-overlay {
@@ -1135,4 +1142,45 @@ body.sm-mode-active .flavor-delete-btn:active {
 }
 .bgm-select:focus {
     border-color: #888;
+}
+
+/* オーディオ設定の横並びレイアウト */
+.audio-settings-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+}
+.audio-settings-row .common-control-group {
+    flex: 1;
+    align-items: center;
+}
+
+/* 設定用チェックボックスリスト */
+.settings-checkbox-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+    width: 100%;
+    background-color: rgba(0,0,0,0.3);
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    box-sizing: border-box;
+}
+.settings-checkbox-list label {
+    font-size: 0.85em;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.settings-checkbox-list input {
+    margin-right: 5px;
 }

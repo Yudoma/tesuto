@@ -11,17 +11,16 @@ let flavorDelete1, flavorDelete2, flavorCancelBtn;
 let flavorUpload1, flavorUpload2;
 let flavorDropZone1, flavorDropZone2;
 
-// 新規追加ボタン・入力
 let commonExportBoardBtn, commonImportBoardBtn;
 let recordStartBtn, recordStopBtn, replayPlayBtn, replayPauseBtn, replayStopBtn, loadReplayBtn;
 let replayFileNameDisplay, replayFileNameText, replayWaitTimeInput;
-// BGM関連
+
 let bgmSelect, bgmPlayBtn, bgmPauseBtn, bgmStopBtn;
 let bgmVolumeSlider, bgmVolumeVal, seVolumeSlider, seVolumeVal;
 
-// リサイズ中判定用のフラグ
+let seCheckAllBtn, seUncheckAllBtn, effectCheckAllBtn, effectUncheckAllBtn;
+
 let isResizingDrawer = false;
-// カーソル音制御用
 let lastHoveredElement = null;
 
 let stepButtons = [];
@@ -57,8 +56,6 @@ function closeContextMenu() {
     currentPermanentHandler = null;
     currentAddFlavorHandler = null;
     currentBlockerHandler = null;
-    currentMemoTarget = null;
-    currentFlavorTarget = null;
     currentMasturbateHandler = null;
 }
 
@@ -70,7 +67,6 @@ function performMemoSave() {
         } else {
             delete currentMemoTarget.dataset.memo;
         }
-        // メモ変更の記録
         if (isRecording && typeof recordAction === 'function') {
             recordAction({
                 type: 'memoChange',
@@ -123,7 +119,6 @@ function deleteFlavorImage(slotNumber) {
         delete currentFlavorTarget.dataset.flavor2;
         updateFlavorPreview(2, null);
     }
-    // フレーバー削除の記録
     if (isRecording && typeof recordAction === 'function') {
         recordAction({
             type: 'flavorDelete',
@@ -151,7 +146,6 @@ function handleFlavorFile(file, slotNumber) {
             updateFlavorPreview(2, imgSrc);
         }
         
-        // フレーバー更新の記録
         if (isRecording && typeof recordAction === 'function') {
             recordAction({
                 type: 'flavorUpdate',
@@ -209,7 +203,12 @@ function setupStepButtons() {
         if (button) {
             button.addEventListener('click', () => {
                 if (!button.disabled) {
-                    playSe('ボタン共通.mp3');
+                    if (button.id === 'step-start') {
+                        playSe('ターン開始.mp3');
+                    } else {
+                        playSe('ボタン共通.mp3');
+                    }
+                    
                     currentStepIndex = index;
                     updateStepUI();
 
@@ -228,7 +227,6 @@ function setupStepButtons() {
                              turnPlayerSelect.value = 'first';
                          }
                          
-                         // ターン自動更新の記録
                          if (isRecording && typeof recordAction === 'function') {
                              recordAction({ 
                                  type: 'turnAutoUpdate', 
@@ -248,18 +246,6 @@ function setupStepButtons() {
 
 
 function setupUI() {
-    // カーソル音の設定
-    document.body.addEventListener('mouseover', (e) => {
-        const target = e.target.closest('button, .thumbnail, .card-slot, .drawer-toggle, .counter-btn, input[type="range"], select');
-        
-        if (target && target !== lastHoveredElement) {
-            playSe('カーソル.mp3');
-            lastHoveredElement = target;
-        } else if (!target) {
-            lastHoveredElement = null;
-        }
-    });
-
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('dragover', (e) => e.preventDefault());
     document.addEventListener('drop', (e) => e.preventDefault());
@@ -340,6 +326,11 @@ function setupUI() {
     seVolumeSlider = document.getElementById('se-volume-slider');
     seVolumeVal = document.getElementById('se-volume-val');
 
+    seCheckAllBtn = document.getElementById('se-check-all');
+    seUncheckAllBtn = document.getElementById('se-uncheck-all');
+    effectCheckAllBtn = document.getElementById('effect-check-all');
+    effectUncheckAllBtn = document.getElementById('effect-uncheck-all');
+
     if (!contextMenu || !deleteMenuItem || !toGraveMenuItem || !toExcludeMenuItem || !toHandMenuItem || !toDeckMenuItem || !toSideDeckMenuItem || !flipMenuItem || !addCounterMenuItem || !removeCounterMenuItem
         || !actionMenuItem || !targetMenuItem || !addFlavorMenuItem || !masturbateMenuItem || !blockerMenuItem || !permanentMenuItem || !attackMenuItem
         || !memoMenuItem || !memoEditorModal || !memoTextarea || !memoSaveBtn || !memoCancelBtn || !memoTooltip
@@ -354,6 +345,97 @@ function setupUI() {
         console.error("必須UI要素が見つかりません。");
         return;
     }
+
+    // SE個別設定のチェックボックス生成
+    const seSettingsContainer = document.getElementById('se-settings-container');
+    if (seSettingsContainer && typeof seConfig !== 'undefined') {
+        seSettingsContainer.innerHTML = '';
+        Object.keys(seConfig).forEach(seName => {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = seConfig[seName];
+            input.dataset.seName = seName; // 識別用
+            input.addEventListener('change', (e) => {
+                seConfig[seName] = e.target.checked;
+            });
+            
+            const span = document.createElement('span');
+            span.textContent = seName.replace('.mp3', '').replace('.wav', '');
+            
+            label.appendChild(input);
+            label.appendChild(span);
+            seSettingsContainer.appendChild(label);
+        });
+    }
+
+    // SE全選択/全解除
+    if (seCheckAllBtn) {
+        seCheckAllBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            Object.keys(seConfig).forEach(key => seConfig[key] = true);
+            const boxes = seSettingsContainer.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(box => box.checked = true);
+        });
+    }
+    if (seUncheckAllBtn) {
+        seUncheckAllBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            Object.keys(seConfig).forEach(key => seConfig[key] = false);
+            const boxes = seSettingsContainer.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(box => box.checked = false);
+        });
+    }
+
+    // エフェクト個別設定のチェックボックス生成
+    const effectSettingsContainer = document.getElementById('effect-settings-container');
+    if (effectSettingsContainer && typeof effectConfig !== 'undefined') {
+        effectSettingsContainer.innerHTML = '';
+        const effectNames = {
+            'masturbate': 'オナニー',
+            'permanent': '常時発動',
+            'attack': 'アタック',
+            'effect': '効果発動',
+            'target': '対象選択',
+            'autoDecrease': '自動減少(盤面)'
+        };
+        Object.keys(effectConfig).forEach(key => {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = effectConfig[key];
+            input.dataset.effectKey = key;
+            input.addEventListener('change', (e) => {
+                effectConfig[key] = e.target.checked;
+            });
+            
+            const span = document.createElement('span');
+            span.textContent = effectNames[key] || key;
+            
+            label.appendChild(input);
+            label.appendChild(span);
+            effectSettingsContainer.appendChild(label);
+        });
+    }
+
+    // エフェクト全選択/全解除
+    if (effectCheckAllBtn) {
+        effectCheckAllBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            Object.keys(effectConfig).forEach(key => effectConfig[key] = true);
+            const boxes = effectSettingsContainer.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(box => box.checked = true);
+        });
+    }
+    if (effectUncheckAllBtn) {
+        effectUncheckAllBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            Object.keys(effectConfig).forEach(key => effectConfig[key] = false);
+            const boxes = effectSettingsContainer.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(box => box.checked = false);
+        });
+    }
+
 
     lightboxOverlay.addEventListener('click', (e) => closeLightbox());
     lightboxContent.addEventListener('click', (e) => {
@@ -548,7 +630,7 @@ function setupUI() {
         openFlavorFileInput(2);
     });
 
-    // BGMリストの初期化 (state.jsのbgmFileListを使用)
+    // BGMリストの初期化
     if (bgmSelect && typeof bgmFileList !== 'undefined') {
         bgmFileList.forEach(filename => {
             const option = document.createElement('option');
@@ -556,13 +638,8 @@ function setupUI() {
             option.textContent = filename;
             bgmSelect.appendChild(option);
         });
-
-        bgmSelect.addEventListener('change', (e) => {
-            // 選択変更時は停止するなど必要に応じて
-        });
     }
 
-    // オーディオ操作イベント
     if (bgmPlayBtn) {
         bgmPlayBtn.addEventListener('click', () => {
             playSe('ボタン共通.mp3');
@@ -636,14 +713,11 @@ function setupUI() {
         commonDrawer.classList.toggle('open');
     });
 
-    // 盤面反転ボタン（記録なし）
     commonFlipBoardBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         document.body.classList.toggle('board-flipped');
         document.getElementById('player-drawer')?.classList.remove('open');
         document.getElementById('opponent-drawer')?.classList.remove('open');
-        
-        // recordAction は削除
     });
 
     commonDecorationModeBtn.addEventListener('click', () => {
@@ -661,15 +735,6 @@ function setupUI() {
             if(target) target.classList.toggle('decoration-highlight', isDecorationMode);
         });
     });
-
-    if(commonToggleSeBtn) {
-        // SEボタンは削除されたので、念のためnullチェック
-        commonToggleSeBtn.addEventListener('click', () => {
-            const isMuted = toggleSeMute();
-            commonToggleSeBtn.textContent = isMuted ? '効果音再開' : '効果音停止';
-            if (!isMuted) playSe('ボタン共通.mp3');
-        });
-    }
 
     // Board I/O
     commonExportBoardBtn.addEventListener('click', () => {
@@ -692,12 +757,10 @@ function setupUI() {
     });
     recordStopBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        // 停止と保存を統合
         if (typeof stopReplayRecording === 'function') stopReplayRecording();
     });
     replayPlayBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        // 再開も兼ねる
         if (isReplayPaused) {
             if (typeof resumeReplay === 'function') resumeReplay();
         } else {
@@ -713,8 +776,6 @@ function setupUI() {
         if (typeof stopReplay === 'function') stopReplay();
     });
     
-    // loadReplayBtn (読込) is existing
-
     loadReplayBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         if (typeof importReplayData === 'function') importReplayData();
@@ -765,11 +826,10 @@ function setupUI() {
 
     if (commonDrawer) activateDrawerTab('common-general-panel', commonDrawer);
 
-    // ドロワーのリサイズ機能を初期化
     setupDrawerResize();
 
+    // 共通メニュードラッグ移動
     const commonDrawerHeader = document.getElementById('common-drawer-header');
-    
     if (commonDrawer && commonDrawerHeader) {
         let isDragging = false;
         let currentX;
@@ -784,11 +844,15 @@ function setupUI() {
         document.addEventListener("mousemove", drag);
 
         function dragStart(e) {
+            // リサイズ中などはドラッグしない
+            if (e.target.classList.contains('resize-handle') || isResizingDrawer) return;
+            
             initialX = e.clientX - xOffset;
             initialY = e.clientY - yOffset;
 
             if (e.target === commonDrawerHeader || e.target.parentNode === commonDrawerHeader) {
                 isDragging = true;
+                e.preventDefault(); // テキスト選択防止
             }
         }
 
@@ -805,17 +869,14 @@ function setupUI() {
                 let newX = e.clientX - initialX;
                 let newY = e.clientY - initialY;
 
-                // 画面外にはみ出ないように制限を追加
                 const drawerWidth = commonDrawer.offsetWidth;
                 const drawerHeight = commonDrawer.offsetHeight;
                 const vw = window.innerWidth;
                 const vh = window.innerHeight;
 
-                // 中心(50%, 50%)からのオフセットの限界値を計算
                 const limitX = Math.max(0, (vw - drawerWidth) / 2);
                 const limitY = Math.max(0, (vh - drawerHeight) / 2);
 
-                // 制約を適用
                 if (newX < -limitX) newX = -limitX;
                 if (newX > limitX) newX = limitX;
                 
@@ -828,12 +889,8 @@ function setupUI() {
                 xOffset = currentX;
                 yOffset = currentY;
 
-                setTranslate(currentX, currentY, commonDrawer);
+                commonDrawer.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px))`;
             }
-        }
-
-        function setTranslate(xPos, yPos, el) {
-            el.style.transform = `translate(calc(-50% + ${xPos}px), calc(-50% + ${yPos}px))`;
         }
         
         const closeHint = commonDrawerHeader.querySelector('.drawer-close-hint');
@@ -846,16 +903,14 @@ function setupUI() {
         }
     }
     
-    // カウンター操作の記録（board.jsで生成されるボタンへの委譲）
+    // カウンター操作の記録
     document.body.addEventListener('click', (e) => {
         if (!isRecording) return;
         const btn = e.target.closest('.counter-btn');
         if (!btn) return;
         
-        // ダイス・コインは個別に処理済み
         if (btn.id === 'dice-roll-btn' || btn.id === 'coin-toss-btn') return; 
         
-        // 自動減少ボタン
         if (btn.id && btn.id.includes('auto-decrease')) {
              if (typeof recordAction === 'function') {
                  recordAction({ type: 'autoDecreaseToggle', id: btn.id });
@@ -863,7 +918,6 @@ function setupUI() {
              return;
         }
 
-        // 手動増減ボタン
         if (btn.dataset.value) {
             const group = btn.closest('.hand-counter-group');
             if (group) {
@@ -890,7 +944,6 @@ function activateDrawerTab(targetId, drawerElement) {
     drawerPanels.forEach(p => p.classList.toggle('active', p.id === targetId));
     drawerTabs.forEach(t => t.classList.toggle('active', t.dataset.target === targetId));
 
-    // テキストファイルの読み込みトリガー
     if (targetId === 'common-spec-panel') {
         loadTextContent('txt/仕様説明.txt', 'spec-text-content');
     } else if (targetId === 'common-about-panel') {
@@ -902,7 +955,6 @@ async function loadTextContent(filePath, elementId) {
     const element = document.getElementById(elementId);
     if (!element) return;
     
-    // 既に読み込み済み（デフォルトの読み込み中...ではない）なら再取得しない
     if (!element.textContent.includes('読み込み中...')) return;
 
     try {
@@ -945,7 +997,7 @@ function setupDrawerResize() {
         e.preventDefault();
         e.stopPropagation();
         isResizing = true;
-        isResizingDrawer = true; // グローバルフラグON
+        isResizingDrawer = true;
         startW = drawer.offsetWidth;
         startH = drawer.offsetHeight;
         startX = e.clientX;
@@ -961,23 +1013,18 @@ function setupDrawerResize() {
         let newW = startW + (e.clientX - startX);
         let newH = startH + (e.clientY - startY);
 
-        // 画面外にはみ出ないように制限を追加
         const rect = drawer.getBoundingClientRect();
-        // 現在の中心座標
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         
         const vw = window.innerWidth;
         const vh = window.innerHeight;
         
-        // 中心から画面端までの距離の2倍が、その中心位置で許容される最大サイズ
-        // これを超えると画面からはみ出すことになる
         const maxWidth = 2 * Math.min(centerX, vw - centerX);
         const maxHeight = 2 * Math.min(centerY, vh - centerY);
         
-        // 最小サイズ(300px)と計算した最大サイズでクリップ
-        newW = Math.max(300, Math.min(newW, maxWidth));
-        newH = Math.max(300, Math.min(newH, maxHeight));
+        newW = Math.max(500, Math.min(newW, maxWidth));
+        newH = Math.max(400, Math.min(newH, maxHeight));
         
         drawer.style.width = `${newW}px`;
         drawer.style.height = `${newH}px`;
@@ -985,8 +1032,6 @@ function setupDrawerResize() {
 
     function handleMouseUp(e) {
         isResizing = false;
-        
-        // クリックイベントが発火するのを待ってからフラグをOFFにする
         setTimeout(() => {
             isResizingDrawer = false;
         }, 100);

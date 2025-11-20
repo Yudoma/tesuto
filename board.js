@@ -111,7 +111,6 @@ function setupBoardButtons(idPrefix) {
         playSe('降参.mp3');
     });
     
-    // デッキエクスポート（ファイル名入力対応）
     document.getElementById(idPrefix + 'export-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         const defaultName = (idPrefix ? 'opponent' : 'player') + '_deck';
@@ -136,6 +135,9 @@ function setupCounters(idPrefix) {
         const btn = document.getElementById(btnId);
         if (!btn) return;
         
+        const wrapperClass = idPrefix ? '.opponent-wrapper' : '.player-wrapper';
+        const wrapper = document.querySelector(wrapperClass);
+
         let timerId = null;
         if (!btn.dataset.originalText) btn.dataset.originalText = btn.textContent;
 
@@ -146,6 +148,7 @@ function setupCounters(idPrefix) {
                 btn.textContent = btn.dataset.originalText;
                 btn.style.backgroundColor = '';
                 btn.style.boxShadow = '';
+                if(wrapper) wrapper.classList.remove('auto-decrease-active');
                 stopSe('自動減少.mp3');
                 playSe('ボタン共通.mp3');
             } else {
@@ -153,6 +156,7 @@ function setupCounters(idPrefix) {
                 btn.textContent = '停止';
                 btn.style.backgroundColor = '#cc0000';
                 btn.style.boxShadow = '0 2px #800000';
+                if(wrapper) wrapper.classList.add('auto-decrease-active');
                 playSe('自動減少.mp3', true);
                 timerId = setInterval(() => {
                     counter.value = Math.max(0, (parseInt(counter.value) || 0) - 1);
@@ -550,7 +554,7 @@ function extractZoneData(containerId, singleSlot = false) {
             rotation: parseInt(thumb.querySelector('.card-image').dataset.rotation) || 0,
             isMasturbating: thumb.dataset.isMasturbating === 'true',
             isBlocker: thumb.dataset.isBlocker === 'true',
-            isPermanent: thumb.dataset.isPermanent === 'true', // 追加: 常時発動情報
+            isPermanent: thumb.dataset.isPermanent === 'true', 
             ownerPrefix: thumb.dataset.ownerPrefix || ''
         }));
     });
@@ -593,7 +597,6 @@ function applyDataToZone(containerId, zoneData) {
             const cards = Array.isArray(cardsInSlot) ? cardsInSlot : [cardsInSlot];
             
             cards.forEach(cardData => {
-                // createCardThumbnail内でisBlocker/isPermanentを見て処理する
                 const thumb = createCardThumbnail(cardData, slots[i], cardData.isDecoration, false, cardData.ownerPrefix);
                 
                 if (cardData.rotation) {

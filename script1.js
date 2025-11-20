@@ -58,8 +58,9 @@ const loopSeInstances = {};
 
 // SE再生 (フォールバック機能付き)
 function playSe(filename, isLoop = false) {
-    // リプレイ再生中は、リプレイ設定のSE有効無効に従う
-    if (isPlaying && replaySoundEnabled === false) return;
+    // SE個別設定のチェック (無効なら再生しない)
+    // リプレイ中もこの設定に従う
+    if (typeof seConfig !== 'undefined' && seConfig[filename] === false) return;
 
     // 音量チェック (0の場合は再生しない)
     if (typeof seVolume !== 'undefined' && seVolume <= 0) return;
@@ -86,7 +87,6 @@ function playSe(filename, isLoop = false) {
             // 指定ファイルがなく、かつそれが「ボタン共通」でない場合、ボタン共通を鳴らす
             if (filename !== 'ボタン共通.mp3') {
                 // console.log(`Fallback: ${filename} not found, playing common button sound.`);
-                // 再帰呼び出し時の無限ループ防止のため、ファイル名チェックを入れています
                 playSe('ボタン共通.mp3');
             }
         };
@@ -110,15 +110,6 @@ function stopSe(filename) {
 
 // BGM再生機能
 function playBgm(filename) {
-    // 既に同じ曲が再生中なら再開するだけにするか、頭からにするか。
-    // ここではシンプルに「別の曲なら切り替え、同じ曲で停止中なら再開、再生中なら何もしない」
-    // または「常に指定ファイルを再生」とするか。
-    // 要件: "選んで流せるようにして欲しい（ループ）"
-
-    // 既に何か再生中なら止める（ファイル切り替え）
-    // ただし一時停止からの再開(resume)の場合は引数なしで呼ばれることを想定するか、
-    // 引数ありなら「その曲を再生」とする。
-    
     if (currentBgmAudio && !currentBgmAudio.paused && currentBgmAudio.src.includes(encodeURIComponent(filename))) {
         return; // 同じ曲が再生中なら何もしない
     }
@@ -152,8 +143,6 @@ function stopBgm() {
     if (currentBgmAudio) {
         currentBgmAudio.pause();
         currentBgmAudio.currentTime = 0;
-        // 次回再生のためにインスタンスは破棄せず保持するか、nullにするか。
-        // ここではファイル選択からの再生が基本なのでnullにするのが安全
         currentBgmAudio = null;
     }
 }
@@ -168,7 +157,6 @@ function updateBgmVolume() {
 // --- リプレイ機能 ---
 
 let replayInitialState = null;
-let replaySoundEnabled = true;
 
 function startReplayRecording() {
     if (isRecording) return;
@@ -224,14 +212,11 @@ function exportReplayData() {
         return; 
     }
 
-    const isSeEnabled = (typeof seVolume !== 'undefined') ? seVolume > 0 : true;
-    
+    // SE音量設定などを保存するかは任意だが、現状は再生側の設定優先
     const replayData = {
         initialState: replayInitialState,
         log: actionLog,
-        settings: {
-            seEnabled: isSeEnabled
-        }
+        settings: {} 
     };
 
     const jsonData = JSON.stringify(replayData, null, 2);
@@ -259,8 +244,6 @@ function importReplayData() {
                     replayInitialState = importData.initialState;
                     actionLog = importData.log;
                     
-                    replaySoundEnabled = importData.settings ? importData.settings.seEnabled : true;
-
                     currentReplayFileName = file.name;
                     const nameDisplay = document.getElementById('replay-file-name-display');
                     const nameText = document.getElementById('replay-file-name-text');
@@ -665,7 +648,12 @@ function executeAction(action) {
         case 'stepChange': {
             currentStepIndex = action.index;
             updateStepUI();
-            playSe('ボタン共通.mp3');
+            // ターン開始時のみ専用SE
+            if (action.index === 0) {
+                playSe('ターン開始.mp3');
+            } else {
+                playSe('ボタン共通.mp3');
+            }
             break;
         }
         case 'dice': {
@@ -681,7 +669,7 @@ function executeAction(action) {
             break;
         }
         case 'boardFlip': {
-            // リプレイ再生時の盤面反転は無視（記録データにあっても実行しない）
+            // リプレイ再生時の盤面反転は無視
             break; 
         }
         case 'autoDecreaseToggle': {
