@@ -110,10 +110,17 @@ function setupBoardButtons(idPrefix) {
     document.getElementById(idPrefix + 'surrender-btn')?.addEventListener('click', () => {
         playSe('降参.mp3');
     });
+    
+    // デッキエクスポート（ファイル名入力対応）
     document.getElementById(idPrefix + 'export-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        exportDeck(idPrefix);
+        const defaultName = (idPrefix ? 'opponent' : 'player') + '_deck';
+        const fileName = prompt("保存するファイル名を入力してください", defaultName);
+        if(fileName) {
+            exportDeck(idPrefix, fileName);
+        }
     });
+    
     document.getElementById(idPrefix + 'import-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         importDeck(idPrefix);
@@ -322,7 +329,7 @@ function updateSmTheme(idPrefix, forceDefault = false) {
     document.body.classList.toggle('sm-mode-active', !!isAnySadist);
 }
 
-function exportDeck(idPrefix) {
+function exportDeck(idPrefix, fileName = 'deck') {
      try {
         const exportData = {
             deck: extractZoneData(idPrefix + 'deck-back-slots'),
@@ -341,7 +348,7 @@ function exportDeck(idPrefix) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${idPrefix || 'player'}_deck_export.json`;
+        a.download = `${fileName}.json`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
@@ -384,7 +391,7 @@ function importDeck(idPrefix) {
     fileInput.click();
 }
 
-function exportAllBoardData() {
+function exportAllBoardData(fileName = 'sm_solitaire_board') {
     try {
         const state = getAllBoardState();
         const jsonData = JSON.stringify(state, null, 2);
@@ -392,8 +399,7 @@ function exportAllBoardData() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
-        a.download = `sm_solitaire_board_${dateStr}.json`;
+        a.download = `${fileName}.json`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {
@@ -435,17 +441,13 @@ function getAllBoardState() {
         const state = {};
         zones.forEach(zoneId => {
             const fullId = idPrefix + zoneId;
-            // デコレーションとカード両方を保存するため、singleSlot=falseで配列として取得するが、
-            // decorationについては個別に扱う必要がある場合も、ここでは全て配列として保存し復元時に任せる
             state[zoneId] = extractZoneData(fullId);
-            
-            // icon-zoneなど、通常カードではないデコレーション専用ゾーンもextractZoneDataで取れるように修正済み
         });
 
         const smBtn = document.getElementById(idPrefix + 'sm-toggle-btn');
         const lpVal = document.getElementById(idPrefix + 'counter-value')?.value;
         const manaVal = document.getElementById(idPrefix + 'mana-counter-value')?.value;
-        const nameVal = document.getElementById(idPrefix + (idPrefix ? 'player-name' : 'player-name'))?.value; // idPrefix is opponent- or empty. name id is opponent-player-name or player-name
+        const nameVal = document.getElementById(idPrefix + (idPrefix ? 'player-name' : 'player-name'))?.value;
 
         state.meta = {
             smMode: smBtn ? smBtn.dataset.mode : 'masochist',
@@ -526,7 +528,6 @@ function extractZoneData(containerId, singleSlot = false) {
     const container = document.getElementById(containerId);
     if (!container) return null;
     
-    // ゾーン自体がcard-slotの場合（icon-zoneなど）と、コンテナ内に複数のcard-slotがある場合を考慮
     let slots = [];
     if (container.classList.contains('card-slot')) {
         slots = [container];
@@ -548,20 +549,17 @@ function extractZoneData(containerId, singleSlot = false) {
             flavor2: thumb.dataset.flavor2 || '',
             rotation: parseInt(thumb.querySelector('.card-image').dataset.rotation) || 0,
             isMasturbating: thumb.dataset.isMasturbating === 'true',
+            isBlocker: thumb.dataset.isBlocker === 'true',
+            isPermanent: thumb.dataset.isPermanent === 'true', // 追加: 常時発動情報
             ownerPrefix: thumb.dataset.ownerPrefix || ''
         }));
     });
     
-    // singleSlot要求があっても、常に配列構造（スロット毎のカード配列の配列）で返す方が統一性があるが、
-    // 既存のexportDeckとの互換性を保つため、singleSlot引数がtrueなら最初の有効なスロットのデータを返す
     if (singleSlot) {
         const validData = data.filter(d => d);
-        return validData.length > 0 ? validData[0][0] : null; // 特定のカード単体データを返す既存挙動
+        return validData.length > 0 ? validData[0][0] : null; 
     }
     
-    // 通常は [[card1, card2], null, [card3]] のような構造（nullは空スロット）
-    // 空スロットも含めるか、フィルタするか。import側はindex順に埋めるため、nullも含めておくべきか？
-    // 既存のapplyDataToZoneは forEach((cardsInSlot, i) => ...) で実装されているので、nullを含めるのが正しい。
     return data;
 }
 
@@ -588,26 +586,20 @@ function applyDataToZone(containerId, zoneData) {
     
     const slots = container.classList.contains('card-slot') ? [container] : container.querySelectorAll('.card-slot');
     
-    // zoneDataは [[card, card], null, [card]] のような配列を想定
-    // または、単一カードオブジェクトの配列（デコレーション復元時など）の場合もあるため柔軟に対応
-    
-    // もしzoneDataが単一オブジェクト（exportDeckのdecorationsのような形式）なら配列にラップ
     const dataArray = Array.isArray(zoneData) ? zoneData : [zoneData];
 
     dataArray.forEach((cardsInSlot, i) => {
         if (slots[i] && cardsInSlot) {
-            // cardsInSlotも配列であることを期待。もし単一オブジェクトなら配列化
             const cards = Array.isArray(cardsInSlot) ? cardsInSlot : [cardsInSlot];
             
             cards.forEach(cardData => {
+                // createCardThumbnail内でisBlocker/isPermanentを見て処理する
                 const thumb = createCardThumbnail(cardData, slots[i], cardData.isDecoration, false, cardData.ownerPrefix);
                 
-                // 回転の適用
                 if (cardData.rotation) {
                     const img = thumb.querySelector('.card-image');
                     if (img) {
                         img.dataset.rotation = cardData.rotation;
-                        // スロットの回転クラス制御
                         if (Math.abs(cardData.rotation) % 180 !== 0) {
                             slots[i].classList.add('rotated-90');
                              const { width, height } = getCardDimensions();
@@ -618,11 +610,6 @@ function applyDataToZone(containerId, zoneData) {
                             img.style.transform = `rotate(${cardData.rotation}deg)`;
                         }
                     }
-                }
-                
-                // オナニー状態の適用
-                if (cardData.isMasturbating) {
-                    thumb.dataset.isMasturbating = 'true';
                 }
             });
             

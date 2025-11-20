@@ -52,36 +52,50 @@ function getParentZoneId(element) {
     return closestZone ? closestZone.id : null;
 }
 
-// SE再生機能
+// --- オーディオ機能 (BGM/SE) ---
+
 const loopSeInstances = {};
-let isSeMuted = false;
 
-function toggleSeMute() {
-    isSeMuted = !isSeMuted;
-    if (isSeMuted) {
-        // ミュートにしたタイミングでループ再生中のSEがあれば停止する
-        Object.keys(loopSeInstances).forEach(key => stopSe(key));
-    }
-    return isSeMuted;
-}
-
+// SE再生 (フォールバック機能付き)
 function playSe(filename, isLoop = false) {
-    if (isSeMuted) return;
+    // リプレイ再生中は、リプレイ設定のSE有効無効に従う
+    if (isPlaying && replaySoundEnabled === false) return;
+
+    // 音量チェック (0の場合は再生しない)
+    if (typeof seVolume !== 'undefined' && seVolume <= 0) return;
 
     const path = `./se/${filename}`;
+    const audio = new Audio(path);
     
+    // 音量適用 (0-10 -> 0.0-1.0)
+    if (typeof seVolume !== 'undefined') {
+        audio.volume = seVolume / 10;
+    }
+
     if (isLoop) {
-        // 既に再生中なら重複して再生しない
-        if (loopSeInstances[filename]) return;
+        if (loopSeInstances[filename]) return; // 既に再生中なら何もしない
         
-        const audio = new Audio(path);
         audio.loop = true;
-        audio.play().catch(e => console.error('SE再生エラー:', e));
+        audio.play().catch(e => {
+             console.warn(`SE Play Error (${filename}):`, e);
+        });
         loopSeInstances[filename] = audio;
     } else {
-        const audio = new Audio(path);
+        // エラーハンドリング（フォールバック）
+        audio.onerror = () => {
+            // 指定ファイルがなく、かつそれが「ボタン共通」でない場合、ボタン共通を鳴らす
+            if (filename !== 'ボタン共通.mp3') {
+                // console.log(`Fallback: ${filename} not found, playing common button sound.`);
+                // 再帰呼び出し時の無限ループ防止のため、ファイル名チェックを入れています
+                playSe('ボタン共通.mp3');
+            }
+        };
+
         audio.currentTime = 0;
-        audio.play().catch(e => console.error('SE再生エラー:', e));
+        audio.play().catch(e => {
+            // ユーザー操作なしの自動再生ブロックなどの対応
+            console.warn(`SE Play Error (${filename}):`, e);
+        });
     }
 }
 
@@ -94,9 +108,67 @@ function stopSe(filename) {
     }
 }
 
+// BGM再生機能
+function playBgm(filename) {
+    // 既に同じ曲が再生中なら再開するだけにするか、頭からにするか。
+    // ここではシンプルに「別の曲なら切り替え、同じ曲で停止中なら再開、再生中なら何もしない」
+    // または「常に指定ファイルを再生」とするか。
+    // 要件: "選んで流せるようにして欲しい（ループ）"
+
+    // 既に何か再生中なら止める（ファイル切り替え）
+    // ただし一時停止からの再開(resume)の場合は引数なしで呼ばれることを想定するか、
+    // 引数ありなら「その曲を再生」とする。
+    
+    if (currentBgmAudio && !currentBgmAudio.paused && currentBgmAudio.src.includes(encodeURIComponent(filename))) {
+        return; // 同じ曲が再生中なら何もしない
+    }
+
+    stopBgm(); // 既存BGM停止
+
+    if (!filename) return;
+    
+    // 音量チェック
+    if (typeof bgmVolume !== 'undefined' && bgmVolume <= 0) return;
+
+    const path = `./bgm/${filename}`;
+    currentBgmAudio = new Audio(path);
+    
+    if (typeof bgmVolume !== 'undefined') {
+        currentBgmAudio.volume = bgmVolume / 10;
+    }
+    
+    currentBgmAudio.loop = true; // ループ再生
+
+    currentBgmAudio.play().catch(e => console.error("BGM Play Error:", e));
+}
+
+function pauseBgm() {
+    if (currentBgmAudio && !currentBgmAudio.paused) {
+        currentBgmAudio.pause();
+    }
+}
+
+function stopBgm() {
+    if (currentBgmAudio) {
+        currentBgmAudio.pause();
+        currentBgmAudio.currentTime = 0;
+        // 次回再生のためにインスタンスは破棄せず保持するか、nullにするか。
+        // ここではファイル選択からの再生が基本なのでnullにするのが安全
+        currentBgmAudio = null;
+    }
+}
+
+function updateBgmVolume() {
+    if (currentBgmAudio && typeof bgmVolume !== 'undefined') {
+        currentBgmAudio.volume = bgmVolume / 10;
+    }
+}
+
+
 // --- リプレイ機能 ---
 
 let replayInitialState = null;
+let replaySoundEnabled = true;
 
 function startReplayRecording() {
     if (isRecording) return;
@@ -105,17 +177,29 @@ function startReplayRecording() {
     replayStartTime = Date.now();
     replayInitialState = getAllBoardState(); 
     
+    // UI更新
+    const startBtn = document.getElementById('record-start-btn');
+    const stopBtn = document.getElementById('record-stop-btn');
+    if(startBtn) startBtn.style.display = 'none';
+    if(stopBtn) stopBtn.style.display = 'inline-block';
+    
     alert("記録を開始しました。");
-    const btn = document.getElementById('record-start-btn');
-    if(btn) btn.style.backgroundColor = '#ffcc00';
 }
 
 function stopReplayRecording() {
     if (!isRecording) return;
     isRecording = false;
-    alert("記録を終了しました。");
-    const btn = document.getElementById('record-start-btn');
-    if(btn) btn.style.backgroundColor = '';
+    
+    // UI更新
+    const startBtn = document.getElementById('record-start-btn');
+    const stopBtn = document.getElementById('record-stop-btn');
+    if(startBtn) startBtn.style.display = 'inline-block';
+    if(stopBtn) stopBtn.style.display = 'none';
+
+    // 即座に保存フローへ移行
+    setTimeout(() => {
+        exportReplayData();
+    }, 100);
 }
 
 function recordAction(actionData) {
@@ -132,17 +216,30 @@ function exportReplayData() {
         alert("保存するリプレイデータがありません。");
         return;
     }
+
+    const defaultName = "sm_solitaire_replay";
+    const fileName = prompt("リプレイファイル名を入力してください", defaultName);
+    if (!fileName) {
+        alert("保存をキャンセルしました。");
+        return; 
+    }
+
+    const isSeEnabled = (typeof seVolume !== 'undefined') ? seVolume > 0 : true;
+    
     const replayData = {
         initialState: replayInitialState,
-        log: actionLog
+        log: actionLog,
+        settings: {
+            seEnabled: isSeEnabled
+        }
     };
+
     const jsonData = JSON.stringify(replayData, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
-    a.download = `sm_solitaire_replay_${dateStr}.json`;
+    a.download = `${fileName}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -161,7 +258,20 @@ function importReplayData() {
                 if (importData.initialState && importData.log) {
                     replayInitialState = importData.initialState;
                     actionLog = importData.log;
-                    alert("リプレイデータを読み込みました。「再生」ボタンで開始します。");
+                    
+                    replaySoundEnabled = importData.settings ? importData.settings.seEnabled : true;
+
+                    currentReplayFileName = file.name;
+                    const nameDisplay = document.getElementById('replay-file-name-display');
+                    const nameText = document.getElementById('replay-file-name-text');
+                    if (nameDisplay && nameText) {
+                        nameText.textContent = currentReplayFileName;
+                        nameDisplay.style.display = 'block';
+                    }
+
+                    alert(`「${file.name}」を読み込みました。\n再生ボタンで開始します。`);
+                    // 読み込み完了時に停止状態のUIにする
+                    updateReplayUI('stopped');
                 } else {
                     alert("無効なリプレイデータ形式です。");
                 }
@@ -175,18 +285,40 @@ function importReplayData() {
     fileInput.click();
 }
 
+// --- 再生制御ロジック ---
+
+function updateReplayUI(state) {
+    const playBtn = document.getElementById('replay-play-btn');
+    const pauseBtn = document.getElementById('replay-pause-btn');
+    const stopBtn = document.getElementById('replay-stop-btn');
+    const recordStart = document.getElementById('record-start-btn');
+    
+    if (state === 'playing') {
+        if(playBtn) playBtn.style.display = 'none';
+        if(pauseBtn) pauseBtn.style.display = 'inline-block';
+        if(stopBtn) stopBtn.style.display = 'inline-block';
+        if(recordStart) recordStart.disabled = true;
+    } else if (state === 'paused') {
+        if(playBtn) {
+            playBtn.style.display = 'inline-block';
+            playBtn.textContent = '再開'; 
+        }
+        if(pauseBtn) pauseBtn.style.display = 'none';
+        if(stopBtn) stopBtn.style.display = 'inline-block';
+    } else { // stopped
+        if(playBtn) {
+            playBtn.style.display = 'inline-block';
+            playBtn.textContent = '再生';
+        }
+        if(pauseBtn) pauseBtn.style.display = 'none';
+        if(stopBtn) stopBtn.style.display = 'none';
+        if(recordStart) recordStart.disabled = false;
+    }
+}
+
 function playReplay() {
     if (!replayInitialState || actionLog.length === 0) {
         alert("再生するリプレイデータがありません。");
-        return;
-    }
-    
-    if (isPlaying) {
-        // 既に再生中の場合は停止処理（全タイマークリア）
-        replayTimerIds.forEach(id => clearTimeout(id));
-        replayTimerIds = [];
-        isPlaying = false;
-        alert("再生を停止しました。");
         return;
     }
 
@@ -194,35 +326,104 @@ function playReplay() {
         stopReplayRecording();
     }
 
-    // 初期状態に復元
-    restoreAllBoardState(replayInitialState);
     isPlaying = true;
-    replayTimerIds = [];
+    isReplayPaused = false;
+    currentReplayIndex = 0;
     
-    alert("リプレイ再生を開始します。");
+    restoreAllBoardState(replayInitialState);
+    updateReplayUI('playing');
+    
+    processNextReplayStep(0); 
+}
 
-    actionLog.forEach(entry => {
-        const timerId = setTimeout(() => {
-            executeAction(entry.data);
-        }, entry.time);
-        replayTimerIds.push(timerId);
-    });
-
-    // 終了検知用のタイマー
-    const lastTime = actionLog.length > 0 ? actionLog[actionLog.length - 1].time : 0;
-    const endTimerId = setTimeout(() => {
-        isPlaying = false;
+function pauseReplay() {
+    if (!isPlaying) return;
+    isReplayPaused = true;
+    
+    if (replayTimerIds.length > 0) {
+        clearTimeout(replayTimerIds[0]);
         replayTimerIds = [];
+    }
+    updateReplayUI('paused');
+}
+
+function resumeReplay() {
+    if (!isPlaying || !isReplayPaused) return;
+    isReplayPaused = false;
+    updateReplayUI('playing');
+    
+    // 再開時は少し待ってから実行
+    processNextReplayStep(100);
+}
+
+function stopReplay() {
+    isPlaying = false;
+    isReplayPaused = false;
+    currentReplayIndex = 0;
+    
+    if (replayTimerIds.length > 0) {
+        replayTimerIds.forEach(id => clearTimeout(id));
+        replayTimerIds = [];
+    }
+    
+    updateReplayUI('stopped');
+}
+
+function processNextReplayStep(forceDelay = null) {
+    if (!isPlaying || isReplayPaused) return;
+    if (currentReplayIndex >= actionLog.length) {
+        stopReplay();
         alert("リプレイ再生が終了しました。");
-    }, lastTime + 500);
-    replayTimerIds.push(endTimerId);
+        return;
+    }
+
+    let delay = 0;
+    if (forceDelay !== null) {
+        delay = forceDelay;
+    } else {
+        // 待機時間設定を確認
+        const waitTimeInput = document.getElementById('replay-wait-time-input');
+        const fixedWaitTime = waitTimeInput && waitTimeInput.value !== "" ? parseFloat(waitTimeInput.value) * 1000 : null;
+
+        if (fixedWaitTime !== null && !isNaN(fixedWaitTime)) {
+            // 指定秒数を使用
+            delay = fixedWaitTime;
+        } else {
+            // 記録された時間を使用（最大2秒短縮ロジック）
+            const currentActionTime = actionLog[currentReplayIndex].time;
+            const prevActionTime = currentReplayIndex > 0 ? actionLog[currentReplayIndex - 1].time : 0;
+            const rawDiff = currentActionTime - prevActionTime;
+            delay = Math.min(rawDiff, 2000);
+        }
+    }
+
+    const timerId = setTimeout(() => {
+        if (!isPlaying || isReplayPaused) return;
+        
+        const actionEntry = actionLog[currentReplayIndex];
+        executeAction(actionEntry.data);
+        currentReplayIndex++;
+        
+        processNextReplayStep();
+
+    }, delay);
+    
+    replayTimerIds = [timerId];
 }
 
 // アクション実行ロジック
 function executeAction(action) {
-    // アクション実行中は効果音を鳴らすため、playSeは各処理内で適宜呼ぶか、
-    // ここでswitch文で分岐して処理する
     
+    const updatePreviewForAction = (zoneId, slotIndex) => {
+        const slot = getSlotByIndex(zoneId, slotIndex);
+        if (slot) {
+            const thumb = slot.querySelector('.thumbnail');
+            if (thumb && window.updateCardPreview) {
+                window.updateCardPreview(thumb);
+            }
+        }
+    };
+
     switch (action.type) {
         case 'move': {
             const fromSlot = getSlotByIndex(action.fromZone, action.fromSlotIndex);
@@ -234,15 +435,12 @@ function executeAction(action) {
                 
                 if (card) {
                     if (targetCard) {
-                        // Swap
                         fromSlot.appendChild(targetCard);
                         toSlot.appendChild(card);
                     } else {
-                        // Move
                         toSlot.appendChild(card);
                     }
                     
-                    // ゾーンごとの後処理
                     [fromSlot, toSlot].forEach(slot => {
                         resetSlotToDefault(slot);
                         updateSlotStackState(slot);
@@ -252,11 +450,12 @@ function executeAction(action) {
                         if (decorationZones.includes(baseId)) syncMainZoneImage(baseId, getPrefixFromZoneId(zId));
                     });
                     
-                    // SE判定
                     const toBase = getBaseId(getParentZoneId(toSlot));
                     if (toBase === 'grave' || toBase === 'grave-back-slots') playSe('墓地に送る.mp3');
                     else if (toBase === 'exclude' || toBase === 'exclude-back-slots') playSe('除外する.mp3');
                     else playSe('カードを配置する.mp3');
+
+                    updatePreviewForAction(action.toZone, action.toSlotIndex);
                 }
             }
             break;
@@ -273,6 +472,8 @@ function executeAction(action) {
                 if (zId && zId.endsWith('-back-slots')) arrangeSlots(zId);
                 const baseId = getBaseId(zId);
                 if (decorationZones.includes(baseId)) syncMainZoneImage(baseId, prefix);
+                
+                updatePreviewForAction(action.zoneId, action.slotIndex);
             }
             break;
         }
@@ -280,13 +481,11 @@ function executeAction(action) {
             const container = document.getElementById(action.zoneId);
             const slot = container ? container.querySelector('.card-slot') : null;
             if (slot) {
-                // 既存のデコレーションを探す
                 let existingThumbnail = slot.querySelector('.thumbnail[data-is-decoration="true"]');
                 if (existingThumbnail) {
                     const img = existingThumbnail.querySelector('img');
                     if (img) img.src = action.imageData;
                 } else {
-                    // 既存のカードがあれば消す
                     const anyThumb = getExistingThumbnail(slot);
                     if (anyThumb) slot.removeChild(anyThumb);
                     const prefix = getPrefixFromZoneId(action.zoneId);
@@ -320,6 +519,7 @@ function executeAction(action) {
                             if(!getBaseId(action.zoneId).startsWith('mana')) playSe('タップ.mp3');
                         }
                     }
+                    updatePreviewForAction(action.zoneId, action.slotIndex);
                 }
             }
             break;
@@ -330,11 +530,11 @@ function executeAction(action) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
                     const prefix = getPrefixFromZoneId(action.zoneId);
-                    // 現在の状態を確認して、必要なら反転実行
                     const currentFlipped = card.dataset.isFlipped === 'true';
                     if (currentFlipped !== action.isFlipped) {
-                         flipCard(card, prefix); // card.jsの関数を使用
+                         flipCard(card, prefix); 
                          playSe('カードを反転させる.wav');
+                         updatePreviewForAction(action.zoneId, action.slotIndex);
                     }
                 }
             }
@@ -345,7 +545,7 @@ function executeAction(action) {
             if (slot) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
-                    deleteCard(card); // card.jsの関数
+                    deleteCard(card);
                     playSe('ボタン共通.mp3');
                 }
             }
@@ -363,6 +563,7 @@ function executeAction(action) {
                         overlay.style.display = action.counter > 0 ? 'flex' : 'none';
                         if (action.counter > 0) playSe('カウンターを置く.mp3');
                         else playSe('カウンターを取り除く.mp3');
+                        updatePreviewForAction(action.zoneId, action.slotIndex);
                     }
                 }
             }
@@ -376,6 +577,58 @@ function executeAction(action) {
                     card.dataset.isMasturbating = action.isMasturbating;
                     if(action.isMasturbating) playSe('O.mp3', true);
                     else stopSe('O.mp3');
+                    updatePreviewForAction(action.zoneId, action.slotIndex);
+                }
+            }
+            break;
+        }
+        case 'permanent': {
+            const slot = getSlotByIndex(action.zoneId, action.slotIndex);
+            if (slot) {
+                const card = slot.querySelector('.thumbnail');
+                if (card) {
+                    card.dataset.isPermanent = action.isPermanent;
+                    if(action.isPermanent) {
+                        playSe('常時発動.mp3');
+                    } else {
+                        playSe('ボタン共通.mp3');
+                    }
+                    updatePreviewForAction(action.zoneId, action.slotIndex);
+                }
+            }
+            break;
+        }
+        case 'blocker': {
+            const slot = getSlotByIndex(action.zoneId, action.slotIndex);
+            if (slot) {
+                const card = slot.querySelector('.thumbnail');
+                if (card) {
+                    if (action.isBlocker) {
+                        card.dataset.isBlocker = 'true';
+                        addBlockerOverlay(card);
+                        playSe('ブロッカー.mp3');
+                    } else {
+                        card.dataset.isBlocker = 'false';
+                        removeBlockerOverlay(card);
+                        playSe('ボタン共通.mp3');
+                    }
+                    updatePreviewForAction(action.zoneId, action.slotIndex);
+                }
+            }
+            break;
+        }
+        case 'effect': {
+            const slot = getSlotByIndex(action.zoneId, action.slotIndex);
+            if (slot) {
+                const card = slot.querySelector('.thumbnail');
+                if (card) {
+                    triggerEffect(card, action.subType);
+                    // エフェクトの種類に応じてSE再生
+                    if(action.subType === 'attack') playSe('アタック.mp3');
+                    else if(action.subType === 'effect') playSe('効果発動.mp3');
+                    else playSe('対象に取る.mp3');
+                    
+                    updatePreviewForAction(action.zoneId, action.slotIndex);
                 }
             }
             break;
@@ -428,23 +681,22 @@ function executeAction(action) {
             break;
         }
         case 'boardFlip': {
-            if (action.isFlipped) document.body.classList.add('board-flipped');
-            else document.body.classList.remove('board-flipped');
-            playSe('ボタン共通.mp3');
-            break;
+            // リプレイ再生時の盤面反転は無視（記録データにあっても実行しない）
+            break; 
         }
         case 'autoDecreaseToggle': {
             const btn = document.getElementById(action.id);
-            if (btn) btn.click(); // 既存のロジックをトリガー
+            if (btn) btn.click();
             break;
         }
         case 'memoChange': {
-            const slot = getSlotByIndex(action.zoneId, action.cardIndex); // cardIndexとslotIndexの混同に注意。記録側はslotIndex相当の意図
+            const slot = getSlotByIndex(action.zoneId, action.cardIndex);
             if (slot) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
                     card.dataset.memo = action.memo;
                     playSe('ボタン共通.mp3');
+                    updatePreviewForAction(action.zoneId, action.cardIndex);
                 }
             }
             break;
@@ -457,6 +709,7 @@ function executeAction(action) {
                     if (action.slotNumber === 1) card.dataset.flavor1 = action.imgSrc;
                     else if (action.slotNumber === 2) card.dataset.flavor2 = action.imgSrc;
                     playSe('ボタン共通.mp3');
+                    updatePreviewForAction(action.zoneId, action.cardIndex);
                 }
             }
             break;
@@ -469,16 +722,17 @@ function executeAction(action) {
                     if (action.slotNumber === 1) delete card.dataset.flavor1;
                     else if (action.slotNumber === 2) delete card.dataset.flavor2;
                     playSe('ボタン共通.mp3');
+                    updatePreviewForAction(action.zoneId, action.cardIndex);
                 }
             }
             break;
         }
         case 'effectAction':
-            console.log('Replay: Effect Action Triggered');
+            console.log('Replay: Effect Action Triggered (Legacy)');
             playSe('効果発動.mp3');
             break;
         case 'target':
-            console.log('Replay: Target Action Triggered');
+             console.log('Replay: Target Action Triggered (Legacy)');
             playSe('対象に取る.mp3');
             break;
     }
@@ -488,10 +742,8 @@ function getSlotByIndex(zoneId, index) {
     const zone = document.getElementById(zoneId);
     if (!zone) return null;
     
-    // zoneId自体がカードスロットの場合（例: icon-zone）
     if (zone.classList.contains('card-slot')) return zone;
 
-    // コンテナを探す
     const container = zone.querySelector('.slot-container, .deck-back-slot-container, .free-space-slot-container, .hand-zone-slots') || zone;
     const slots = container.querySelectorAll('.card-slot');
     return slots[index] || null;

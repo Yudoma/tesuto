@@ -592,7 +592,6 @@ body.nav-hidden .zone-header {
     
     padding: 10px 5px;
 
-    /* 変更: デフォルトを白系に */
     background-color: #f0f0f0;
     color: #333;
     box-shadow: 0 2px #b0b0b0;
@@ -607,7 +606,6 @@ body.nav-hidden .zone-header {
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s;
 }
 .drawer-toggle:active {
-    /* 変更: 押下時を黄色に */
     background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
     transform: translateY(2px);
@@ -1105,11 +1103,11 @@ body.common-decoration-mode-active .player-stats-group {
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
     
-    width: 400px;
-    height: 500px;
+    width: 700px;
+    height: 650px;
     
-    min-width: 300px;
-    min-height: 300px;
+    min-width: 500px;
+    min-height: 400px;
     max-width: 95vw;
     max-height: 95vh;
 
@@ -1176,6 +1174,7 @@ body.common-decoration-mode-active .player-stats-group {
     align-items: center;
     user-select: none; 
     flex-shrink: 0;
+    z-index: 10;
 }
 
 .drawer-header:hover {

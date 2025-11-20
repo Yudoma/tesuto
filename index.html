@@ -252,6 +252,7 @@
                             <button class="drawer-tab-btn active" data-target="common-general-panel">全般</button>
                             <button class="drawer-tab-btn" data-target="common-player-panel">自分(P)</button>
                             <button class="drawer-tab-btn" data-target="common-opponent-panel">相手(O)</button>
+                            <button class="drawer-tab-btn" data-target="common-settings-panel">設定(BGM/SE)</button>
                             <button class="drawer-tab-btn" data-target="common-spec-panel">仕様説明</button>
                             <button class="drawer-tab-btn" data-target="common-about-panel">S＆Mとは</button>
                         </div>
@@ -269,7 +270,6 @@
                                                     <button class="draw-btn" id="common-flip-board-btn">盤面反転</button>
                                                     <button class="draw-btn" id="common-decoration-mode-btn">装飾モード</button>
                                                     <button class="draw-btn" id="common-toggle-nav-btn">ナビ非表示</button>
-                                                    <button class="draw-btn" id="common-toggle-se-btn">効果音停止</button>
                                                 </div>
                                             </div>
 
@@ -283,11 +283,20 @@
 
                                             <div class="common-control-group">
                                                 <span class="area-label">リプレイ</span>
+                                                <div id="replay-file-name-display" style="font-size: 0.8em; color: #ccc; margin-bottom: 5px; display: none;">
+                                                    読込中: <span id="replay-file-name-text"></span>
+                                                </div>
+                                                <div style="margin-bottom: 5px; color: #ccc; font-size: 0.9em;">
+                                                    待機時間: <input type="number" id="replay-wait-time-input" class="lp-counter-input" style="width: 50px; font-size: 0.9em; padding: 2px;" min="0" step="0.1"> 秒 <br>(空欄:記録通り)
+                                                </div>
                                                 <div class="common-control-buttons">
                                                     <button class="draw-btn" id="record-start-btn">記録開始</button>
-                                                    <button class="draw-btn" id="record-stop-btn">記録終了</button>
+                                                    <button class="draw-btn" id="record-stop-btn" style="display:none;">記録終了(保存)</button>
+                                                    
                                                     <button class="draw-btn" id="replay-play-btn">再生</button>
-                                                    <button class="draw-btn" id="save-replay-btn">保存</button>
+                                                    <button class="draw-btn" id="replay-pause-btn" style="display:none;">一時停止</button>
+                                                    <button class="draw-btn" id="replay-stop-btn" style="display:none;">停止</button>
+                                                    
                                                     <button class="draw-btn" id="load-replay-btn">読込</button>
                                                 </div>
                                             </div>
@@ -363,6 +372,39 @@
                                                 </div>
                                             </div>
 
+                                        </div>
+                                    </div>
+
+                                    <div class="drawer-panel" id="common-settings-panel">
+                                        <div class="drawer-common-controls">
+                                            <div class="common-control-group">
+                                                <span class="area-label">BGM設定</span>
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                    <select id="bgm-select" class="bgm-select" style="width: 100%; max-width: 250px; padding: 5px;">
+                                                        <option value="">-- BGM選択 --</option>
+                                                    </select>
+                                                    
+                                                    <div class="common-control-buttons">
+                                                        <button class="draw-btn" id="bgm-play-btn">再生</button>
+                                                        <button class="draw-btn" id="bgm-pause-btn" style="display:none;">一時停止</button>
+                                                        <button class="draw-btn" id="bgm-stop-btn" style="display:none;">停止</button>
+                                                    </div>
+
+                                                    <div style="display: flex; align-items: center; gap: 5px; color: #ccc; margin-top: 5px;">
+                                                        <span>音量:</span>
+                                                        <input type="range" id="bgm-volume-slider" min="0" max="10" value="5">
+                                                        <span id="bgm-volume-val">5</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="common-control-group">
+                                                <span class="area-label">SE設定</span>
+                                                <div style="display: flex; align-items: center; gap: 5px; color: #ccc;">
+                                                    <span>音量:</span>
+                                                    <input type="range" id="se-volume-slider" min="0" max="10" value="5">
+                                                    <span id="se-volume-val">5</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -540,8 +582,9 @@
 
     <div id="custom-context-menu" class="custom-context-menu">
         <ul>
-            <li id="context-menu-masturbate" style="display:none;">オナニーする</li>
+            <li id="context-menu-attack">アタック/攻撃</li>
             <li id="context-menu-action">効果発動</li>
+            <li id="context-menu-permanent">常時発動</li>
             <li id="context-menu-target">対象に取る</li>
             <li id="context-menu-to-grave">墓地へ送る</li>
             <li id="context-menu-to-exclude">除外する</li>
@@ -553,8 +596,10 @@
             <li id="context-menu-remove-counter">カウンターを一つ取り除く</li>
             <li id="context-menu-memo">メモ編集</li>
             <li id="context-menu-add-flavor">フレーバーイラストを追加</li>
+            <li id="context-menu-blocker">ブロッカー効果を付与</li>
+            <li id="context-menu-masturbate" style="display:none;">オナニーする</li>
             <li id="context-menu-delete">削除</li>
-            </ul>
+        </ul>
     </div>
     
     <div id="memo-editor" class="memo-editor-modal">

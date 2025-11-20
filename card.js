@@ -1,5 +1,5 @@
 function createCardThumbnail(cardData, slotElement, isDecoration = false, insertAtBottom = false, ownerPrefix = '') {
-    let imageSrc, isFlipped, originalSrc, counter, memo, flavor1, flavor2, rotation, isMasturbating;
+    let imageSrc, isFlipped, originalSrc, counter, memo, flavor1, flavor2, rotation, isMasturbating, isBlocker, isPermanent;
 
     if (typeof cardData === 'string') {
         imageSrc = cardData;
@@ -11,6 +11,8 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
         flavor2 = '';
         rotation = 0;
         isMasturbating = false;
+        isBlocker = false;
+        isPermanent = false;
     } else { 
         imageSrc = cardData.src;
         isDecoration = cardData.isDecoration || isDecoration; 
@@ -23,6 +25,8 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
         ownerPrefix = cardData.ownerPrefix || ownerPrefix;
         rotation = cardData.rotation || 0;
         isMasturbating = cardData.isMasturbating || false;
+        isBlocker = cardData.isBlocker || false;
+        isPermanent = cardData.isPermanent || false;
     }
 
     const thumbnailElement = document.createElement('div');
@@ -36,13 +40,19 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
     if (isMasturbating) {
         thumbnailElement.dataset.isMasturbating = 'true';
     }
+    
+    if (isBlocker) {
+        thumbnailElement.dataset.isBlocker = 'true';
+    }
+
+    if (isPermanent) {
+        thumbnailElement.dataset.isPermanent = 'true';
+    }
 
     const imgElement = document.createElement('img');
     imgElement.classList.add('card-image');
     imgElement.dataset.rotation = rotation; 
-    // 注意: 実際のtransform適用はboard.jsのapplyDataToZoneで行われるか、
-    // 新規作成時は0度スタートが基本だが、復元時などはここでdatasetに入れておくことが重要
-
+    
     if (isFlipped && originalSrc) {
         thumbnailElement.dataset.isFlipped = 'true';
         thumbnailElement.dataset.originalSrc = originalSrc;
@@ -53,6 +63,11 @@ function createCardThumbnail(cardData, slotElement, isDecoration = false, insert
     }
 
     thumbnailElement.appendChild(imgElement);
+
+    // ブロッカーオーバーレイ
+    if (isBlocker) {
+        addBlockerOverlay(thumbnailElement);
+    }
 
     const counterOverlay = document.createElement('div');
     counterOverlay.classList.add('card-counter-overlay');
@@ -218,19 +233,49 @@ function handleCardContextMenu(e) {
     // スロットのインデックスを取得（記録用）
     const slotIndex = Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode);
 
+    // アタック
+    if (attackMenuItem) {
+        currentAttackHandler = () => {
+            triggerEffect(thumbnailElement, 'attack');
+            // SEはui.js側でアタック.mp3を再生
+        };
+    }
+
+    // 効果発動
     currentActionHandler = () => {
-        console.log(`[${idPrefix}] 効果発動（未実装）`);
-        if (isRecording && typeof recordAction === 'function') {
-            recordAction({ type: 'effectAction', zoneId: sourceZoneId, slotIndex: slotIndex });
-        }
+        triggerEffect(thumbnailElement, 'effect');
     };
     
+    // 対象に取る
     currentTargetHandler = () => {
-        console.log(`[${idPrefix}] 対象に取る（未実装）`);
-        if (isRecording && typeof recordAction === 'function') {
-            recordAction({ type: 'target', zoneId: sourceZoneId, slotIndex: slotIndex });
-        }
+        triggerEffect(thumbnailElement, 'target');
     };
+
+    // 常時発動
+    if (permanentMenuItem) {
+        const isPermanent = thumbnailElement.dataset.isPermanent === 'true';
+        permanentMenuItem.textContent = isPermanent ? '発動停止' : '常時発動';
+        
+        currentPermanentHandler = () => {
+            const newState = !isPermanent;
+            thumbnailElement.dataset.isPermanent = newState;
+            
+            if (newState) {
+                playSe('常時発動.mp3');
+            } else {
+                playSe('ボタン共通.mp3');
+            }
+            
+            if (isRecording && typeof recordAction === 'function') {
+                recordAction({ 
+                    type: 'permanent', 
+                    zoneId: sourceZoneId, 
+                    slotIndex: slotIndex, 
+                    isPermanent: newState 
+                });
+            }
+        };
+    }
 
     currentAddFlavorHandler = () => openFlavorEditor(thumbnailElement);
     currentDeleteHandler = () => deleteCard(thumbnailElement);
@@ -252,33 +297,35 @@ function handleCardContextMenu(e) {
     };
     currentFlipHandler = () => flipCard(thumbnailElement, idPrefix);
 
+    // オナニーメニュー
     if (masturbateMenuItem) {
-        const isOpponentSadist = document.body.classList.contains('opponent-sadist-active');
-        const isOpponentCard = idPrefix === 'opponent-'; 
+        masturbateMenuItem.style.display = 'block';
+        const isMasturbating = thumbnailElement.dataset.isMasturbating === 'true';
+        masturbateMenuItem.textContent = isMasturbating ? 'オナニーを止める' : 'オナニーする';
 
-        if (isOpponentSadist && isOpponentCard) {
-            masturbateMenuItem.style.display = 'block';
+        currentMasturbateHandler = () => {
+            const newState = !isMasturbating;
+            thumbnailElement.dataset.isMasturbating = newState;
             
-            const isMasturbating = thumbnailElement.dataset.isMasturbating === 'true';
-            masturbateMenuItem.textContent = isMasturbating ? 'オナニーを止める' : 'オナニーする';
-
-            currentMasturbateHandler = () => {
-                const newState = !isMasturbating;
-                thumbnailElement.dataset.isMasturbating = newState;
-                
-                if (isRecording && typeof recordAction === 'function') {
-                    recordAction({ 
-                        type: 'masturbate', 
-                        zoneId: sourceZoneId, 
-                        slotIndex: slotIndex, 
-                        isMasturbating: newState 
-                    });
-                }
-            };
-        } else {
-            masturbateMenuItem.style.display = 'none';
-            currentMasturbateHandler = null;
-        }
+            if (isRecording && typeof recordAction === 'function') {
+                recordAction({ 
+                    type: 'masturbate', 
+                    zoneId: sourceZoneId, 
+                    slotIndex: slotIndex, 
+                    isMasturbating: newState 
+                });
+            }
+        };
+    }
+    
+    // ブロッカーメニュー
+    if (blockerMenuItem) {
+        blockerMenuItem.style.display = 'block';
+        const isBlocker = thumbnailElement.dataset.isBlocker === 'true';
+        blockerMenuItem.textContent = isBlocker ? 'ブロッカー効果を削除' : 'ブロッカー効果を付与';
+        currentBlockerHandler = () => {
+            toggleBlocker(thumbnailElement);
+        };
     }
 
     const hideForIcon = isIconZone;
@@ -289,7 +336,9 @@ function handleCardContextMenu(e) {
     toSideDeckMenuItem.style.display = hideForIcon ? 'none' : 'block';
     flipMenuItem.style.display = hideForIcon ? 'none' : 'block';
 
+    if (attackMenuItem) attackMenuItem.style.display = 'block';
     actionMenuItem.style.display = 'block';
+    if (permanentMenuItem) permanentMenuItem.style.display = 'block'; 
     targetMenuItem.style.display = 'block';
     addCounterMenuItem.style.display = 'block';
     removeCounterMenuItem.style.display = 'block';
@@ -298,8 +347,11 @@ function handleCardContextMenu(e) {
     deleteMenuItem.style.display = 'block'; 
 
     if (!isIconZone && thumbnailElement.dataset.isDecoration === 'true') {
+        if (attackMenuItem) attackMenuItem.style.display = 'none';
         actionMenuItem.style.display = 'none';
+        if (permanentMenuItem) permanentMenuItem.style.display = 'none';
         targetMenuItem.style.display = 'none';
+        blockerMenuItem.style.display = 'none'; 
         addCounterMenuItem.style.display = 'none';
         removeCounterMenuItem.style.display = 'none';
         memoMenuItem.style.display = 'none';
@@ -307,7 +359,9 @@ function handleCardContextMenu(e) {
         flipMenuItem.style.display = 'none';
         deleteMenuItem.style.display = isDecorationMode ? 'block' : 'none';
     } else if (isIconZone) {
-        
+        if (attackMenuItem) attackMenuItem.style.display = 'none';
+        blockerMenuItem.style.display = 'none';
+        if (permanentMenuItem) permanentMenuItem.style.display = 'none'; 
     } else {
         if (!stackableZones.includes(sourceBaseId)) {
             addCounterMenuItem.style.display = 'none';
@@ -330,8 +384,9 @@ function handleCardContextMenu(e) {
 }
 
 
-function handleCardMouseOver(e) {
-    const thumbnailElement = e.target.closest('.thumbnail');
+// プレビュー更新関数を外部公開
+window.updateCardPreview = function(thumbnailElement) {
+    if (!thumbnailElement) return;
     const imgElement = thumbnailElement.querySelector('.card-image');
     if (!imgElement) return;
 
@@ -387,15 +442,26 @@ function handleCardMouseOver(e) {
         }
     });
 
-    if (memo) {
+    const memoTooltip = document.getElementById('memo-tooltip');
+    if (memo && memoTooltip) {
         memoTooltip.textContent = memo;
         memoTooltip.style.display = 'block';
+    } else if (memoTooltip) {
+        memoTooltip.style.display = 'none';
+    }
+};
+
+function handleCardMouseOver(e) {
+    const thumbnailElement = e.target.closest('.thumbnail');
+    if (thumbnailElement) {
+        window.updateCardPreview(thumbnailElement);
     }
     e.stopPropagation();
 }
 
 function handleCardMouseOut(e) {
-    memoTooltip.style.display = 'none';
+    const memoTooltip = document.getElementById('memo-tooltip');
+    if(memoTooltip) memoTooltip.style.display = 'none';
     e.stopPropagation();
 }
 
@@ -531,5 +597,76 @@ function resetCardFlipState(thumbnailElement) {
         imgElement.src = originalSrc;
         thumbnailElement.dataset.isFlipped = 'false';
         delete thumbnailElement.dataset.originalSrc;
+    }
+}
+
+// --- ブロッカー / エフェクト関連ヘルパー関数 ---
+
+function toggleBlocker(thumbnailElement) {
+    const isBlocker = thumbnailElement.dataset.isBlocker === 'true';
+    const newState = !isBlocker;
+    thumbnailElement.dataset.isBlocker = newState;
+    
+    if (newState) {
+        addBlockerOverlay(thumbnailElement);
+        playSe('ブロッカー.mp3');
+    } else {
+        removeBlockerOverlay(thumbnailElement);
+        playSe('ボタン共通.mp3');
+    }
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'blocker',
+            zoneId: getParentZoneId(thumbnailElement.parentNode),
+            slotIndex: Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode),
+            isBlocker: newState
+        });
+    }
+}
+
+function addBlockerOverlay(thumbnailElement) {
+    if (thumbnailElement.querySelector('.blocker-overlay')) return;
+    const overlay = document.createElement('div');
+    overlay.classList.add('blocker-overlay');
+    const img = document.createElement('img');
+    img.src = './decoration/ブロッカー.png';
+    img.onerror = () => { overlay.remove(); console.warn('ブロッカー画像が見つかりません: ./decoration/ブロッカー.png'); };
+    overlay.appendChild(img);
+    
+    // カウンターオーバーレイより手前、カード画像より後
+    const counter = thumbnailElement.querySelector('.card-counter-overlay');
+    if(counter) {
+        thumbnailElement.insertBefore(overlay, counter);
+    } else {
+        thumbnailElement.appendChild(overlay);
+    }
+}
+
+function removeBlockerOverlay(thumbnailElement) {
+    const overlay = thumbnailElement.querySelector('.blocker-overlay');
+    if (overlay) thumbnailElement.removeChild(overlay);
+}
+
+function triggerEffect(thumbnailElement, type) {
+    // type: 'effect' or 'target' or 'attack'
+    let className = 'effect-active';
+    if (type === 'target') className = 'target-active';
+    else if (type === 'attack') className = 'attack-active';
+
+    thumbnailElement.classList.add(className);
+    
+    // CSSアニメーション終了後にクラス削除
+    setTimeout(() => {
+        thumbnailElement.classList.remove(className);
+    }, 1000); 
+    
+    if (isRecording && typeof recordAction === 'function') {
+        recordAction({
+            type: 'effect',
+            subType: type,
+            zoneId: getParentZoneId(thumbnailElement.parentNode),
+            slotIndex: Array.from(thumbnailElement.parentNode.parentNode.children).indexOf(thumbnailElement.parentNode)
+        });
     }
 }

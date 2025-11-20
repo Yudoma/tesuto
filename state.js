@@ -3,9 +3,24 @@ let isDecorationMode = false;
 
 let isRecording = false;
 let isPlaying = false;
+let isReplayPaused = false;
+let currentReplayIndex = 0;
+let currentReplayFileName = '';
 let actionLog = [];
 let replayStartTime = 0;
 let replayTimerIds = [];
+
+// Audio State
+let bgmVolume = 5;
+let seVolume = 5;
+let currentBgmAudio = null;
+
+// BGMリスト: bgmフォルダに入れているファイル名をここに記述してください
+const bgmFileList = [
+    'Battle.mp3',
+    'Theme.mp3',
+    'Ending.wav'
+];
 
 let currentDeleteHandler = null;
 let currentMoveToGraveHandler = null;
@@ -18,9 +33,12 @@ let currentMemoHandler = null;
 let currentAddCounterHandler = null;
 let currentRemoveCounterHandler = null;
 let currentActionHandler = null;
+let currentAttackHandler = null; // 追加: アタック
 let currentTargetHandler = null;
+let currentPermanentHandler = null; // 追加: 常時発動
 let currentAddFlavorHandler = null;
 let currentMasturbateHandler = null;
+let currentBlockerHandler = null;
 let currentMemoTarget = null;
 let currentFlavorTarget = null;
 

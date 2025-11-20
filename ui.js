@@ -1,4 +1,4 @@
-let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem, masturbateMenuItem;
+let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem, masturbateMenuItem, blockerMenuItem, permanentMenuItem, attackMenuItem;
 let actionMenuItem, targetMenuItem, addFlavorMenuItem;
 let memoEditorModal, memoTextarea, memoSaveBtn, memoCancelBtn, memoTooltip;
 let lightboxOverlay, lightboxContent;
@@ -11,12 +11,18 @@ let flavorDelete1, flavorDelete2, flavorCancelBtn;
 let flavorUpload1, flavorUpload2;
 let flavorDropZone1, flavorDropZone2;
 
-// 新規追加ボタン
+// 新規追加ボタン・入力
 let commonExportBoardBtn, commonImportBoardBtn;
-let recordStartBtn, recordStopBtn, replayPlayBtn, saveReplayBtn, loadReplayBtn;
+let recordStartBtn, recordStopBtn, replayPlayBtn, replayPauseBtn, replayStopBtn, loadReplayBtn;
+let replayFileNameDisplay, replayFileNameText, replayWaitTimeInput;
+// BGM関連
+let bgmSelect, bgmPlayBtn, bgmPauseBtn, bgmStopBtn;
+let bgmVolumeSlider, bgmVolumeVal, seVolumeSlider, seVolumeVal;
 
 // リサイズ中判定用のフラグ
 let isResizingDrawer = false;
+// カーソル音制御用
+let lastHoveredElement = null;
 
 let stepButtons = [];
 const stepOrder = ['step-start', 'step-draw', 'step-mana', 'step-main', 'step-attack', 'step-end'];
@@ -46,8 +52,11 @@ function closeContextMenu() {
     currentAddCounterHandler = null;
     currentRemoveCounterHandler = null;
     currentActionHandler = null;
+    currentAttackHandler = null;
     currentTargetHandler = null;
+    currentPermanentHandler = null;
     currentAddFlavorHandler = null;
+    currentBlockerHandler = null;
     currentMemoTarget = null;
     currentFlavorTarget = null;
     currentMasturbateHandler = null;
@@ -239,12 +248,26 @@ function setupStepButtons() {
 
 
 function setupUI() {
+    // カーソル音の設定
+    document.body.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('button, .thumbnail, .card-slot, .drawer-toggle, .counter-btn, input[type="range"], select');
+        
+        if (target && target !== lastHoveredElement) {
+            playSe('カーソル.mp3');
+            lastHoveredElement = target;
+        } else if (!target) {
+            lastHoveredElement = null;
+        }
+    });
+
     document.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('dragover', (e) => e.preventDefault());
     document.addEventListener('drop', (e) => e.preventDefault());
 
     contextMenu = document.getElementById('custom-context-menu');
     actionMenuItem = document.getElementById('context-menu-action');
+    permanentMenuItem = document.getElementById('context-menu-permanent'); 
+    attackMenuItem = document.getElementById('context-menu-attack'); 
     targetMenuItem = document.getElementById('context-menu-target');
     deleteMenuItem = document.getElementById('context-menu-delete');
     toGraveMenuItem = document.getElementById('context-menu-to-grave');
@@ -258,6 +281,7 @@ function setupUI() {
     removeCounterMenuItem = document.getElementById('context-menu-remove-counter');
     addFlavorMenuItem = document.getElementById('context-menu-add-flavor');
     masturbateMenuItem = document.getElementById('context-menu-masturbate');
+    blockerMenuItem = document.getElementById('context-menu-blocker');
 
     memoEditorModal = document.getElementById('memo-editor');
     memoTextarea = document.getElementById('memo-editor-textarea');
@@ -279,11 +303,16 @@ function setupUI() {
 
     commonExportBoardBtn = document.getElementById('common-export-board-btn');
     commonImportBoardBtn = document.getElementById('common-import-board-btn');
+    
     recordStartBtn = document.getElementById('record-start-btn');
     recordStopBtn = document.getElementById('record-stop-btn');
     replayPlayBtn = document.getElementById('replay-play-btn');
-    saveReplayBtn = document.getElementById('save-replay-btn');
+    replayPauseBtn = document.getElementById('replay-pause-btn');
+    replayStopBtn = document.getElementById('replay-stop-btn');
     loadReplayBtn = document.getElementById('load-replay-btn');
+    replayFileNameDisplay = document.getElementById('replay-file-name-display');
+    replayFileNameText = document.getElementById('replay-file-name-text');
+    replayWaitTimeInput = document.getElementById('replay-wait-time-input');
 
     diceRollBtn = document.getElementById('dice-roll-btn');
     coinTossBtn = document.getElementById('coin-toss-btn');
@@ -301,12 +330,22 @@ function setupUI() {
     flavorUpload2 = document.getElementById('flavor-upload-2');
     flavorCancelBtn = document.getElementById('flavor-editor-cancel');
 
+    // オーディオ設定UI
+    bgmSelect = document.getElementById('bgm-select');
+    bgmPlayBtn = document.getElementById('bgm-play-btn');
+    bgmPauseBtn = document.getElementById('bgm-pause-btn');
+    bgmStopBtn = document.getElementById('bgm-stop-btn');
+    bgmVolumeSlider = document.getElementById('bgm-volume-slider');
+    bgmVolumeVal = document.getElementById('bgm-volume-val');
+    seVolumeSlider = document.getElementById('se-volume-slider');
+    seVolumeVal = document.getElementById('se-volume-val');
+
     if (!contextMenu || !deleteMenuItem || !toGraveMenuItem || !toExcludeMenuItem || !toHandMenuItem || !toDeckMenuItem || !toSideDeckMenuItem || !flipMenuItem || !addCounterMenuItem || !removeCounterMenuItem
-        || !actionMenuItem || !targetMenuItem || !addFlavorMenuItem || !masturbateMenuItem
+        || !actionMenuItem || !targetMenuItem || !addFlavorMenuItem || !masturbateMenuItem || !blockerMenuItem || !permanentMenuItem || !attackMenuItem
         || !memoMenuItem || !memoEditorModal || !memoTextarea || !memoSaveBtn || !memoCancelBtn || !memoTooltip
         || !lightboxOverlay || !lightboxContent || !commonPreviewArea
-        || !commonDrawer || !commonDrawerToggle || !commonFlipBoardBtn || !commonDecorationModeBtn || !commonToggleNavBtn || !commonToggleSeBtn
-        || !commonExportBoardBtn || !commonImportBoardBtn || !recordStartBtn || !recordStopBtn || !replayPlayBtn || !saveReplayBtn || !loadReplayBtn
+        || !commonDrawer || !commonDrawerToggle || !commonFlipBoardBtn || !commonDecorationModeBtn || !commonToggleNavBtn
+        || !commonExportBoardBtn || !commonImportBoardBtn || !recordStartBtn || !recordStopBtn || !replayPlayBtn || !replayPauseBtn || !replayStopBtn || !loadReplayBtn
         || !diceRollBtn || !coinTossBtn || !randomResultDisplay
         || !flavorEditorModal || !flavorEditorHeader || !flavorPreview1 || !flavorPreview2 || !flavorDelete1 || !flavorDelete2
         || !flavorDropZone1 || !flavorDropZone2 || !flavorUpload1 || !flavorUpload2
@@ -324,7 +363,6 @@ function setupUI() {
     });
 
     document.addEventListener('click', (e) => {
-        // リサイズ操作直後のクリックイベントなら無視する
         if (isResizingDrawer) {
             return;
         }
@@ -375,6 +413,22 @@ function setupUI() {
         if (typeof currentTargetHandler === 'function') currentTargetHandler(); 
         closeContextMenu(); 
     });
+    attackMenuItem.addEventListener('click', () => {
+        playSe('アタック.mp3');
+        if (typeof currentAttackHandler === 'function') currentAttackHandler();
+        closeContextMenu();
+    });
+    permanentMenuItem.addEventListener('click', () => { 
+        playSe('ボタン共通.mp3');
+        if (typeof currentPermanentHandler === 'function') currentPermanentHandler(); 
+        closeContextMenu(); 
+    });
+    blockerMenuItem.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof currentBlockerHandler === 'function') currentBlockerHandler();
+        closeContextMenu();
+    });
+
     deleteMenuItem.addEventListener('click', () => { 
         playSe('ボタン共通.mp3');
         if (typeof currentDeleteHandler === 'function') currentDeleteHandler(); 
@@ -494,6 +548,61 @@ function setupUI() {
         openFlavorFileInput(2);
     });
 
+    // BGMリストの初期化 (state.jsのbgmFileListを使用)
+    if (bgmSelect && typeof bgmFileList !== 'undefined') {
+        bgmFileList.forEach(filename => {
+            const option = document.createElement('option');
+            option.value = filename;
+            option.textContent = filename;
+            bgmSelect.appendChild(option);
+        });
+
+        bgmSelect.addEventListener('change', (e) => {
+            // 選択変更時は停止するなど必要に応じて
+        });
+    }
+
+    // オーディオ操作イベント
+    if (bgmPlayBtn) {
+        bgmPlayBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (bgmSelect) {
+                const filename = bgmSelect.value;
+                if (filename && typeof playBgm === 'function') {
+                    playBgm(filename);
+                }
+            }
+        });
+    }
+    if (bgmPauseBtn) {
+        bgmPauseBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (typeof pauseBgm === 'function') pauseBgm();
+        });
+    }
+    if (bgmStopBtn) {
+        bgmStopBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (typeof stopBgm === 'function') stopBgm();
+        });
+    }
+
+    if (bgmVolumeSlider) {
+        bgmVolumeSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            bgmVolumeVal.textContent = val;
+            bgmVolume = val;
+            if (typeof updateBgmVolume === 'function') updateBgmVolume();
+        });
+    }
+    if (seVolumeSlider) {
+        seVolumeSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            seVolumeVal.textContent = val;
+            seVolume = val;
+        });
+    }
+
     const turnInput = document.getElementById('common-turn-value');
     const turnPrevBtn = document.getElementById('common-turn-prev');
     const turnNextBtn = document.getElementById('common-turn-next');
@@ -526,15 +635,15 @@ function setupUI() {
         playSe('ボタン共通.mp3');
         commonDrawer.classList.toggle('open');
     });
+
+    // 盤面反転ボタン（記録なし）
     commonFlipBoardBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         document.body.classList.toggle('board-flipped');
         document.getElementById('player-drawer')?.classList.remove('open');
         document.getElementById('opponent-drawer')?.classList.remove('open');
         
-        if (isRecording && typeof recordAction === 'function') {
-            recordAction({ type: 'boardFlip', isFlipped: document.body.classList.contains('board-flipped') });
-        }
+        // recordAction は削除
     });
 
     commonDecorationModeBtn.addEventListener('click', () => {
@@ -553,16 +662,23 @@ function setupUI() {
         });
     });
 
-    commonToggleSeBtn.addEventListener('click', () => {
-        const isMuted = toggleSeMute();
-        commonToggleSeBtn.textContent = isMuted ? '効果音再開' : '効果音停止';
-        if (!isMuted) playSe('ボタン共通.mp3');
-    });
+    if(commonToggleSeBtn) {
+        // SEボタンは削除されたので、念のためnullチェック
+        commonToggleSeBtn.addEventListener('click', () => {
+            const isMuted = toggleSeMute();
+            commonToggleSeBtn.textContent = isMuted ? '効果音再開' : '効果音停止';
+            if (!isMuted) playSe('ボタン共通.mp3');
+        });
+    }
 
     // Board I/O
     commonExportBoardBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        if (typeof exportAllBoardData === 'function') exportAllBoardData();
+        const defaultName = "sm_solitaire_board";
+        const fileName = prompt("保存するファイル名を入力してください", defaultName);
+        if (fileName) {
+             if (typeof exportAllBoardData === 'function') exportAllBoardData(fileName);
+        }
     });
     commonImportBoardBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
@@ -576,16 +692,29 @@ function setupUI() {
     });
     recordStopBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
+        // 停止と保存を統合
         if (typeof stopReplayRecording === 'function') stopReplayRecording();
     });
     replayPlayBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        if (typeof playReplay === 'function') playReplay();
+        // 再開も兼ねる
+        if (isReplayPaused) {
+            if (typeof resumeReplay === 'function') resumeReplay();
+        } else {
+            if (typeof playReplay === 'function') playReplay();
+        }
     });
-    saveReplayBtn.addEventListener('click', () => {
+    replayPauseBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        if (typeof exportReplayData === 'function') exportReplayData();
+        if (typeof pauseReplay === 'function') pauseReplay();
     });
+    replayStopBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof stopReplay === 'function') stopReplay();
+    });
+    
+    // loadReplayBtn (読込) is existing
+
     loadReplayBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         if (typeof importReplayData === 'function') importReplayData();
@@ -676,14 +805,13 @@ function setupUI() {
                 let newX = e.clientX - initialX;
                 let newY = e.clientY - initialY;
 
-                // 画面外にはみ出ないように制限
+                // 画面外にはみ出ないように制限を追加
                 const drawerWidth = commonDrawer.offsetWidth;
                 const drawerHeight = commonDrawer.offsetHeight;
                 const vw = window.innerWidth;
                 const vh = window.innerHeight;
 
                 // 中心(50%, 50%)からのオフセットの限界値を計算
-                // ドロワーが画面より大きい場合は、はみ出しを許容しつつ中央に寄せる（制限値0以上）
                 const limitX = Math.max(0, (vw - drawerWidth) / 2);
                 const limitY = Math.max(0, (vh - drawerHeight) / 2);
 
