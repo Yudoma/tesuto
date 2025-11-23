@@ -1,8 +1,9 @@
 body {
     margin: 0;
-    min-height: 100vh;
+    height: 100vh;
     display: flex; 
     justify-content: center; 
+    align-items: center;
     
     background-color: #ffb6c1; 
     font-family: 'Georgia', serif; 
@@ -10,10 +11,8 @@ body {
 
     font-size: 72%;
     
-    padding-top: 0px;
-    padding-right: 0px;
-    padding-bottom: 0px;
-    padding-left: 0px; 
+    padding: 0;
+    overflow: hidden;
     
     -webkit-user-select: none; 
     -moz-user-select: none;    
@@ -37,37 +36,130 @@ body {
 .main-container {
     display: flex;
     flex-direction: row; 
-    gap: 10px; 
+    gap: 1px; 
     align-items: stretch; 
-    align-self: stretch; 
+    align-self: center; 
     
-    padding: 10px;
+    padding: 2px;
     box-sizing: border-box;
     width: 100%;
-    min-height: calc(100vh - 20px); 
+    height: 100vh; 
+    max-height: 100vh;
 
     background-color: #ba55d3;  
     color: #333;  
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s, padding 0.3s, border-radius 0.3s;
+    border-radius: 0;
+    box-shadow: none;
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.common-preview-wrapper {
+    display: flex;
+    flex-direction: column; 
+    gap: 5px; 
+    align-items: center; 
+    flex-shrink: 0; 
+    
+    justify-content: space-between;
+    box-sizing: border-box; 
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 4px;
+    width: 325px; 
+}
+
+.game-area-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0; 
+    flex-grow: 1; 
+    
+    min-width: 0; 
+    
+    justify-content: center; 
+    
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden; 
+}
+
+.opponent-wrapper,
+.player-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1; 
+    min-height: 0; 
+    width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .opponent-wrapper {
-    display: flex;
-    gap: 15px; 
-    align-items: flex-start;
-    align-self: stretch; 
-    
     transform: scaleY(-1); 
-    margin-bottom: -0px; 
+    margin-bottom: 0;
+    justify-content: flex-start; 
 }
 
 .player-wrapper {
+    justify-content: flex-start; 
+}
+
+.board-and-hand-wrapper {
     display: flex;
-    gap: 15px; 
-    align-items: flex-start;
-    align-self: stretch;
+    flex-direction: column; 
+    gap: 1px; 
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    justify-content: center; 
+}
+
+.center-controls-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 2px 10px;
+    box-sizing: border-box;
+    
+    flex-shrink: 0; 
+    min-height: 36px; 
+    
+    margin: 2px 0; 
+    z-index: 50;
+}
+
+.game-board {
+    width: 100%; 
+    
+    border: 4px solid #555;
+    box-shadow: 0 4px 15px rgba(100, 100, 100, 0.2);
+    background-color: #333;
+    
+    display: grid;
+    grid-template-columns: 0.5fr 2.0fr 3fr 2.0fr 0.5fr;  
+    grid-template-rows: minmax(140px, 1fr) minmax(140px, 1fr); 
+
+    grid-template-areas:
+        "grave special1 battle special2 exclude" 
+        "mana-left mana-left spell mana-right mana-right"; 
+    
+    gap: 0px;
+    padding: 0px; 
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+    
+    flex-shrink: 0; 
+    
+    max-width: 100%;
+}
+
+.hand-area-container {
+    width: 100%;
+    min-height: 0;
 }
 
 .opponent-text-flip {
@@ -83,42 +175,8 @@ body.board-flipped .player-wrapper .zone-header {
     transform: translate(-50%, -50%) scaleY(-1);
 }
 
-.common-preview-wrapper {
-    display: flex;
-    flex-direction: column; 
-    gap: 10px; 
-    align-items: center; 
-    flex-shrink: 0; 
-    
-    justify-content: space-between;
-    box-sizing: border-box; 
-
-}
-
-.game-area-container {
-    display: flex;
-    flex-direction: column;
-    gap: 0px;  
-    flex-grow: 1; 
-    min-width: 0; 
-    justify-content: space-between; 
-
-    box-sizing: border-box;
-}
-
-.board-and-hand-wrapper {
-    display: flex;
-    flex-direction: column; 
-    gap: 2px; 
-    flex-grow: 1; 
-    min-width: 0; 
-    box-sizing: border-box; 
-}
-
 .card-preview-area {
-     
     width: 322.56px; 
-     
     height: 532.224px; 
     
     background-color: #333;
@@ -130,7 +188,8 @@ body.board-flipped .player-wrapper .zone-header {
     padding: 0px;
     box-sizing: border-box;
     
-    flex-shrink: 0; 
+    flex-shrink: 1; 
+    min-height: 200px; 
     transition: background-color 0.3s, border-color 0.3s;
     
     position: relative; 
@@ -143,7 +202,6 @@ body.board-flipped .player-wrapper .zone-header {
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-    
     position: absolute; 
     top: 0;
     left: 0;
@@ -174,12 +232,10 @@ body.board-flipped .player-wrapper .zone-header {
     flex-direction: column; 
     justify-content: space-between; 
     align-items: stretch; 
-    
     position: absolute; 
     top: 0; 
     left: 0;
     z-index: 10; 
-    
     pointer-events: none; 
 }
 
@@ -193,9 +249,7 @@ body.board-flipped .player-wrapper .zone-header {
     flex-grow: 0;
     flex-shrink: 0;
     text-align: center;
-    
     pointer-events: auto; 
-    
     display: none;  
     white-space: nowrap; 
 }
@@ -210,18 +264,13 @@ body.board-flipped .player-wrapper .zone-header {
     font-weight: bold;
     color: #fff; 
     text-align: center;
-    
     background-color: #555; 
     padding: 3px 8px;
     border-radius: 4px;
-    
     margin: 0 5px; 
-    
     max-width: 95%; 
     box-sizing: border-box;
-    
     pointer-events: auto; 
-    
     display: none;  
 }
 
@@ -234,7 +283,6 @@ body.board-flipped .player-wrapper .zone-header {
     gap: 5px; 
     padding: 5px; 
     box-sizing: border-box; 
-    
     pointer-events: auto; 
 }
 
@@ -260,7 +308,6 @@ body.board-flipped .player-wrapper .zone-header {
     flex-direction: column;  
     align-items: flex-end;  
     gap: 5px;
-    
     flex-grow: 1;  
     flex-shrink: 1;  
     min-width: 0;  
@@ -273,33 +320,25 @@ body.board-flipped .player-wrapper .zone-header {
     background-color: rgba(85, 85, 85, 0.7) !important;  
     padding: 4px 6px;
     border-radius: 4px;
-    
     width: 95%; 
     box-sizing: border-box;
     text-align: left; 
-    
     white-space: pre-wrap; 
     word-break: break-word; 
-    
     display: none;  
     pointer-events: auto;
-    
     max-height: 100px; 
     overflow-y: auto;
-    
     align-self: center; 
 }
 
 .card-preview-area #preview-flavor-text {
     background-color: #555;  
-
     width: auto;
     max-width: 100%;  
     align-self: flex-end; 
-    
     flex-grow: 0;
     flex-shrink: 0; 
-    
     text-align: center;  
 }
 
@@ -307,29 +346,6 @@ body.board-flipped .player-wrapper .zone-header {
      max-height: 150px;
      width: 95%; 
      align-self: center; 
-      
-}
-
-.game-board {
-    width: 100%; 
-    
-    border: 4px solid #555;
-    box-shadow: 0 4px 15px rgba(100, 100, 100, 0.2);
-    background-color: #333;
-    
-    display: grid;
-    
-grid-template-columns: 0.5fr 2.0fr 3fr 2.0fr 0.5fr;  
-
-    grid-template-rows: minmax(100px, 1fr) minmax(150px, 1fr); 
-
-    grid-template-areas:
-        "grave special1 battle special2 exclude" 
-        "mana-left mana-left spell mana-right mana-right"; 
-    
-    gap: 0px;
-    padding: 0px; 
-    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .zone {
@@ -339,7 +355,6 @@ grid-template-columns: 0.5fr 2.0fr 3fr 2.0fr 0.5fr;
     display: flex;
     flex-direction: column; 
     align-items: center; 
-     
     justify-content: center; 
     padding: 0px; 
     box-sizing: border-box;
@@ -352,10 +367,8 @@ grid-template-columns: 0.5fr 2.0fr 3fr 2.0fr 0.5fr;
     font-size: 1.2em;  
     font-weight: bold;
     z-index: 12; 
-    
     text-decoration: none; 
     transition: color 0.2s, text-decoration 0.2s, background-color 0.3s; 
-
     position: absolute; 
     top: 50%; 
     left: 50%; 
@@ -392,31 +405,17 @@ body.nav-hidden .zone-header {
     gap: 3px; 
 }
 
-.special-zone-1 { 
-    grid-area: special1; 
-}
-.spell-zone {
-    grid-area: spell;
-}
-.battle-zone { 
-    grid-area: battle; 
-}
-.special-zone-2 { 
-    grid-area: special2; 
-}
-.exclude-zone { 
-    grid-area: exclude; 
-}
+.special-zone-1 { grid-area: special1; }
+.spell-zone { grid-area: spell; }
+.battle-zone { grid-area: battle; }
+.special-zone-2 { grid-area: special2; }
+.exclude-zone { grid-area: exclude; }
 
 .mana-zone#mana-left,
-.mana-zone#opponent-mana-left {
-    grid-area: mana-left;
-}
+.mana-zone#opponent-mana-left { grid-area: mana-left; }
 
 .mana-zone#mana-right,
-.opponent-wrapper #opponent-mana-right {
-    grid-area: mana-right;
-}
+.opponent-wrapper #opponent-mana-right { grid-area: mana-right; }
 
 .grave-zone {
     grid-area: grave; 
@@ -538,7 +537,6 @@ body.nav-hidden .zone-header {
 .card-slot.drag-over {
     background-color: #777;
     border: 2px solid #aaa;
-    
     transform: scale(1.02);
     transition: transform 0.1s;
 }
@@ -547,23 +545,17 @@ body.nav-hidden .zone-header {
     position: fixed;
     right: 10px;
     z-index: 600;
-
     background-color: #2a2a4e; 
     border: 2px solid #5a5a9a;
     color: #e0e0e0;
-    
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    
     width: 90%;  
     max-width: 1200px;  
     height: auto;  
-    
     display: flex;
     flex-direction: column;  
-
     transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
-    
     transform: translateX(105%);  
     transition: transform 0.3s ease-in-out;
     visibility: hidden;
@@ -576,33 +568,43 @@ body.nav-hidden .zone-header {
 
 #player-drawer {
     top: 10px;
+    max-height: 45vh;
 }
 
 #opponent-drawer {
     bottom: 10px;
+    max-height: 45vh;
+}
+
+#c-drawer {
+    top: 50%;
+    bottom: auto;
+    transform: translate(105%, -50%);
+    background-color: #1e3a2e; 
+    border-color: #4a8a6a;
+}
+
+#c-drawer.open {
+    transform: translate(0, -50%); 
+    visibility: visible;
 }
 
 .drawer-toggle {
     position: fixed;  
     right: 10px;      
     z-index: 501;     
-    
     writing-mode: vertical-rl;
-    text-orientation: mixed;
-    
+    text-orientation: upright; /* 修正: mixed -> upright (文字を正立させる) */
     padding: 10px 5px;
-
     background-color: #f0f0f0;
     color: #333;
     box-shadow: 0 2px #b0b0b0;
-    
     border: none;
     border-radius: 8px;  
     cursor: pointer;
     font-weight: bold;
     font-family: 'Georgia', serif;
     font-size: 1.1em;
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s;
 }
 .drawer-toggle:active {
@@ -611,24 +613,32 @@ body.nav-hidden .zone-header {
     transform: translateY(2px);
 }
 
-#player-drawer-toggle {
-    top: 60px;  
-}
-
-#opponent-drawer-toggle {
-    bottom: 60px;  
-}
+#player-drawer-toggle { top: 60px; }
+#opponent-drawer-toggle { bottom: 60px; }
 #opponent-drawer-toggle:active {
     transform: translateY(2px);  
     background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
 }
 
+#c-drawer-toggle {
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #8abda0;
+    color: #0a1f15;
+    box-shadow: 0 2px #4a8a6a;
+}
+
+#c-drawer-toggle:active {
+    transform: translateY(calc(-50% + 2px));
+    background-color: #4a8a6a;
+    box-shadow: 0 0 #2f5f4f;
+}
+
 .drawer-content {
     display: flex;
     flex-direction: column;
     width: 100%;
-     
     height: 100%;
     overflow: hidden;
     border-radius: 6px;  
@@ -662,9 +672,19 @@ body.nav-hidden .zone-header {
     height: auto;
     padding: 5px;  
     box-sizing: border-box;
-
     border-left: 2px solid #5a5a9a;
-    
+    transition: border-color 0.3s;
+}
+
+.drawer-token-space {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 220px; 
+    height: auto;
+    padding: 5px;
+    box-sizing: border-box;
+    border-left: 2px solid #5a5a9a;
     transition: border-color 0.3s;
 }
 
@@ -672,10 +692,8 @@ body.nav-hidden .zone-header {
     display: flex;
     flex-direction: row;
     flex-shrink: 0;
-
     border-bottom: 2px solid #5a5a9a;
     background-color: #1a1a2e;
-    
     transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -684,9 +702,7 @@ body.nav-hidden .zone-header {
     cursor: pointer;
     background-color: transparent;
     border: none;
-
     color: #a0a0e0;
-    
     font-size: 1em;
     font-family: 'Georgia', serif;
     font-weight: bold;
@@ -694,13 +710,36 @@ body.nav-hidden .zone-header {
     border-right: 1px solid #4a4a88;
 }
 
-.drawer-tab-btn:hover {
-    background-color: #3a3a5e;
-}
-
+.drawer-tab-btn:hover { background-color: #3a3a5e; }
 .drawer-tab-btn.active {
     background-color: #5a5a9a;
     color: white;
+}
+
+#c-drawer .drawer-tabs {
+    background-color: #152a20;
+    border-bottom-color: #4a8a6a;
+}
+#c-drawer .drawer-tab-btn {
+    border-right-color: #2f5f4f;
+    color: #8abda0;
+}
+#c-drawer .drawer-tab-btn:hover {
+    background-color: #2f5f4f;
+}
+#c-drawer .drawer-tab-btn.active {
+    background-color: #4a8a6a;
+    color: #e0f0e8;
+}
+#c-drawer .drawer-free-space {
+    border-left-color: #4a8a6a;
+}
+#c-drawer .free-space-slot-container {
+    background-color: #152a20; 
+    border-color: #2f5f4f;
+}
+#c-drawer .area-label {
+    color: #8abda0;
 }
 
 .drawer-panels {
@@ -718,9 +757,7 @@ body.nav-hidden .zone-header {
     flex-direction: column;
     box-sizing: border-box;
 }
-.drawer-panel.active {
-    display: flex;
-}
+.drawer-panel.active { display: flex; }
 
 .drawer-panel .deck-back-slot-container {
     height: auto; 
@@ -730,9 +767,7 @@ body.nav-hidden .zone-header {
     display: flex; 
     flex-direction: row; 
     flex-wrap: nowrap; 
-     
     overflow-x: auto; 
-     
     overflow-y: visible;  
     padding: 5px;
     gap: 3px; 
@@ -745,7 +780,6 @@ body.nav-hidden .zone-header {
 }
 
 .drawer-free-space .free-space-slot-container {
-     
     height: auto; 
     min-height: calc(var(--small-card-height) + 10px);
     width: 100%; 
@@ -753,15 +787,32 @@ body.nav-hidden .zone-header {
     display: flex; 
     flex-direction: row; 
     flex-wrap: nowrap; 
-     
     overflow-x: auto; 
-     
     overflow-y: visible;  
     padding: 5px;
     gap: 3px; 
     justify-content: flex-start; 
     align-items: center;  
-    
+    background-color: #1a1a2e; 
+    border-radius: 5px;
+    border: 1px solid #4a4a88;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.drawer-token-space .token-slot-container {
+    height: auto; 
+    min-height: calc(var(--small-card-height) + 10px);
+    width: 100%; 
+    box-sizing: border-box;
+    display: flex; 
+    flex-direction: row; 
+    flex-wrap: nowrap; 
+    overflow-x: auto; 
+    overflow-y: visible;  
+    padding: 5px;
+    gap: 3px; 
+    justify-content: flex-start; 
+    align-items: center;  
     background-color: #1a1a2e; 
     border-radius: 5px;
     border: 1px solid #4a4a88;
@@ -769,7 +820,8 @@ body.nav-hidden .zone-header {
 }
 
 .drawer-panel .card-slot,
-.drawer-free-space .card-slot {
+.drawer-free-space .card-slot,
+.drawer-token-space .card-slot {
     width: var(--small-card-width);
     height: var(--small-card-height);
     flex-shrink: 0;  
@@ -792,7 +844,8 @@ body.nav-hidden .zone-header {
 }
 
 .drawer-panel .bottom-deck-label,
-.drawer-free-space .bottom-deck-label {
+.drawer-free-space .bottom-deck-label,
+.drawer-token-space .bottom-deck-label {
     margin-bottom: 5px;
     text-align: left;  
     padding-left: 5px;
@@ -803,32 +856,27 @@ body.nav-hidden .zone-header {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 5px;
+    gap: 2px;
     padding: 2px 0;  
     flex-shrink: 0;  
-     
+    flex-wrap: wrap;
 }
 
 .step-btn {
-    padding: 4px 10px;  
-    font-size: 0.9em;   
+    padding: 4px 8px;  
+    font-size: 0.85em;   
     font-weight: bold;
     font-family: 'Georgia', serif;
-    
     background-color: #f0f0f0; 
     color: #333;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 
-.step-btn:hover {
-    background-color: #d0d0d0;
-}
-
+.step-btn:hover { background-color: #d0d0d0; }
 .step-btn:active {
     background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
@@ -839,9 +887,7 @@ body.nav-hidden .zone-header {
     background-color: #ffcc00;  
     box-shadow: 0 2px #997a00;
 }
-.step-btn.active:hover {
-    background-color: #ffdb4d;
-}
+.step-btn.active:hover { background-color: #ffdb4d; }
 .step-btn.active:active {
     box-shadow: 0 0 #997a00;
     transform: translateY(2px);
@@ -856,28 +902,18 @@ body.nav-hidden .zone-header {
     transform: none;        
 }
 
-.center-controls-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;  
-    align-items: center;  
-    gap: 20px;  
-    flex-shrink: 0;
-    width: 100%;
-    padding: 0px 0;  
-}
-
 .common-turn-counter {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 10px;
-
+    padding: 4px 8px;
     background-color: #2a2a4e;
     border: 2px solid #5a5a9a;
     border-radius: 5px;
     color: #e0e0e0;
-
+    width: auto;
+    justify-content: center;
+    box-sizing: border-box;
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
@@ -886,9 +922,7 @@ body.sm-mode-active .common-turn-counter {
     border-color: #FF69B4; 
     color: #333;
 }
-body.sm-mode-active .common-turn-counter .turn-label {
-    color: #C71585;
-}
+body.sm-mode-active .common-turn-counter .turn-label { color: #C71585; }
 body.sm-mode-active .common-turn-counter .turn-select {
     background-color: #FFF5FA;
     border-color: #FFB6C1;
@@ -919,7 +953,6 @@ body.sm-mode-active .common-turn-counter .turn-input {
     font-family: 'Georgia', serif;
     padding: 2px 4px;
     border-radius: 3px;
-
     background-color: #3a3a5e;
     border: 1px solid #5a5a9a;
     color: #e0e0e0;
@@ -933,7 +966,6 @@ body.sm-mode-active .common-turn-counter .turn-input {
     font-family: 'Georgia', serif;
     padding: 2px;
     border-radius: 3px;
-
     background-color: #3a3a5e;
     border: 1px solid #5a5a9a;
     color: #e0e0e0;
@@ -953,7 +985,6 @@ body.sm-mode-active .common-turn-counter .turn-input {
     padding: 2px 8px;  
     font-size: 1em; 
     font-weight: bold;
-
     background-color: #f0f0f0; 
     color: #333;
     border: none;
@@ -962,9 +993,7 @@ body.sm-mode-active .common-turn-counter .turn-input {
     box-shadow: 0 2px #b0b0b0; 
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
-.turn-btn:hover {
-    background-color: #d0d0d0;
-}
+.turn-btn:hover { background-color: #d0d0d0; }
 .turn-btn:active {
     background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
@@ -975,19 +1004,18 @@ html body #common-drawer-toggle {
     background-color: #f0f0f0;
     box-shadow: 0 2px #b0b0b0;
     color: #333;
+    width: auto;
+    writing-mode: horizontal-tb;
+    height: auto;
+    padding: 4px 8px;
 }
-html body #common-drawer-toggle:hover {
-    background-color: #d0d0d0;
-}
+html body #common-drawer-toggle:hover { background-color: #d0d0d0; }
 html body #common-drawer-toggle:active {
     background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
 }
 
-html body #common-drawer .area-label {
-    color: #f0f0f0;
-}
-
+html body #common-drawer .area-label { color: #f0f0f0; }
 html body #common-drawer .random-result-display {
     background-color: #333;
     border-color: #666;
@@ -1001,9 +1029,7 @@ html body #common-drawer .counter-btn {
     box-shadow: 0 2px #b0b0b0;
 }
 html body #common-drawer .draw-btn:hover,
-html body #common-drawer .counter-btn:hover {
-    background-color: #d0d0d0;
-}
+html body #common-drawer .counter-btn:hover { background-color: #d0d0d0; }
 html body #common-drawer .draw-btn:active,
 html body #common-drawer .counter-btn:active {
     background-color: #ffcc00;
@@ -1033,9 +1059,7 @@ html body #common-turn-counter {
     border-color: #777;
     color: #f0f0f0;
 }
-html body #common-turn-counter .turn-label {
-    color: #f0f0f0;
-}
+html body #common-turn-counter .turn-label { color: #f0f0f0; }
 html body #common-turn-counter .turn-select,
 html body #common-turn-counter .turn-input {
     background-color: #555;
@@ -1051,9 +1075,7 @@ html body #common-card-preview {
     background-color: #444;
     border-color: #777;
 }
-html body #common-card-preview p {
-    color: #f0f0f0;
-}
+html body #common-card-preview p { color: #f0f0f0; }
 html body #common-card-preview .preview-stat,
 html body #common-card-preview .preview-name,
 html body #common-card-preview .preview-text-block {
@@ -1091,30 +1113,22 @@ body.common-decoration-mode-active .player-stats-group {
     top: 50%;
     left: 50%;
     bottom: auto; 
-    
     transform: translate(-50%, -50%);
-    
     z-index: 600;
-
     background-color: #2a2a4e; 
     border: 2px solid #5a5a9a;
     color: #e0e0e0;
-    
     border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
-    
     width: 700px;
     height: 650px;
-    
     min-width: 500px;
     min-height: 400px;
     max-width: 95vw;
     max-height: 95vh;
-
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
@@ -1137,10 +1151,7 @@ body.common-decoration-mode-active .player-stats-group {
     padding: 8px 15px;
 }
 
-#common-drawer .drawer-tab-btn:hover {
-    background-color: #555;
-}
-
+#common-drawer .drawer-tab-btn:hover { background-color: #555; }
 #common-drawer .drawer-tab-btn.active {
     background-color: #666;
     color: #fff;
@@ -1177,9 +1188,7 @@ body.common-decoration-mode-active .player-stats-group {
     z-index: 10;
 }
 
-.drawer-header:hover {
-    background-color: #252540;
-}
+.drawer-header:hover { background-color: #252540; }
 
 .drawer-close-hint {
     font-size: 1.2em;
@@ -1187,9 +1196,7 @@ body.common-decoration-mode-active .player-stats-group {
     cursor: pointer;
     line-height: 1;
 }
-.drawer-close-hint:hover {
-    color: #fff;
-}
+.drawer-close-hint:hover { color: #fff; }
 
 #common-drawer .drawer-tab-content {
     flex-grow: 1;
@@ -1235,42 +1242,59 @@ body.sm-mode-active .drawer-header {
     color: #C71585;
     border-bottom-color: #FF69B4;
 }
-body.sm-mode-active .drawer-header:hover {
-    background-color: #ffe0eb;
-}
-body.sm-mode-active .drawer-close-hint {
-    color: #FF69B4;
-}
+body.sm-mode-active .drawer-header:hover { background-color: #ffe0eb; }
+body.sm-mode-active .drawer-close-hint { color: #FF69B4; }
 
 body.sm-mode-active .resize-handle {
     background: linear-gradient(135deg, transparent 50%, #FF69B4 50%);
 }
 
-/* ナビ非表示中のボタン（「ナビ再表示」） */
 body.nav-hidden #common-toggle-nav-btn {
     background-color: #ffcc00;
     box-shadow: 0 2px #997a00;
     color: #333;
 }
-body.nav-hidden #common-toggle-nav-btn:hover {
-    background-color: #ffdb4d;
-}
+body.nav-hidden #common-toggle-nav-btn:hover { background-color: #ffdb4d; }
 body.nav-hidden #common-toggle-nav-btn:active {
     box-shadow: 0 0 #997a00;
     transform: translateY(3px);
 }
 
-/* ナビ表示中のボタン（「ナビ非表示」） */
 body:not(.nav-hidden) #common-toggle-nav-btn {
     background-color: #f0f0f0;
     color: #333;
     box-shadow: 0 2px #b0b0b0;
 }
-body:not(.nav-hidden) #common-toggle-nav-btn:hover {
-    background-color: #d0d0d0;
-}
+body:not(.nav-hidden) #common-toggle-nav-btn:hover { background-color: #d0d0d0; }
 body:not(.nav-hidden) #common-toggle-nav-btn:active {
     background-color: #ffcc00;
     box-shadow: 0 0 #997a00;
     transform: translateY(3px);
+}
+
+body.player-sadist-active #player-drawer .drawer-free-space,
+body.opponent-sadist-active #opponent-drawer .drawer-free-space,
+body.player-sadist-active #player-drawer .drawer-token-space,
+body.opponent-sadist-active #opponent-drawer .drawer-token-space {
+    border-left-color: #FF69B4; 
+}
+
+body.player-sadist-active #player-drawer .drawer-panel .area-label,
+body.player-sadist-active #player-drawer .drawer-free-space .area-label,
+body.player-sadist-active #player-drawer .drawer-token-space .area-label,
+body.opponent-sadist-active #opponent-drawer .drawer-panel .area-label,
+body.opponent-sadist-active #opponent-drawer .drawer-free-space .area-label,
+body.opponent-sadist-active #opponent-drawer .drawer-token-space .area-label {
+    color: #C71585; 
+    text-shadow: 1px 1px 2px #FFB6C1; 
+}
+
+body.player-sadist-active #player-drawer .drawer-panel .deck-back-slot-container,
+body.player-sadist-active #player-drawer .drawer-free-space .free-space-slot-container,
+body.player-sadist-active #player-drawer .drawer-token-space .token-slot-container,
+body.opponent-sadist-active #opponent-drawer .drawer-panel .deck-back-slot-container,
+body.opponent-sadist-active #opponent-drawer .drawer-free-space .free-space-slot-container,
+body.opponent-sadist-active #opponent-drawer .drawer-token-space .token-slot-container {
+    background-color: #FFF5FA;
+    border-color: #FFB6C1;
 }

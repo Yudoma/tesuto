@@ -1,15 +1,49 @@
+// UI内でもデフォルトメモを使用するため定義
+const UI_DEFAULT_CARD_MEMO = `[カード名:-]/#e0e0e0/#555/1.0/非表示/
+[属性:-]/#e0e0e0/#555/1.0/非表示/
+[マナ:-]/#e0e0e0/#555/1.0/非表示/
+[BP:-]/#e0e0e0/#555/1.0/非表示/
+[スペル:-]/#e0e0e0/#555/1.0/非表示/
+[フレーバーテキスト:-]/#fff/#555/1.0/非表示/
+[効果:-]/#e0e0e0/#555/0.7/非表示/`;
+
 let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem, masturbateMenuItem, blockerMenuItem, permanentMenuItem, attackMenuItem;
 let actionMenuItem, targetMenuItem, addFlavorMenuItem;
-let memoEditorModal, memoTextarea, memoSaveBtn, memoCancelBtn, memoTooltip;
+let customCounterMenuItem, changeStyleMenuItem; 
+let exportCardMenuItem, importCardMenuItem, setAsTopMenuItem;
+let memoEditorModal, memoTextarea, memoSaveBtn, memoCancelBtn, memoTooltip, memoEditorHeader;
 let lightboxOverlay, lightboxContent;
 let commonDrawer, commonDrawerToggle;
-let commonFlipBoardBtn, commonDecorationModeBtn, commonToggleSeBtn;
+let cDrawer, cDrawerToggle;
+let commonFlipBoardBtn, commonDecorationSettingsBtn, commonToggleSeBtn;
 let diceRollBtn, coinTossBtn, randomResultDisplay;
 let commonToggleNavBtn;
 let flavorEditorModal, flavorEditorHeader, flavorPreview1, flavorPreview2;
 let flavorDelete1, flavorDelete2, flavorCancelBtn;
 let flavorUpload1, flavorUpload2;
 let flavorDropZone1, flavorDropZone2;
+
+// カスタムカウンターモーダル用
+let customCounterModal, customCounterCloseBtn, createCounterBtn, newCounterNameInput, newCounterImageDrop, customCounterListContainer;
+let currentCustomCounterTarget = null; 
+let newCounterImageSrc = null; 
+
+// 装飾＆アイコン設定モーダル用
+let decorationSettingsModal, decorationSettingsHeader, decorationSettingsCloseBtn;
+let customIconStocks = {
+    player: {}, 
+    opponent: {}
+};
+let draggedStockItem = null; 
+let currentStockItemTarget = null; // コンテキストメニュー用
+
+// バトル確認モーダル用
+let battleConfirmModal, battleConfirmHeader, battleConfirmAttackerImg, battleConfirmTargetImg;
+let battleConfirmAttackerBpInput, battleConfirmTargetBpInput;
+let battleConfirmExecuteBtn, battleConfirmCancelBtn;
+
+// 勝敗表示用
+let gameResultOverlay, gameResultMessage, gameResultCloseBtn;
 
 let commonExportBoardBtn, commonImportBoardBtn;
 let recordStartBtn, recordStopBtn, replayPlayBtn, replayPauseBtn, replayStopBtn, loadReplayBtn;
@@ -19,9 +53,20 @@ let bgmSelect, bgmPlayBtn, bgmPauseBtn, bgmStopBtn;
 let bgmVolumeSlider, bgmVolumeVal, seVolumeSlider, seVolumeVal;
 
 let seCheckAllBtn, seUncheckAllBtn, effectCheckAllBtn, effectUncheckAllBtn;
+let autoCheckAllBtn, autoUncheckAllBtn, autoConfigContainer;
+let battleTargetOverlay, battleCancelBtn;
+
+let playerAutoDecreaseInput, opponentAutoDecreaseInput;
+
+// シャッフルボタン
+let shuffleDeckBtn, shuffleHandBtn;
+let opponentShuffleDeckBtn, opponentShuffleHandBtn;
+
+let cSearchFilter;
 
 let isResizingDrawer = false;
 let lastHoveredElement = null;
+let lastRightClickedElement = null;
 
 let stepButtons = [];
 const stepOrder = ['step-start', 'step-draw', 'step-mana', 'step-main', 'step-attack', 'step-end'];
@@ -39,6 +84,22 @@ function closeLightbox() {
 function closeContextMenu() {
     if (contextMenu) {
         contextMenu.style.display = 'none';
+        // サブメニューの展開状態をリセット
+        const submenus = contextMenu.querySelectorAll('.submenu');
+        submenus.forEach(sub => {
+            sub.classList.remove('open-left', 'open-top');
+        });
+        
+        // 非表示にされたメニュー項目をリセット
+        const allItems = contextMenu.querySelectorAll('li');
+        allItems.forEach(li => {
+            li.style.display = ''; 
+        });
+        
+        const hasSubmenus = contextMenu.querySelectorAll('.has-submenu');
+        hasSubmenus.forEach(li => {
+            li.style.display = ''; 
+        });
     }
     currentDeleteHandler = null;
     currentMoveToGraveHandler = null;
@@ -57,7 +118,567 @@ function closeContextMenu() {
     currentAddFlavorHandler = null;
     currentBlockerHandler = null;
     currentMasturbateHandler = null;
+    currentExportCardHandler = null;
+    currentImportCardHandler = null;
+    currentStockItemTarget = null;
 }
+
+// --- Custom Counter UI Logic ---
+
+function openCustomCounterModal(targetCard) {
+    currentCustomCounterTarget = targetCard;
+    renderCustomCounterList();
+    
+    newCounterNameInput.value = '';
+    newCounterImageSrc = null;
+    newCounterImageDrop.innerHTML = '画像D&Dまたはクリック';
+    newCounterImageDrop.style.backgroundImage = '';
+    
+    customCounterModal.style.display = 'block';
+}
+
+function closeCustomCounterModal() {
+    customCounterModal.style.display = 'none';
+    currentCustomCounterTarget = null;
+}
+
+function handleNewCounterImageFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        newCounterImageSrc = e.target.result;
+        newCounterImageDrop.innerHTML = '';
+        newCounterImageDrop.style.backgroundImage = `url(${newCounterImageSrc})`;
+        newCounterImageDrop.style.backgroundSize = 'contain';
+        newCounterImageDrop.style.backgroundRepeat = 'no-repeat';
+        newCounterImageDrop.style.backgroundPosition = 'center';
+    };
+    reader.readAsDataURL(file);
+}
+
+function createNewCustomCounterType() {
+    const name = newCounterNameInput.value.trim();
+    if (!name) {
+        alert('カウンター名を入力してください');
+        return;
+    }
+    if (!newCounterImageSrc) {
+        alert('画像を設定してください');
+        return;
+    }
+
+    const id = 'cnt_' + Date.now();
+    const newCounter = { id, name, icon: newCounterImageSrc };
+    customCounterTypes.push(newCounter);
+    
+    playSe('ボタン共通.mp3');
+    renderCustomCounterList();
+    
+    newCounterNameInput.value = '';
+    newCounterImageSrc = null;
+    newCounterImageDrop.innerHTML = '画像D&Dまたはクリック';
+    newCounterImageDrop.style.backgroundImage = '';
+}
+
+function deleteCustomCounterType(id) {
+    if (!confirm('このカウンター種類を削除しますか？（使用中のカードからは消えません）')) return;
+    customCounterTypes = customCounterTypes.filter(c => c.id !== id);
+    playSe('ボタン共通.mp3');
+    renderCustomCounterList();
+}
+
+function renderCustomCounterList() {
+    customCounterListContainer.innerHTML = '';
+    
+    customCounterTypes.forEach(counter => {
+        const item = document.createElement('div');
+        item.className = 'counter-list-item';
+        item.title = counter.name; 
+        
+        const img = document.createElement('img');
+        img.src = counter.icon;
+        
+        const span = document.createElement('span');
+        span.textContent = counter.name;
+        
+        const deleteBtn = document.createElement('div');
+        deleteBtn.className = 'counter-delete-btn';
+        deleteBtn.textContent = '×';
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteCustomCounterType(counter.id);
+        });
+        
+        item.appendChild(img);
+        item.appendChild(span);
+        item.appendChild(deleteBtn);
+        
+        item.addEventListener('click', () => {
+            if (currentCustomCounterTarget) {
+                if (typeof addCustomCounter === 'function') {
+                    addCustomCounter(currentCustomCounterTarget, counter.id);
+                    playSe('カウンターを置く.mp3');
+                    closeCustomCounterModal();
+                }
+            }
+        });
+        
+        customCounterListContainer.appendChild(item);
+    });
+}
+
+// --- Decoration Settings UI Logic ---
+
+function openDecorationSettingsModal() {
+    if (!decorationSettingsModal) return;
+    decorationSettingsModal.style.display = 'flex';
+    setupDecorationDropZones();
+    
+    const currentMode = document.getElementById('sm-toggle-btn')?.dataset.mode || 'simple';
+    
+    const defaultDecorationsCommon = {
+        'deck': ['./decoration/デッキ.png'],
+        'side-deck': ['./decoration/EXデッキ.png'],
+        'grave': ['./decoration/墓地エリア.png'],
+        'exclude': ['./decoration/除外エリア.png']
+    };
+
+    const defaultIconsPlayer = [
+        './decoration/マゾヒスト.png',
+        './decoration/マジッカーズ.png',
+        './decoration/ストライカー.png',
+        './decoration/サディスト.png',
+        './decoration/シンプル.png'
+    ];
+
+    const defaultIconsOpponent = [
+        './decoration/サディスト.png',
+        './decoration/マジッカーズ.png',
+        './decoration/マゾヒスト.png',
+        './decoration/ストライカー.png',
+        './decoration/シンプル.png'
+    ];
+
+    ['player', 'opponent'].forEach(owner => {
+        ['deck', 'side-deck', 'grave', 'exclude', 'icon'].forEach(targetType => {
+            const column = decorationSettingsModal.querySelector(`.decoration-column[data-target-type="${targetType}"][data-owner="${owner}"]`);
+            if (column) {
+                const container = column.querySelector('.decoration-stock-container');
+                container.innerHTML = ''; 
+                
+                if (!customIconStocks[owner][currentMode]) {
+                    customIconStocks[owner][currentMode] = {}; 
+                }
+
+                if (targetType === 'icon') {
+                    let stock = customIconStocks[owner][currentMode] || [];
+                    if (!Array.isArray(stock) || stock.length === 0) {
+                        stock = (owner === 'player') ? defaultIconsPlayer : defaultIconsOpponent;
+                        customIconStocks[owner][currentMode] = stock;
+                    }
+                    
+                    stock.forEach(imgSrc => {
+                        addDecorationToStock(imgSrc, targetType, owner, container, false);
+                    });
+                } else {
+                    const defaults = defaultDecorationsCommon[targetType] || [];
+                    defaults.forEach(imgSrc => {
+                        addDecorationToStock(imgSrc, targetType, owner, container, false);
+                    });
+                }
+            }
+        });
+    });
+}
+
+function closeDecorationSettingsModal() {
+    decorationSettingsModal.style.display = 'none';
+}
+
+function setupDecorationDropZones() {
+    const dropZones = decorationSettingsModal.querySelectorAll('.decoration-drop-zone');
+    dropZones.forEach(zone => {
+        if (zone.dataset.listenerAttached) return;
+        zone.dataset.listenerAttached = true;
+
+        const column = zone.closest('.decoration-column');
+        const targetType = column.dataset.targetType;
+        const owner = column.dataset.owner; 
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.style.backgroundColor = '#5a5a7e';
+        });
+
+        zone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.style.backgroundColor = '';
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.style.backgroundColor = '';
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    addDecorationToStock(evt.target.result, targetType, owner, column.querySelector('.decoration-stock-container'));
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        });
+
+        zone.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.onchange = (e) => {
+                if (e.target.files.length > 0) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        addDecorationToStock(evt.target.result, targetType, owner, column.querySelector('.decoration-stock-container'));
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            };
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            document.body.removeChild(fileInput);
+        });
+    });
+}
+
+function addDecorationToStock(imageSrc, targetType, owner, container, isNew = true) {
+    const existingItems = Array.from(container.querySelectorAll('img')).map(img => img.src);
+    if (!isNew) {
+        const isDuplicate = existingItems.some(src => src.includes(imageSrc) || imageSrc.includes(src));
+        if (isDuplicate) return;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'decoration-stock-item';
+    item.draggable = true;
+    item.dataset.targetType = targetType;
+    item.dataset.owner = owner;
+    
+    if (isNew || targetType === 'icon') {
+        item.dataset.memo = UI_DEFAULT_CARD_MEMO;
+    }
+
+    const img = document.createElement('img');
+    img.src = imageSrc;
+    
+    // 画像読み込みエラー時に要素を削除する
+    img.onerror = () => {
+        item.remove();
+    };
+    
+    item.appendChild(img);
+
+    const deleteBtn = document.createElement('div');
+    deleteBtn.className = 'decoration-delete-btn';
+    deleteBtn.textContent = '×';
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        item.remove();
+        playSe('ボタン共通.mp3');
+        updateZoneDecorationFromStock(targetType, owner, container);
+        saveIconStock(targetType, owner, container);
+    });
+    item.appendChild(deleteBtn);
+
+    item.addEventListener('dragstart', handleStockItemDragStart);
+    item.addEventListener('dragover', handleStockItemDragOver);
+    item.addEventListener('drop', handleStockItemDrop);
+    
+    item.addEventListener('contextmenu', (e) => {
+        handleStockItemContextMenu(e, item, targetType, owner, container);
+    });
+
+    if (isNew) {
+        container.insertBefore(item, container.firstChild);
+        playSe('ボタン共通.mp3');
+        updateZoneDecorationFromStock(targetType, owner, container);
+        saveIconStock(targetType, owner, container);
+    } else {
+        container.appendChild(item);
+    }
+}
+
+function handleStockItemContextMenu(e, item, targetType, owner, container) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!contextMenu) return;
+
+    const allItems = contextMenu.querySelectorAll('li');
+    allItems.forEach(li => li.style.display = 'none');
+    
+    const topItems = contextMenu.querySelectorAll('#custom-context-menu > ul > li');
+    topItems.forEach(li => li.style.display = 'none');
+
+    if (memoMenuItem) memoMenuItem.style.display = 'block'; 
+    if (setAsTopMenuItem) setAsTopMenuItem.style.display = 'block';
+    
+    if (deleteMenuItem) deleteMenuItem.style.display = 'none';
+    
+    currentMemoHandler = () => {
+        currentMemoTarget = item;
+        memoTextarea.value = item.dataset.memo || '';
+        openMemoEditor(); 
+    };
+    
+    currentStockItemTarget = () => setDecorationAsTop(item, targetType, owner, container);
+
+    contextMenu.style.display = 'block';
+    contextMenu.style.visibility = 'hidden';
+    contextMenu.style.zIndex = '10005'; 
+    
+    const menuWidth = contextMenu.offsetWidth;
+    const menuHeight = contextMenu.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let left = e.pageX;
+    let top = e.pageY;
+
+    if (left + menuWidth > windowWidth) left -= menuWidth;
+    if (top + menuHeight > windowHeight) top -= menuHeight;
+
+    contextMenu.style.top = `${top}px`;
+    contextMenu.style.left = `${left}px`;
+    contextMenu.style.visibility = 'visible';
+}
+
+function setDecorationAsTop(item, targetType, owner, container) {
+    if (container.firstChild !== item) {
+        container.insertBefore(item, container.firstChild);
+        updateZoneDecorationFromStock(targetType, owner, container);
+        saveIconStock(targetType, owner, container);
+        playSe('ボタン共通.mp3');
+    }
+}
+
+function handleStockItemDragStart(e) {
+    draggedStockItem = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleStockItemDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleStockItemDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetItem = e.currentTarget;
+    
+    if (draggedStockItem && draggedStockItem !== targetItem && draggedStockItem.parentNode === targetItem.parentNode) {
+        const container = targetItem.parentNode;
+        const items = Array.from(container.children);
+        const fromIndex = items.indexOf(draggedStockItem);
+        const toIndex = items.indexOf(targetItem);
+        
+        if (fromIndex < toIndex) {
+            container.insertBefore(draggedStockItem, targetItem.nextSibling);
+        } else {
+            container.insertBefore(draggedStockItem, targetItem);
+        }
+        
+        const targetType = draggedStockItem.dataset.targetType;
+        const owner = draggedStockItem.dataset.owner;
+        
+        updateZoneDecorationFromStock(targetType, owner, container);
+        saveIconStock(targetType, owner, container);
+    }
+    draggedStockItem = null;
+}
+
+function saveIconStock(targetType, owner, container) {
+    if (targetType !== 'icon') return;
+    const currentMode = document.getElementById('sm-toggle-btn')?.dataset.mode || 'simple';
+    const items = Array.from(container.querySelectorAll('.decoration-stock-item img'));
+    customIconStocks[owner][currentMode] = items.map(img => img.src);
+}
+
+function updateZoneDecorationFromStock(targetType, owner, container) {
+    const firstItem = container.querySelector('.decoration-stock-item');
+    let imgSrc = null;
+    let memo = null;
+    
+    if (firstItem) {
+        imgSrc = firstItem.querySelector('img').src;
+        memo = firstItem.dataset.memo;
+    } else {
+        const defaults = {
+            'deck': './decoration/デッキ.png',
+            'side-deck': './decoration/EXデッキ.png',
+            'grave': './decoration/墓地エリア.png',
+            'exclude': './decoration/除外エリア.png',
+            'icon': '' 
+        };
+        imgSrc = defaults[targetType];
+    }
+    
+    const idPrefix = (owner === 'opponent') ? 'opponent-' : '';
+    let zoneId = '';
+    
+    if (targetType === 'icon') {
+        zoneId = idPrefix + 'icon-zone';
+    } else {
+        zoneId = idPrefix + targetType;
+    }
+    
+    const zoneElement = document.getElementById(zoneId);
+    if (!zoneElement) return;
+    
+    if (targetType === 'icon') {
+        zoneElement.innerHTML = ''; 
+        if (imgSrc) {
+             createCardThumbnail({
+                src: imgSrc,
+                isDecoration: true,
+                memo: memo || UI_DEFAULT_CARD_MEMO, // メモがない場合はデフォルトを使用
+                ownerPrefix: idPrefix
+            }, zoneElement, true, false, idPrefix);
+        }
+    } else {
+        const slot = zoneElement.querySelector('.card-slot');
+        if (slot) {
+            let decorationThumb = slot.querySelector('.thumbnail[data-is-decoration="true"]');
+            
+            if (imgSrc) {
+                if (decorationThumb) {
+                    const img = decorationThumb.querySelector('img');
+                    if (img) img.src = imgSrc;
+                } else {
+                    createCardThumbnail(imgSrc, slot, true, false, idPrefix);
+                }
+            } else {
+                if (decorationThumb) decorationThumb.remove();
+            }
+            
+            if (typeof syncMainZoneImage === 'function') {
+                syncMainZoneImage(targetType, idPrefix);
+            }
+        }
+    }
+}
+
+
+// --- Game Result UI Logic ---
+
+window.showGameResult = function(message) {
+    if (!gameResultOverlay || !gameResultMessage) return;
+    
+    if (typeof autoConfig !== 'undefined' && !autoConfig.autoGameEnd) return;
+
+    gameResultMessage.textContent = message;
+    gameResultOverlay.style.display = 'flex';
+    
+    if (message.includes('WIN')) {
+        playSe('勝利.mp3');
+    } else if (message.includes('LOSE')) {
+        playSe('敗北.mp3');
+    } else {
+        playSe('Theme.mp3');
+    }
+};
+
+function closeGameResult() {
+    if (gameResultOverlay) {
+        gameResultOverlay.style.display = 'none';
+    }
+}
+
+// --- Battle Confirm Modal Logic ---
+
+window.openBattleConfirmModal = function(attacker, target) {
+    if (!battleConfirmModal) return;
+    
+    document.body.classList.remove('battle-target-mode');
+    if (battleTargetOverlay) battleTargetOverlay.style.display = 'none';
+    isBattleTargetMode = false;
+    const candidates = document.querySelectorAll('.battle-target-candidate');
+    candidates.forEach(el => el.classList.remove('battle-target-candidate'));
+
+    const attackerImg = attacker.querySelector('.card-image');
+    if (attackerImg && battleConfirmAttackerImg) {
+        battleConfirmAttackerImg.style.backgroundImage = `url(${attackerImg.src})`;
+    }
+    
+    if (battleConfirmTargetImg) {
+        battleConfirmTargetImg.style.backgroundImage = 'none'; 
+        if (target.id === 'icon-zone' || target.id === 'opponent-icon-zone') {
+            const iconImg = target.closest('.player-icon-slot')?.querySelector('.thumbnail .card-image');
+            if (iconImg) {
+                battleConfirmTargetImg.style.backgroundImage = `url(${iconImg.src})`;
+            } else {
+                battleConfirmTargetImg.innerHTML = '<span style="color:#ccc; font-size:0.8em; display: flex; justify-content: center; align-items: center; height: 100%;">Player</span>';
+            }
+        } else {
+            const targetThumb = target.querySelector('.thumbnail');
+            const targetImg = targetThumb ? targetThumb.querySelector('.card-image') : null;
+            if (targetImg) {
+                battleConfirmTargetImg.style.backgroundImage = `url(${targetImg.src})`;
+            }
+        }
+    }
+
+    battleConfirmModal.style.display = 'flex';
+    isBattleConfirmMode = true;
+    currentAttacker = attacker;
+    currentBattleTarget = target;
+
+    window.updateBattleConfirmModal();
+};
+
+window.updateBattleConfirmModal = function() {
+    if (!battleConfirmModal || battleConfirmModal.style.display === 'none') return;
+    
+    const getBP = (element) => {
+        if (!element) return 0;
+        const memo = element.dataset.memo || '';
+        const match = memo.match(/\[BP:(.*?)\]/i);
+        let bp = 0;
+        if (match) {
+            bp = parseInt(match[1]);
+            if (isNaN(bp)) bp = 0;
+        }
+        return bp;
+    };
+
+    if (currentAttacker && battleConfirmAttackerBpInput) {
+        battleConfirmAttackerBpInput.value = getBP(currentAttacker);
+    }
+
+    if (currentBattleTarget && battleConfirmTargetBpInput) {
+        let targetEl = currentBattleTarget;
+        if (targetEl.id !== 'icon-zone' && targetEl.id !== 'opponent-icon-zone') {
+            targetEl = targetEl.querySelector('.thumbnail') || targetEl;
+        }
+        battleConfirmTargetBpInput.value = getBP(targetEl);
+    }
+};
+
+window.closeBattleConfirmModal = function() {
+    if (battleConfirmModal) {
+        battleConfirmModal.style.display = 'none';
+    }
+    isBattleConfirmMode = false;
+    currentBattleTarget = null;
+    if (currentAttacker) {
+        currentAttacker.classList.remove('battle-attacker');
+    }
+};
+
+// --- Existing Logic ---
 
 function performMemoSave() {
     if (currentMemoTarget) {
@@ -67,13 +688,32 @@ function performMemoSave() {
         } else {
             delete currentMemoTarget.dataset.memo;
         }
-        if (isRecording && typeof recordAction === 'function') {
-            recordAction({
-                type: 'memoChange',
-                zoneId: getParentZoneId(currentMemoTarget.parentNode),
-                cardIndex: Array.from(currentMemoTarget.parentNode.parentNode.children).indexOf(currentMemoTarget.parentNode),
-                memo: newMemo
-            });
+        
+        if (!currentMemoTarget.classList.contains('decoration-stock-item')) {
+            if (isRecording && typeof recordAction === 'function') {
+                recordAction({
+                    type: 'memoChange',
+                    zoneId: getParentZoneId(currentMemoTarget.parentNode),
+                    cardIndex: Array.from(currentMemoTarget.parentNode.parentNode.children).indexOf(currentMemoTarget.parentNode),
+                    memo: newMemo
+                });
+            }
+            
+            if (typeof window.updateCardPreview === 'function') {
+                window.updateCardPreview(currentMemoTarget);
+            }
+
+            if (isBattleConfirmMode) {
+                window.updateBattleConfirmModal();
+            }
+        } else {
+            const container = currentMemoTarget.parentNode;
+            const firstItem = container.querySelector('.decoration-stock-item');
+            if (currentMemoTarget === firstItem) {
+                const targetType = currentMemoTarget.dataset.targetType;
+                const owner = currentMemoTarget.dataset.owner;
+                updateZoneDecorationFromStock(targetType, owner, container);
+            }
         }
     }
     memoEditorModal.style.display = 'none';
@@ -83,6 +723,17 @@ function performMemoSave() {
 function performMemoCancel() {
     memoEditorModal.style.display = 'none';
     currentMemoTarget = null;
+}
+
+// メモ編集モーダルを開く（高さ自動調整）
+function openMemoEditor() {
+    memoEditorModal.style.display = 'flex';
+    memoTextarea.style.height = 'auto'; 
+    // スクロール高さに合わせてリサイズ。最大値はCSSで制御される
+    if (memoTextarea.scrollHeight > 0) {
+        memoTextarea.style.height = (memoTextarea.scrollHeight + 10) + 'px';
+    }
+    memoTextarea.focus();
 }
 
 function openFlavorEditor(targetThumbnail) {
@@ -127,6 +778,9 @@ function deleteFlavorImage(slotNumber) {
             slotNumber: slotNumber
         });
     }
+    if (typeof window.updateCardPreview === 'function') {
+        window.updateCardPreview(currentFlavorTarget);
+    }
 }
 
 function handleFlavorFile(file, slotNumber) {
@@ -154,6 +808,9 @@ function handleFlavorFile(file, slotNumber) {
                 slotNumber: slotNumber,
                 imgSrc: imgSrc
             });
+        }
+        if (typeof window.updateCardPreview === 'function') {
+            window.updateCardPreview(currentFlavorTarget);
         }
     };
     reader.readAsDataURL(file);
@@ -244,9 +901,84 @@ function setupStepButtons() {
     updateStepUI();
 }
 
+function initializeTokens() {
+    const initToken = (zoneId, slotIndex, imgSrc, memo) => {
+        const zone = document.getElementById(zoneId);
+        if (!zone) return;
+        const container = zone.querySelector('.token-slot-container');
+        if (!container) return;
+        const slots = container.querySelectorAll('.card-slot');
+        const slot = slots[slotIndex];
+        if (slot && !slot.querySelector('.thumbnail')) {
+            const prefix = zoneId.startsWith('opponent-') ? 'opponent-' : '';
+            createCardThumbnail({
+                src: imgSrc,
+                memo: memo,
+                ownerPrefix: prefix
+            }, slot, false, false, prefix);
+        }
+    };
+
+    const token1Memo = '[属性:S]/#e0e0e0/#555/1.0/表示/\n[マナ:1]/#e0e0e0/#555/1.0/表示/\n[BP:1000]/#e0e0e0/#555/1.0/表示/\n[カード名:トークンカード（S）]/#e0e0e0/#555/1.0/表示/\n[フレーバーテキスト:女王]/#fff/#555/1.0/非表示/\n[効果:なし]/#e0e0e0/#555/1.0/表示/\n';
+    const token2Memo = '[属性:M]/#e0e0e0/#555/1.0/表示/\n[マナ:1]/#e0e0e0/#555/1.0/表示/\n[BP:1000]/#e0e0e0/#555/1.0/表示/\n[カード名:トークンカード（M）]/#e0e0e0/#555/1.0/表示/\n[フレーバーテキスト:奴隷]/#fff/#555/1.0/非表示/\n[効果:なし]/#e0e0e0/#555/1.0/表示/\n';
+
+    initToken('token-zone-slots', 0, './decoration/トークン1.png', token1Memo);
+    initToken('token-zone-slots', 1, './decoration/トークン2.png', token2Memo);
+
+    initToken('opponent-token-zone-slots', 0, './decoration/トークン1.png', token1Memo);
+    initToken('opponent-token-zone-slots', 1, './decoration/トークン2.png', token2Memo);
+}
+
+function makeDraggable(headerElement, containerElement) {
+    if (!headerElement || !containerElement) return;
+    let isDragging = false;
+    let currentX = 0;
+    let currentY = 0;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    headerElement.addEventListener("mousedown", dragStart);
+    document.addEventListener("mouseup", dragEnd);
+    document.addEventListener("mousemove", drag);
+
+    function dragStart(e) {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+
+        if (e.target === headerElement || headerElement.contains(e.target)) {
+            isDragging = true;
+        }
+    }
+
+    function dragEnd() {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            containerElement.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px))`;
+            xOffset = currentX;
+            yOffset = currentY;
+        }
+    }
+}
 
 function setupUI() {
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('contextmenu', (e) => {
+        lastRightClickedElement = e.target.closest('.thumbnail') || e.target.closest('.card-slot');
+        // 装飾設定内のアイテム右クリックも許可する
+        if (!e.target.closest('.decoration-stock-item')) {
+            e.preventDefault();
+        }
+    });
     document.addEventListener('dragover', (e) => e.preventDefault());
     document.addEventListener('drop', (e) => e.preventDefault());
 
@@ -262,14 +994,21 @@ function setupUI() {
     toDeckMenuItem = document.getElementById('context-menu-to-deck');
     toSideDeckMenuItem = document.getElementById('context-menu-to-side-deck');
     flipMenuItem = document.getElementById('context-menu-flip');
+    changeStyleMenuItem = document.getElementById('context-menu-change-style');
     memoMenuItem = document.getElementById('context-menu-memo');
     addCounterMenuItem = document.getElementById('context-menu-add-counter');
     removeCounterMenuItem = document.getElementById('context-menu-remove-counter');
     addFlavorMenuItem = document.getElementById('context-menu-add-flavor');
     masturbateMenuItem = document.getElementById('context-menu-masturbate');
     blockerMenuItem = document.getElementById('context-menu-blocker');
+    exportCardMenuItem = document.getElementById('context-menu-export');
+    importCardMenuItem = document.getElementById('context-menu-import');
+    
+    customCounterMenuItem = document.getElementById('context-menu-custom-counter');
+    setAsTopMenuItem = document.getElementById('context-menu-set-as-top');
 
     memoEditorModal = document.getElementById('memo-editor');
+    memoEditorHeader = document.getElementById('memo-editor-header');
     memoTextarea = document.getElementById('memo-editor-textarea');
     memoSaveBtn = document.getElementById('memo-editor-save');
     memoCancelBtn = document.getElementById('memo-editor-cancel');
@@ -282,8 +1021,11 @@ function setupUI() {
 
     commonDrawer = document.getElementById('common-drawer');
     commonDrawerToggle = document.getElementById('common-drawer-toggle');
+    cDrawer = document.getElementById('c-drawer');
+    cDrawerToggle = document.getElementById('c-drawer-toggle');
+
     commonFlipBoardBtn = document.getElementById('common-flip-board-btn');
-    commonDecorationModeBtn = document.getElementById('common-decoration-mode-btn');
+    commonDecorationSettingsBtn = document.getElementById('common-decoration-settings-btn');
     commonToggleNavBtn = document.getElementById('common-toggle-nav-btn');
     commonToggleSeBtn = document.getElementById('common-toggle-se-btn');
 
@@ -315,8 +1057,31 @@ function setupUI() {
     flavorUpload1 = document.getElementById('flavor-upload-1');
     flavorUpload2 = document.getElementById('flavor-upload-2');
     flavorCancelBtn = document.getElementById('flavor-editor-cancel');
+    
+    customCounterModal = document.getElementById('custom-counter-modal');
+    customCounterCloseBtn = document.getElementById('custom-counter-close-btn');
+    createCounterBtn = document.getElementById('create-counter-btn');
+    newCounterNameInput = document.getElementById('new-counter-name');
+    newCounterImageDrop = document.getElementById('new-counter-image-drop');
+    customCounterListContainer = document.getElementById('custom-counter-list');
 
-    // オーディオ設定UI
+    decorationSettingsModal = document.getElementById('decoration-settings-modal');
+    decorationSettingsHeader = document.getElementById('decoration-settings-header');
+    decorationSettingsCloseBtn = document.getElementById('decoration-settings-close-btn');
+
+    battleConfirmModal = document.getElementById('battle-confirm-modal');
+    battleConfirmHeader = document.getElementById('battle-confirm-header');
+    battleConfirmAttackerImg = document.getElementById('battle-confirm-attacker-img');
+    battleConfirmTargetImg = document.getElementById('battle-confirm-target-img');
+    battleConfirmAttackerBpInput = document.getElementById('battle-confirm-attacker-bp');
+    battleConfirmTargetBpInput = document.getElementById('battle-confirm-target-bp');
+    battleConfirmExecuteBtn = document.getElementById('battle-confirm-execute-btn');
+    battleConfirmCancelBtn = document.getElementById('battle-confirm-cancel-btn');
+
+    gameResultOverlay = document.getElementById('game-result-overlay');
+    gameResultMessage = document.getElementById('game-result-message');
+    gameResultCloseBtn = document.getElementById('game-result-close-btn');
+
     bgmSelect = document.getElementById('bgm-select');
     bgmPlayBtn = document.getElementById('bgm-play-btn');
     bgmPauseBtn = document.getElementById('bgm-pause-btn');
@@ -330,23 +1095,31 @@ function setupUI() {
     seUncheckAllBtn = document.getElementById('se-uncheck-all');
     effectCheckAllBtn = document.getElementById('effect-check-all');
     effectUncheckAllBtn = document.getElementById('effect-uncheck-all');
+    autoCheckAllBtn = document.getElementById('auto-check-all');
+    autoUncheckAllBtn = document.getElementById('auto-uncheck-all');
+    autoConfigContainer = document.getElementById('auto-config-container');
+    battleTargetOverlay = document.getElementById('battle-target-overlay');
+    battleCancelBtn = document.getElementById('battle-cancel-btn');
+    
+    playerAutoDecreaseInput = document.getElementById('player-auto-decrease-interval');
+    opponentAutoDecreaseInput = document.getElementById('opponent-auto-decrease-interval');
+    
+    shuffleDeckBtn = document.getElementById('shuffle-deck');
+    opponentShuffleDeckBtn = document.getElementById('opponent-shuffle-deck');
+    shuffleHandBtn = document.getElementById('shuffle-hand');
+    opponentShuffleHandBtn = document.getElementById('opponent-shuffle-hand');
 
-    if (!contextMenu || !deleteMenuItem || !toGraveMenuItem || !toExcludeMenuItem || !toHandMenuItem || !toDeckMenuItem || !toSideDeckMenuItem || !flipMenuItem || !addCounterMenuItem || !removeCounterMenuItem
-        || !actionMenuItem || !targetMenuItem || !addFlavorMenuItem || !masturbateMenuItem || !blockerMenuItem || !permanentMenuItem || !attackMenuItem
-        || !memoMenuItem || !memoEditorModal || !memoTextarea || !memoSaveBtn || !memoCancelBtn || !memoTooltip
-        || !lightboxOverlay || !lightboxContent || !commonPreviewArea
-        || !commonDrawer || !commonDrawerToggle || !commonFlipBoardBtn || !commonDecorationModeBtn || !commonToggleNavBtn
-        || !commonExportBoardBtn || !commonImportBoardBtn || !recordStartBtn || !recordStopBtn || !replayPlayBtn || !replayPauseBtn || !replayStopBtn || !loadReplayBtn
-        || !diceRollBtn || !coinTossBtn || !randomResultDisplay
-        || !flavorEditorModal || !flavorEditorHeader || !flavorPreview1 || !flavorPreview2 || !flavorDelete1 || !flavorDelete2
-        || !flavorDropZone1 || !flavorDropZone2 || !flavorUpload1 || !flavorUpload2
-        || !flavorCancelBtn
-    ) {
+    cSearchFilter = document.getElementById('c-search-filter');
+
+    if (!contextMenu) {
         console.error("必須UI要素が見つかりません。");
         return;
     }
 
-    // SE個別設定のチェックボックス生成
+    makeDraggable(battleConfirmHeader, battleConfirmModal);
+    makeDraggable(memoEditorHeader, memoEditorModal);
+    makeDraggable(decorationSettingsHeader, decorationSettingsModal);
+
     const seSettingsContainer = document.getElementById('se-settings-container');
     if (seSettingsContainer && typeof seConfig !== 'undefined') {
         seSettingsContainer.innerHTML = '';
@@ -355,7 +1128,7 @@ function setupUI() {
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.checked = seConfig[seName];
-            input.dataset.seName = seName; // 識別用
+            input.dataset.seName = seName;
             input.addEventListener('change', (e) => {
                 seConfig[seName] = e.target.checked;
             });
@@ -369,7 +1142,6 @@ function setupUI() {
         });
     }
 
-    // SE全選択/全解除
     if (seCheckAllBtn) {
         seCheckAllBtn.addEventListener('click', () => {
             playSe('ボタン共通.mp3');
@@ -387,7 +1159,6 @@ function setupUI() {
         });
     }
 
-    // エフェクト個別設定のチェックボックス生成
     const effectSettingsContainer = document.getElementById('effect-settings-container');
     if (effectSettingsContainer && typeof effectConfig !== 'undefined') {
         effectSettingsContainer.innerHTML = '';
@@ -397,7 +1168,7 @@ function setupUI() {
             'attack': 'アタック',
             'effect': '効果発動',
             'target': '対象選択',
-            'autoDecrease': '自動減少(盤面)'
+            'autoDecrease': '自動減少'
         };
         Object.keys(effectConfig).forEach(key => {
             const label = document.createElement('label');
@@ -418,7 +1189,6 @@ function setupUI() {
         });
     }
 
-    // エフェクト全選択/全解除
     if (effectCheckAllBtn) {
         effectCheckAllBtn.addEventListener('click', () => {
             playSe('ボタン共通.mp3');
@@ -436,6 +1206,55 @@ function setupUI() {
         });
     }
 
+    if (autoConfigContainer && typeof autoConfig !== 'undefined') {
+        autoConfigContainer.innerHTML = '';
+        const autoConfigLabels = {
+            'autoManaTap': 'マナタップ時自動+1',
+            'autoManaPlacement': 'マナ配置時自動+1',
+            'autoBattleCalc': 'バトル自動計算処理',
+            'autoManaTapInZone': 'マナ配置時タップ状態',
+            'autoAttackTap': 'アタック後タップ',
+            'autoManaCost': 'カード配置時マナ消費',
+            'autoGameEnd': '勝敗判定の自動表示',
+            'drawFlipped': 'ドロー時裏側表示',
+            'autoBpDestruction': 'BP0以下で自動破壊',
+            'autoMasturbateDrain': 'オナニー中BP減少'
+        };
+        Object.keys(autoConfig).forEach(key => {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = autoConfig[key];
+            input.dataset.autoKey = key;
+            input.addEventListener('change', (e) => {
+                autoConfig[key] = e.target.checked;
+            });
+            
+            const span = document.createElement('span');
+            span.textContent = autoConfigLabels[key] || key;
+            
+            label.appendChild(input);
+            label.appendChild(span);
+            autoConfigContainer.appendChild(label);
+        });
+    }
+
+    if (autoCheckAllBtn) {
+        autoCheckAllBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            Object.keys(autoConfig).forEach(key => autoConfig[key] = true);
+            const boxes = autoConfigContainer.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(box => box.checked = true);
+        });
+    }
+    if (autoUncheckAllBtn) {
+        autoUncheckAllBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            Object.keys(autoConfig).forEach(key => autoConfig[key] = false);
+            const boxes = autoConfigContainer.querySelectorAll('input[type="checkbox"]');
+            boxes.forEach(box => box.checked = false);
+        });
+    }
 
     lightboxOverlay.addEventListener('click', (e) => closeLightbox());
     lightboxContent.addEventListener('click', (e) => {
@@ -449,44 +1268,76 @@ function setupUI() {
             return;
         }
 
-        const shouldNotClose = 
-            (contextMenu.style.display === 'block' && e.target.closest('#custom-context-menu')) ||
-            (memoEditorModal.style.display === 'block' && e.target.closest('#memo-editor')) ||
-            (flavorEditorModal.style.display === 'block' && e.target.closest('#flavor-editor')) ||
-            e.target.closest('#common-drawer-toggle');
+        if (contextMenu.style.display === 'block' && !e.target.closest('#custom-context-menu')) {
+            closeContextMenu();
+        }
 
-        if (shouldNotClose) {
+        const isInteractionTarget = 
+            e.target.closest('#custom-context-menu') ||
+            (memoEditorModal.style.display === 'flex' && e.target.closest('.memo-editor-modal')) || 
+            (flavorEditorModal.style.display === 'block' && e.target.closest('.flavor-editor-modal')) ||
+            (customCounterModal.style.display === 'block' && e.target.closest('.custom-counter-modal')) ||
+            (decorationSettingsModal.style.display === 'flex' && e.target.closest('.custom-counter-modal')) || 
+            (battleConfirmModal && battleConfirmModal.style.display === 'flex' && e.target.closest('.custom-counter-modal')) ||
+            (gameResultOverlay.style.display === 'flex' && e.target.closest('.game-result-content')) ||
+            e.target.closest('.drawer-toggle');
+
+        if (isInteractionTarget) {
             return;
         }
 
         closeContextMenu();
 
-        if (commonDrawer.classList.contains('open') && !e.target.closest('#common-drawer')) {
-            if (!isDecorationMode) {
-                commonDrawer.classList.remove('open');
-            }
+        const clickedInsideCommon = e.target.closest('#common-drawer');
+
+        if (commonDrawer.classList.contains('open') && !clickedInsideCommon) {
+            commonDrawer.classList.remove('open');
         }
 
-        const playerDrawer = document.getElementById('player-drawer');
-        if (playerDrawer && playerDrawer.classList.contains('open')) {
-            if (!e.target.closest('#player-drawer') && !e.target.closest('#player-drawer-toggle')) {
-                playerDrawer.classList.remove('open');
-            }
+        if (decorationSettingsModal.style.display === 'flex' && e.target === decorationSettingsModal) {
+            closeDecorationSettingsModal();
         }
 
-        const opponentDrawer = document.getElementById('opponent-drawer');
-        if (opponentDrawer && opponentDrawer.classList.contains('open')) {
-            if (!e.target.closest('#opponent-drawer') && !e.target.closest('#opponent-drawer-toggle')) {
-                opponentDrawer.classList.remove('open');
+        if (!clickedInsideCommon) {
+            const playerDrawer = document.getElementById('player-drawer');
+            if (playerDrawer && playerDrawer.classList.contains('open')) {
+                if (!e.target.closest('#player-drawer')) {
+                    playerDrawer.classList.remove('open');
+                }
+            }
+
+            const opponentDrawer = document.getElementById('opponent-drawer');
+            if (opponentDrawer && opponentDrawer.classList.contains('open')) {
+                if (!e.target.closest('#opponent-drawer')) {
+                    opponentDrawer.classList.remove('open');
+                }
+            }
+            
+            if (cDrawer && cDrawer.classList.contains('open')) {
+                if (!e.target.closest('#c-drawer')) {
+                    cDrawer.classList.remove('open');
+                }
             }
         }
     });
 
     contextMenu.addEventListener('contextmenu', (e) => e.preventDefault());
     
-    // Context Menu Actions
     actionMenuItem.addEventListener('click', () => { 
-        playSe('効果発動.mp3');
+        let isMana = false;
+        if (lastRightClickedElement) {
+            const zoneId = getParentZoneId(lastRightClickedElement);
+            if (zoneId && (zoneId.includes('mana') || getBaseId(zoneId).startsWith('mana'))) {
+                isMana = true;
+            }
+        }
+        
+        if (isMana) {
+            playSe('スペル.mp3');
+        } else {
+            playSe('効果発動.mp3');
+        }
+
         if (typeof currentActionHandler === 'function') currentActionHandler(); 
         closeContextMenu(); 
     });
@@ -495,18 +1346,20 @@ function setupUI() {
         if (typeof currentTargetHandler === 'function') currentTargetHandler(); 
         closeContextMenu(); 
     });
+    
     attackMenuItem.addEventListener('click', () => {
-        playSe('アタック.mp3');
-        if (typeof currentAttackHandler === 'function') currentAttackHandler();
+        playSe('ボタン共通.mp3'); 
+        startBattleTargetSelection(lastRightClickedElement);
         closeContextMenu();
     });
+
     permanentMenuItem.addEventListener('click', () => { 
         playSe('ボタン共通.mp3');
         if (typeof currentPermanentHandler === 'function') currentPermanentHandler(); 
         closeContextMenu(); 
     });
     blockerMenuItem.addEventListener('click', () => {
-        playSe('ボタン共通.mp3');
+        playSe('ブロッカー.mp3');
         if (typeof currentBlockerHandler === 'function') currentBlockerHandler();
         closeContextMenu();
     });
@@ -551,6 +1404,16 @@ function setupUI() {
         if (typeof currentMemoHandler === 'function') currentMemoHandler(); 
         closeContextMenu(); 
     });
+    
+    // 「この画像に設定する」用
+    if (setAsTopMenuItem) {
+        setAsTopMenuItem.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (typeof currentStockItemTarget === 'function') currentStockItemTarget();
+            closeContextMenu();
+        });
+    }
+
     addCounterMenuItem.addEventListener('click', () => { 
         playSe('カウンターを置く.mp3');
         if (typeof currentAddCounterHandler === 'function') currentAddCounterHandler(); 
@@ -561,6 +1424,15 @@ function setupUI() {
         if (typeof currentRemoveCounterHandler === 'function') currentRemoveCounterHandler(); 
         closeContextMenu(); 
     });
+    
+    customCounterMenuItem.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (lastRightClickedElement) {
+            openCustomCounterModal(lastRightClickedElement);
+        }
+        closeContextMenu();
+    });
+
     addFlavorMenuItem.addEventListener('click', () => { 
         playSe('ボタン共通.mp3');
         if (typeof currentAddFlavorHandler === 'function') currentAddFlavorHandler(); 
@@ -568,13 +1440,65 @@ function setupUI() {
     });
     masturbateMenuItem.addEventListener('click', () => { 
         if (masturbateMenuItem.textContent === 'オナニーする') {
-            playSe('O.mp3', true);
+            playSe('オナニー.mp3', true);
         } else {
-            stopSe('O.mp3');
+            stopSe('オナニー.mp3');
         }
         if (typeof currentMasturbateHandler === 'function') currentMasturbateHandler(); 
         closeContextMenu(); 
     });
+    
+    exportCardMenuItem.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof currentExportCardHandler === 'function') currentExportCardHandler();
+        closeContextMenu();
+    });
+    
+    importCardMenuItem.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        if (typeof currentImportCardHandler === 'function') currentImportCardHandler();
+        closeContextMenu();
+    });
+
+    // スタイルの変更
+    changeStyleMenuItem.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        openDecorationSettingsModal();
+        closeContextMenu();
+    });
+
+    const bpModifyBtns = document.querySelectorAll('.bp-modify-btn');
+    bpModifyBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            playSe('ボタン共通.mp3');
+            const val = parseInt(btn.dataset.value);
+            if (lastRightClickedElement && typeof modifyCardBP === 'function') {
+                modifyCardBP(lastRightClickedElement, val);
+                if (isBattleConfirmMode) {
+                    updateBattleConfirmModal();
+                }
+            }
+            closeContextMenu();
+        });
+    });
+
+    if (battleConfirmExecuteBtn) {
+        battleConfirmExecuteBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (typeof resolveBattle === 'function') {
+                const aBp = parseInt(battleConfirmAttackerBpInput.value);
+                const tBp = parseInt(battleConfirmTargetBpInput.value);
+                resolveBattle(aBp, tBp);
+            }
+        });
+    }
+    if (battleConfirmCancelBtn) {
+        battleConfirmCancelBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            closeBattleConfirmModal();
+        });
+    }
 
     memoSaveBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
@@ -629,8 +1553,60 @@ function setupUI() {
         playSe('ボタン共通.mp3');
         openFlavorFileInput(2);
     });
+    
+    customCounterCloseBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        closeCustomCounterModal();
+    });
+    createCounterBtn.addEventListener('click', () => {
+        createNewCustomCounterType();
+    });
+    newCounterImageDrop.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); newCounterImageDrop.classList.add('drag-over'); });
+    newCounterImageDrop.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); newCounterImageDrop.classList.remove('drag-over'); });
+    newCounterImageDrop.addEventListener('drop', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        newCounterImageDrop.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) handleNewCounterImageFile(files[0]);
+    });
+    newCounterImageDrop.addEventListener('click', () => {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.onchange = (e) => {
+            if (e.target.files.length > 0) handleNewCounterImageFile(e.target.files[0]);
+        };
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        document.body.removeChild(fileInput);
+    });
 
-    // BGMリストの初期化
+    decorationSettingsCloseBtn.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        closeDecorationSettingsModal();
+    });
+    
+    if (gameResultCloseBtn) {
+        gameResultCloseBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            closeGameResult();
+        });
+    }
+    
+    if (shuffleHandBtn) {
+        shuffleHandBtn.addEventListener('click', () => {
+            playSe('シャッフル.mp3');
+            if (typeof shuffleHand === 'function') shuffleHand('');
+        });
+    }
+    if (opponentShuffleHandBtn) {
+        opponentShuffleHandBtn.addEventListener('click', () => {
+            playSe('シャッフル.mp3');
+            if (typeof shuffleHand === 'function') shuffleHand('opponent-');
+        });
+    }
+
     if (bgmSelect && typeof bgmFileList !== 'undefined') {
         bgmFileList.forEach(filename => {
             const option = document.createElement('option');
@@ -712,6 +1688,13 @@ function setupUI() {
         playSe('ボタン共通.mp3');
         commonDrawer.classList.toggle('open');
     });
+    
+    if (cDrawerToggle) {
+        cDrawerToggle.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            cDrawer.classList.toggle('open');
+        });
+    }
 
     commonFlipBoardBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
@@ -720,23 +1703,49 @@ function setupUI() {
         document.getElementById('opponent-drawer')?.classList.remove('open');
     });
 
-    commonDecorationModeBtn.addEventListener('click', () => {
+    commonDecorationSettingsBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        isDecorationMode = !isDecorationMode;
-        commonDecorationModeBtn.textContent = isDecorationMode ? 'キャンセル' : '装飾モード';
-        commonDecorationModeBtn.dataset.active = isDecorationMode;
-        document.body.classList.toggle('common-decoration-mode-active', isDecorationMode);
-
-        const highlightTargets = document.querySelectorAll(
-            '.exclude-zone .card-slot, .side-deck-zone .card-slot, .grave-zone .card-slot, .deck-zone .card-slot, #icon-zone, #opponent-icon-zone'
-        );
-
-        highlightTargets.forEach(target => {
-            if(target) target.classList.toggle('decoration-highlight', isDecorationMode);
-        });
+        openDecorationSettingsModal();
     });
+    
+    const openPlayerDrawerBtn = document.getElementById('common-open-player-drawer');
+    const openOpponentDrawerBtn = document.getElementById('common-open-opponent-drawer');
+    const openBankDrawerBtn = document.getElementById('common-open-bank-drawer');
 
-    // Board I/O
+    if (openPlayerDrawerBtn) {
+        openPlayerDrawerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playSe('ボタン共通.mp3');
+            const drawer = document.getElementById('player-drawer');
+            if (drawer) {
+                drawer.classList.add('open');
+                activateDrawerTab('deck-back-slots', drawer);
+            }
+        });
+    }
+    if (openOpponentDrawerBtn) {
+        openOpponentDrawerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playSe('ボタン共通.mp3');
+            const drawer = document.getElementById('opponent-drawer');
+            if (drawer) {
+                drawer.classList.add('open');
+                activateDrawerTab('opponent-deck-back-slots', drawer);
+            }
+        });
+    }
+    if (openBankDrawerBtn) {
+        openBankDrawerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            playSe('ボタン共通.mp3');
+            const drawer = document.getElementById('c-drawer');
+            if (drawer) {
+                drawer.classList.add('open');
+                activateDrawerTab('c-free-space', drawer);
+            }
+        });
+    }
+
     commonExportBoardBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         const defaultName = "sm_solitaire_board";
@@ -750,7 +1759,6 @@ function setupUI() {
         if (typeof importAllBoardData === 'function') importAllBoardData();
     });
 
-    // Replay Controls
     recordStartBtn.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         if (typeof startReplayRecording === 'function') startReplayRecording();
@@ -804,6 +1812,13 @@ function setupUI() {
         const isHidden = document.body.classList.toggle('nav-hidden');
         commonToggleNavBtn.textContent = isHidden ? 'ナビ再表示' : 'ナビ非表示';
     });
+    
+    if (battleCancelBtn) {
+        battleCancelBtn.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (typeof cancelBattleTargetSelection === 'function') cancelBattleTargetSelection();
+        });
+    }
 
     setupStepButtons();
 
@@ -825,10 +1840,10 @@ function setupUI() {
     if (opponentDrawer) activateDrawerTab('opponent-deck-back-slots', opponentDrawer);
 
     if (commonDrawer) activateDrawerTab('common-general-panel', commonDrawer);
+    if (cDrawer) activateDrawerTab('c-free-space', cDrawer);
 
     setupDrawerResize();
 
-    // 共通メニュードラッグ移動
     const commonDrawerHeader = document.getElementById('common-drawer-header');
     if (commonDrawer && commonDrawerHeader) {
         let isDragging = false;
@@ -844,7 +1859,6 @@ function setupUI() {
         document.addEventListener("mousemove", drag);
 
         function dragStart(e) {
-            // リサイズ中などはドラッグしない
             if (e.target.classList.contains('resize-handle') || isResizingDrawer) return;
             
             initialX = e.clientX - xOffset;
@@ -852,7 +1866,7 @@ function setupUI() {
 
             if (e.target === commonDrawerHeader || e.target.parentNode === commonDrawerHeader) {
                 isDragging = true;
-                e.preventDefault(); // テキスト選択防止
+                e.preventDefault(); 
             }
         }
 
@@ -903,7 +1917,6 @@ function setupUI() {
         }
     }
     
-    // カウンター操作の記録
     document.body.addEventListener('click', (e) => {
         if (!isRecording) return;
         const btn = e.target.closest('.counter-btn');
@@ -934,156 +1947,114 @@ function setupUI() {
             }
         }
     });
-}
 
-function activateDrawerTab(targetId, drawerElement) {
-    if (!drawerElement) return;
-    const drawerPanels = drawerElement.querySelectorAll('.drawer-panel');
-    const drawerTabs = drawerElement.querySelectorAll('.drawer-tab-btn');
+    initializeTokens();
     
-    drawerPanels.forEach(p => p.classList.toggle('active', p.id === targetId));
-    drawerTabs.forEach(t => t.classList.toggle('active', t.dataset.target === targetId));
-
-    if (targetId === 'common-spec-panel') {
-        loadTextContent('txt/仕様説明.txt', 'spec-text-content');
-    } else if (targetId === 'common-about-panel') {
-        loadTextContent('txt/S＆Mとは.txt', 'about-text-content');
-    }
-}
-
-async function loadTextContent(filePath, elementId) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-    
-    if (!element.textContent.includes('読み込み中...')) return;
-
-    try {
-        const response = await fetch(filePath);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const text = await response.text();
-        element.textContent = text;
-    } catch (error) {
-        element.textContent = `読み込みに失敗しました:\n${error.message}\n\n(ローカル環境の場合、ブラウザのセキュリティ制限によりテキストファイルを読み込めない場合があります。Webサーバー経由で実行してください)`;
-        console.error("Text load failed:", error);
-    }
-}
-
-function setupHorizontalScroll() {
-    const scrollableContainers = document.querySelectorAll('.deck-back-slot-container, .free-space-slot-container');
-
-    scrollableContainers.forEach(container => {
-        container.addEventListener('wheel', (e) => {
-            if (container.scrollWidth <= container.clientWidth) {
-                return;
+    if (cSearchFilter) {
+        cSearchFilter.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const container = document.getElementById('c-free-space');
+            if (!container) return;
+            const thumbnails = container.querySelectorAll('.thumbnail');
+            thumbnails.forEach(thumb => {
+                const memo = (thumb.dataset.memo || '').toLowerCase();
+                const slot = thumb.closest('.card-slot');
+                if (slot) {
+                    if (memo.includes(query)) {
+                        slot.style.display = ''; 
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                }
+            });
+            
+            if (!query) {
+                 const allSlots = container.querySelectorAll('.card-slot');
+                 allSlots.forEach(s => s.style.display = '');
             }
-            e.preventDefault();
-            container.scrollLeft += e.deltaY;
         });
-    });
+    }
 }
 
-function setupDrawerResize() {
-    const drawer = document.getElementById('common-drawer');
-    const handle = drawer ? drawer.querySelector('.resize-handle') : null;
+window.updateSettingsUIFromState = function() {
+    if (bgmVolumeSlider && bgmVolumeVal) {
+        bgmVolumeSlider.value = bgmVolume;
+        bgmVolumeVal.textContent = bgmVolume;
+    }
+    if (seVolumeSlider && seVolumeVal) {
+        seVolumeSlider.value = seVolume;
+        seVolumeVal.textContent = seVolume;
+    }
     
-    if (!drawer || !handle) return;
-
-    let isResizing = false;
-    let startW, startH, startX, startY;
-
-    handle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        isResizing = true;
-        isResizingDrawer = true;
-        startW = drawer.offsetWidth;
-        startH = drawer.offsetHeight;
-        startX = e.clientX;
-        startY = e.clientY;
-        
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    });
-
-    function handleMouseMove(e) {
-        if (!isResizing) return;
-        
-        let newW = startW + (e.clientX - startX);
-        let newH = startH + (e.clientY - startY);
-
-        const rect = drawer.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        
-        const maxWidth = 2 * Math.min(centerX, vw - centerX);
-        const maxHeight = 2 * Math.min(centerY, vh - centerY);
-        
-        newW = Math.max(500, Math.min(newW, maxWidth));
-        newH = Math.max(400, Math.min(newH, maxHeight));
-        
-        drawer.style.width = `${newW}px`;
-        drawer.style.height = `${newH}px`;
+    const seContainer = document.getElementById('se-settings-container');
+    if (seContainer && typeof seConfig !== 'undefined') {
+        const checkboxes = seContainer.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(box => {
+            const seName = box.dataset.seName;
+            if (seName && typeof seConfig[seName] !== 'undefined') {
+                box.checked = seConfig[seName];
+            }
+        });
+    }
+    
+    const effectContainer = document.getElementById('effect-settings-container');
+    if (effectContainer && typeof effectConfig !== 'undefined') {
+        const checkboxes = effectContainer.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(box => {
+            const key = box.dataset.effectKey;
+            if (key && typeof effectConfig[key] !== 'undefined') {
+                box.checked = effectConfig[key];
+            }
+        });
     }
 
-    function handleMouseUp(e) {
-        isResizing = false;
-        setTimeout(() => {
-            isResizingDrawer = false;
-        }, 100);
-
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+    const autoContainer = document.getElementById('auto-config-container');
+    if (autoContainer && typeof autoConfig !== 'undefined') {
+        const checkboxes = autoContainer.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(box => {
+            const key = box.dataset.autoKey;
+            if (key && typeof autoConfig[key] !== 'undefined') {
+                box.checked = autoConfig[key];
+            }
+        });
     }
-}
+};
 
-function openDecorationImageDialog(targetSlot) {
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            document.body.removeChild(fileInput);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (readEvent) => {
-            const imageData = readEvent.target.result;
-            const idPrefix = getPrefixFromZoneId(targetSlot.id);
-            const baseId = getBaseId(targetSlot.id);
-
-            let existingThumbnail = targetSlot.querySelector('.thumbnail[data-is-decoration="true"]');
-            if (existingThumbnail) {
-                const img = existingThumbnail.querySelector('img');
-                if (img) img.src = imageData;
-            } else {
-                const anyThumbnail = getExistingThumbnail(targetSlot);
-                if (anyThumbnail) targetSlot.removeChild(anyThumbnail);
-                createCardThumbnail(imageData, targetSlot, true, false, idPrefix);
-            }
-
-            if (baseId !== 'icon-zone') {
-                 syncMainZoneImage(baseId, idPrefix);
-            }
-        };
-        reader.readAsDataURL(file);
-        document.body.removeChild(fileInput);
-    });
-
-    fileInput.addEventListener('cancel', () => {
-        if (document.body.contains(fileInput)) {
-            document.body.removeChild(fileInput);
+window.startBattleTargetSelection = function(attacker) {
+    if (!attacker) return;
+    isBattleTargetMode = true;
+    currentAttacker = attacker;
+    document.body.classList.add('battle-target-mode');
+    
+    if (battleTargetOverlay) {
+        battleTargetOverlay.style.display = 'flex';
+    }
+    
+    attacker.classList.add('battle-attacker');
+    
+    const allSlots = document.querySelectorAll('.card-slot, .player-icon-slot');
+    allSlots.forEach(slot => {
+        const hasCard = slot.querySelector('.thumbnail');
+        const isIcon = slot.classList.contains('player-icon-slot') || slot.id === 'icon-zone' || slot.id === 'opponent-icon-zone';
+        
+        if (hasCard || isIcon) {
+            if (hasCard === attacker) return;
+            
+            if (hasCard) hasCard.classList.add('battle-target-candidate');
+            else slot.classList.add('battle-target-candidate'); 
         }
     });
+};
 
-    document.body.appendChild(fileInput);
-    fileInput.click();
-}
+window.cancelBattleTargetSelection = function() {
+    isBattleTargetMode = false;
+    currentAttacker = null;
+    document.body.classList.remove('battle-target-mode');
+    if (battleTargetOverlay) battleTargetOverlay.style.display = 'none';
+    
+    const candidates = document.querySelectorAll('.battle-target-candidate');
+    candidates.forEach(el => el.classList.remove('battle-target-candidate'));
+    
+    const attackers = document.querySelectorAll('.battle-attacker');
+    attackers.forEach(el => el.classList.remove('battle-attacker'));
+};

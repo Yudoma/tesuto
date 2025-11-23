@@ -1,5 +1,3 @@
-// 汎用ユーティリティ関数
-
 function getBaseId(prefixedId) {
     if (!prefixedId) return null;
     return prefixedId.replace('opponent-', '');
@@ -44,7 +42,7 @@ function getParentZoneId(element) {
     if (element.id === 'icon-zone' || element.id === 'opponent-icon-zone') {
         return element.id;
     }
-    const closestZone = element.closest('.zone, .hand-zone-slots, .drawer-panel, .drawer-free-space, .player-icon-slot');
+    const closestZone = element.closest('.zone, .hand-zone-slots, .drawer-panel, .drawer-free-space, .drawer-token-space, .player-icon-slot');
     if (closestZone && closestZone.classList.contains('player-icon-slot')) {
         const iconSlot = closestZone.querySelector('.card-slot');
         if (iconSlot) return iconSlot.id;
@@ -52,29 +50,21 @@ function getParentZoneId(element) {
     return closestZone ? closestZone.id : null;
 }
 
-// --- オーディオ機能 (BGM/SE) ---
-
 const loopSeInstances = {};
 
-// SE再生 (フォールバック機能付き)
 function playSe(filename, isLoop = false) {
-    // SE個別設定のチェック (無効なら再生しない)
-    // リプレイ中もこの設定に従う
     if (typeof seConfig !== 'undefined' && seConfig[filename] === false) return;
-
-    // 音量チェック (0の場合は再生しない)
     if (typeof seVolume !== 'undefined' && seVolume <= 0) return;
 
     const path = `./se/${filename}`;
     const audio = new Audio(path);
     
-    // 音量適用 (0-10 -> 0.0-1.0)
     if (typeof seVolume !== 'undefined') {
         audio.volume = seVolume / 10;
     }
 
     if (isLoop) {
-        if (loopSeInstances[filename]) return; // 既に再生中なら何もしない
+        if (loopSeInstances[filename]) return; 
         
         audio.loop = true;
         audio.play().catch(e => {
@@ -82,18 +72,14 @@ function playSe(filename, isLoop = false) {
         });
         loopSeInstances[filename] = audio;
     } else {
-        // エラーハンドリング（フォールバック）
         audio.onerror = () => {
-            // 指定ファイルがなく、かつそれが「ボタン共通」でない場合、ボタン共通を鳴らす
             if (filename !== 'ボタン共通.mp3') {
-                // console.log(`Fallback: ${filename} not found, playing common button sound.`);
                 playSe('ボタン共通.mp3');
             }
         };
 
         audio.currentTime = 0;
         audio.play().catch(e => {
-            // ユーザー操作なしの自動再生ブロックなどの対応
             console.warn(`SE Play Error (${filename}):`, e);
         });
     }
@@ -108,27 +94,25 @@ function stopSe(filename) {
     }
 }
 
-// BGM再生機能
 function playBgm(filename) {
     if (currentBgmAudio && !currentBgmAudio.paused && currentBgmAudio.src.includes(encodeURIComponent(filename))) {
-        return; // 同じ曲が再生中なら何もしない
+        return; 
     }
 
-    stopBgm(); // 既存BGM停止
+    stopBgm();
 
     if (!filename) return;
     
-    // 音量チェック
     if (typeof bgmVolume !== 'undefined' && bgmVolume <= 0) return;
 
     const path = `./bgm/${filename}`;
     currentBgmAudio = new Audio(path);
     
     if (typeof bgmVolume !== 'undefined') {
-        currentBgmAudio.volume = bgmVolume / 10;
+        currentBgmAudio.volume = (bgmVolume / 10) * 0.5;
     }
     
-    currentBgmAudio.loop = true; // ループ再生
+    currentBgmAudio.loop = true;
 
     currentBgmAudio.play().catch(e => console.error("BGM Play Error:", e));
 }
@@ -149,12 +133,9 @@ function stopBgm() {
 
 function updateBgmVolume() {
     if (currentBgmAudio && typeof bgmVolume !== 'undefined') {
-        currentBgmAudio.volume = bgmVolume / 10;
+        currentBgmAudio.volume = (bgmVolume / 10) * 0.5;
     }
 }
-
-
-// --- リプレイ機能 ---
 
 let replayInitialState = null;
 
@@ -165,7 +146,6 @@ function startReplayRecording() {
     replayStartTime = Date.now();
     replayInitialState = getAllBoardState(); 
     
-    // UI更新
     const startBtn = document.getElementById('record-start-btn');
     const stopBtn = document.getElementById('record-stop-btn');
     if(startBtn) startBtn.style.display = 'none';
@@ -178,13 +158,11 @@ function stopReplayRecording() {
     if (!isRecording) return;
     isRecording = false;
     
-    // UI更新
     const startBtn = document.getElementById('record-start-btn');
     const stopBtn = document.getElementById('record-stop-btn');
     if(startBtn) startBtn.style.display = 'inline-block';
     if(stopBtn) stopBtn.style.display = 'none';
 
-    // 即座に保存フローへ移行
     setTimeout(() => {
         exportReplayData();
     }, 100);
@@ -212,7 +190,6 @@ function exportReplayData() {
         return; 
     }
 
-    // SE音量設定などを保存するかは任意だが、現状は再生側の設定優先
     const replayData = {
         initialState: replayInitialState,
         log: actionLog,
@@ -253,7 +230,6 @@ function importReplayData() {
                     }
 
                     alert(`「${file.name}」を読み込みました。\n再生ボタンで開始します。`);
-                    // 読み込み完了時に停止状態のUIにする
                     updateReplayUI('stopped');
                 } else {
                     alert("無効なリプレイデータ形式です。");
@@ -267,8 +243,6 @@ function importReplayData() {
     };
     fileInput.click();
 }
-
-// --- 再生制御ロジック ---
 
 function updateReplayUI(state) {
     const playBtn = document.getElementById('replay-play-btn');
@@ -288,7 +262,7 @@ function updateReplayUI(state) {
         }
         if(pauseBtn) pauseBtn.style.display = 'none';
         if(stopBtn) stopBtn.style.display = 'inline-block';
-    } else { // stopped
+    } else { 
         if(playBtn) {
             playBtn.style.display = 'inline-block';
             playBtn.textContent = '再生';
@@ -335,7 +309,6 @@ function resumeReplay() {
     isReplayPaused = false;
     updateReplayUI('playing');
     
-    // 再開時は少し待ってから実行
     processNextReplayStep(100);
 }
 
@@ -364,15 +337,12 @@ function processNextReplayStep(forceDelay = null) {
     if (forceDelay !== null) {
         delay = forceDelay;
     } else {
-        // 待機時間設定を確認
         const waitTimeInput = document.getElementById('replay-wait-time-input');
         const fixedWaitTime = waitTimeInput && waitTimeInput.value !== "" ? parseFloat(waitTimeInput.value) * 1000 : null;
 
         if (fixedWaitTime !== null && !isNaN(fixedWaitTime)) {
-            // 指定秒数を使用
             delay = fixedWaitTime;
         } else {
-            // 記録された時間を使用（最大2秒短縮ロジック）
             const currentActionTime = actionLog[currentReplayIndex].time;
             const prevActionTime = currentReplayIndex > 0 ? actionLog[currentReplayIndex - 1].time : 0;
             const rawDiff = currentActionTime - prevActionTime;
@@ -394,7 +364,6 @@ function processNextReplayStep(forceDelay = null) {
     replayTimerIds = [timerId];
 }
 
-// アクション実行ロジック
 function executeAction(action) {
     
     const updatePreviewForAction = (zoneId, slotIndex) => {
@@ -606,7 +575,6 @@ function executeAction(action) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
                     triggerEffect(card, action.subType);
-                    // エフェクトの種類に応じてSE再生
                     if(action.subType === 'attack') playSe('アタック.mp3');
                     else if(action.subType === 'effect') playSe('効果発動.mp3');
                     else playSe('対象に取る.mp3');
@@ -648,7 +616,6 @@ function executeAction(action) {
         case 'stepChange': {
             currentStepIndex = action.index;
             updateStepUI();
-            // ターン開始時のみ専用SE
             if (action.index === 0) {
                 playSe('ターン開始.mp3');
             } else {
@@ -669,7 +636,6 @@ function executeAction(action) {
             break;
         }
         case 'boardFlip': {
-            // リプレイ再生時の盤面反転は無視
             break; 
         }
         case 'autoDecreaseToggle': {
@@ -732,7 +698,77 @@ function getSlotByIndex(zoneId, index) {
     
     if (zone.classList.contains('card-slot')) return zone;
 
-    const container = zone.querySelector('.slot-container, .deck-back-slot-container, .free-space-slot-container, .hand-zone-slots') || zone;
+    const container = zone.querySelector('.slot-container, .deck-back-slot-container, .free-space-slot-container, .token-slot-container, .hand-zone-slots') || zone;
     const slots = container.querySelectorAll('.card-slot');
     return slots[index] || null;
+}
+
+function setupHorizontalScroll() {
+    const containers = document.querySelectorAll('.hand-zone-slots, .deck-back-slot-container, .free-space-slot-container, .token-slot-container, .decoration-columns-container');
+    containers.forEach(container => {
+        container.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                container.scrollLeft += e.deltaY;
+            }
+        });
+    });
+}
+
+function activateDrawerTab(targetId, drawerElement) {
+    if (!drawerElement) return;
+    
+    const tabs = drawerElement.querySelectorAll('.drawer-tab-btn');
+    tabs.forEach(t => {
+        if (t.dataset.target === targetId) {
+            t.classList.add('active');
+        } else {
+            t.classList.remove('active');
+        }
+    });
+
+    const allContentAreas = drawerElement.querySelectorAll('.drawer-panel, .drawer-free-space, .drawer-token-space');
+    allContentAreas.forEach(area => {
+         if (area.id === targetId || area.querySelector(`#${targetId}`)) {
+             area.style.display = 'flex';
+             area.classList.add('active');
+         } else {
+             area.style.display = 'none';
+             area.classList.remove('active');
+         }
+    });
+}
+
+function setupDrawerResize() {
+    const drawers = document.querySelectorAll('.drawer-wrapper, #common-drawer');
+    drawers.forEach(drawer => {
+        let handle = drawer.querySelector('.resize-handle');
+        if (!handle) {
+            handle = document.createElement('div');
+            handle.className = 'resize-handle';
+            drawer.appendChild(handle);
+        }
+        
+        handle.addEventListener('mousedown', initResize);
+        
+        function initResize(e) {
+            window.addEventListener('mousemove', resize);
+            window.addEventListener('mouseup', stopResize);
+            e.preventDefault();
+            isResizingDrawer = true;
+        }
+        
+        function resize(e) {
+            const newWidth = e.clientX - drawer.getBoundingClientRect().left;
+            const newHeight = e.clientY - drawer.getBoundingClientRect().top;
+            if (newWidth > 200) drawer.style.width = newWidth + 'px';
+            if (newHeight > 200) drawer.style.height = newHeight + 'px';
+        }
+        
+        function stopResize() {
+            window.removeEventListener('mousemove', resize);
+            window.removeEventListener('mouseup', stopResize);
+            isResizingDrawer = false;
+        }
+    });
 }

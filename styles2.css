@@ -1,20 +1,19 @@
 .counter-wrapper {
     display: flex;
-    gap: 0px; 
-    align-items: center; 
-     
+    gap: 5px; 
+    align-items: flex-start; 
     width: 322.56px; 
     justify-content: space-between;
     flex-shrink: 0;
-    
     flex-wrap: nowrap; 
+    padding: 2px 0;
 }
 
 .player-info-group {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     width: 160px;  
     flex-shrink: 0;
 }
@@ -22,24 +21,19 @@
 .player-icon-slot {
     width: 160px;   
     height: 190px;  
-    background-color: #444;  
-    border: 2px solid #555;  
-    border-radius: 5px;
-    box-sizing: border-box;
-
     background-color: #2a2a4e;
     border: 3px solid #5a5a9a;
+    border-radius: 5px;
+    box-sizing: border-box;
     transition: background-color 0.3s, border-color 0.3s;
 }
 
 .player-icon-slot .card-slot {
     width: 100%;
     height: 100%;
-
     border: none; 
     background-color: transparent; 
     box-shadow: none;
-
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,16 +41,14 @@
 
 .player-name-input {
     width: 100%;
-    padding: 4px;
-    font-size: 1em;
+    padding: 2px 4px;
+    font-size: 0.95em;
     font-weight: bold;
     text-align: center;
     font-family: 'Georgia', serif;
-
     background-color: #3a3a5e;
     border: 1px solid #5a5a9a;
     color: #e0e0e0;
-    
     border-radius: 5px;
     box-sizing: border-box;
 }
@@ -65,7 +57,7 @@
     display: flex;
     flex-direction: column;  
     gap: 5px;
-    justify-content: center;  
+    justify-content: flex-start;  
     align-items: flex-end;  
     flex-grow: 1;  
 }
@@ -74,28 +66,26 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;  
-    padding: 26px 8px;
-    
+    gap: 2px;  
+    padding: 5px 8px;
     border: 2px solid #555;
     background-color: #333;
-    
     border-radius: 5px;
     flex-shrink: 0;
     transition: background-color 0.3s, border-color 0.3s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .lp-counter-input, .mana-counter-input {
     width: 55px;  
     text-align: center;
-    padding: 4px; 
+    padding: 2px; 
     font-size: 1.2em;  
     font-weight: bold;
-    
     background-color: #444;
     border: 1px solid #666;
     color: #ccc;
-    
     border-radius: 5px;
     -moz-appearance: textfield; 
     margin: 0;  
@@ -129,17 +119,15 @@
 .counter-btn,
 .card-rotate-btn,
 .simple-counter-buttons button {
-    padding: 4px 8px; 
-    font-size: 1.1em; 
+    padding: 2px 8px; 
+    font-size: 1em; 
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #f0f0f0; 
     color: #333;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 
@@ -160,47 +148,51 @@
 .hand-area-container {
     width: 100%; 
     height: auto;
-    flex-shrink: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
     display: flex; 
     flex-direction: column;
+    overflow: hidden;
 }
 
 .hand-controls-top-wrapper {
     display: flex;
     flex-direction: row; 
     justify-content: space-between; 
-    align-items: stretch; 
-    gap: 10px; 
+    align-items: stretch;
+    gap: 2px;
     width: 100%; 
+    height: 100%;
+    min-height: 0;
 }
 
 .hand-controls-frame {
     border: 1px solid #555;
     background-color: #333;
-
-    padding: 5px 10px 10px 10px; 
+    padding: 3px;
     border-radius: 5px;
     display: flex;
-
     flex-grow: 1; 
     flex-shrink: 1;
-    
     align-items: flex-start; 
-
     height: 100%;
-    gap: 5px; 
+    gap: 2px;
     padding-top: 5px; 
     transition: background-color 0.3s, border-color 0.3s;
+    min-height: 0;
 }
 
 .hand-controls-top-wrapper > .deck-zone {
-    flex-shrink: 0; 
-    width: var(--side-zone-width); 
-    height: auto; 
-
+    flex-shrink: 1; 
+    flex-grow: 1;
+    width: auto;
+    height: 100%;
+    aspect-ratio: 67.2 / 119.712; 
+    min-width: 40px;
+    max-width: 80px;
     padding: 1px;
     box-sizing: border-box;
-    
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -209,79 +201,82 @@
 .hand-area-bottom {
     border: 1px dashed #888;
     background-color: #555;
-    
     padding: 5px; 
     border-radius: 5px;
-    
     display: flex;
     align-items: flex-start;
     gap: 10px;
     min-height: 20px; 
-    
     flex-wrap: wrap; 
 }
 
 .area-label {
-    font-size: 1.2em;  
+    font-size: 1em;  
     font-weight: bold;
-    
     color: #ccc; 
-    
     z-index: 12;
     transition: color 0.3s, text-shadow 0.3s;
-
     position: static;
     transform: none;
     opacity: 1;
     pointer-events: auto;
     white-space: normal;
     background-color: transparent;
-    padding: 2px 0;
+    padding: 0;
     border-radius: 0;
     text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .hand-zone-wrapper {
     flex-grow: 1; 
     padding: 0; 
     position: relative; 
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .hand-zone-slots {
     display: flex;
-    gap: 3px;
-    min-height: calc(var(--card-height) + 10px); 
-    
+    gap: 1px;
+    height: 100%;
+    min-height: 0;
     border: 1px solid #555; 
     background-color: #222; 
-    
-    padding: 5px;
+    padding: 1px;
     border-radius: 5px;
-    
     flex-wrap: nowrap; 
     overflow-x: auto; 
-    
+    overflow-y: hidden;
     margin-top: 0; 
-    
     flex-grow: 1; 
-    
     align-items: center; 
-    
     justify-content: center; 
     transition: background-color 0.3s, border-color 0.3s;
+}
+
+.hand-controls-top-wrapper .card-slot,
+.hand-zone-slots .card-slot {
+    width: auto !important; 
+    height: 100% !important; 
+    max-height: var(--card-height); 
+    min-height: 40px; 
+    aspect-ratio: 67.2 / 119.712; 
+    flex-shrink: 1;
+    flex-grow: 0;
 }
 
 .hand-buttons {
     display: flex;
     flex-direction: column;  
     flex-wrap: nowrap;  
-    gap: 5px;
-    margin-left: 10px;
+    gap: 3px;
+    margin-left: 2px;
     padding-top: 0; 
-     
-    width: 110px;  
-     
+    width: 90px;  
     justify-content: flex-start;  
 }
 
@@ -291,17 +286,15 @@
 }
 
 .draw-btn {
-    padding: 3px 12px;
-    font-size: 1em;
+    padding: 2px 8px;
+    font-size: 0.85em;
     font-weight: bold;
-    
     color: #333;
     background-color: #f0f0f0; 
     border: none;
     border-radius: 5px;
     cursor: pointer;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s;
     line-height: 1.2;
     text-align: center;
@@ -322,26 +315,41 @@
     box-shadow: 0 3px #800000;
     color: white; 
 }
-.draw-btn[data-mode="sadist"]:hover {
-    background-color: #e60000;
-}
-.draw-btn[data-mode="sadist"]:active {
-    box-shadow: 0 0 #800000;
-    transform: translateY(3px);
-}
+.draw-btn[data-mode="sadist"]:hover { background-color: #e60000; }
+.draw-btn[data-mode="sadist"]:active { box-shadow: 0 0 #800000; }
 
 .draw-btn[data-mode="masochist"] {
     background-color: #007bff; 
     box-shadow: 0 3px #0056b3; 
     color: white;
 }
-.draw-btn[data-mode="masochist"]:hover {
-    background-color: #0094ff;
+.draw-btn[data-mode="masochist"]:hover { background-color: #0094ff; }
+.draw-btn[data-mode="masochist"]:active { box-shadow: 0 0 #0056b3; }
+
+.draw-btn[data-mode="magickers"] {
+    background-color: #8a2be2; 
+    box-shadow: 0 3px #4b0082; 
+    color: white;
 }
-.draw-btn[data-mode="masochist"]:active {
-    box-shadow: 0 0 #0056b3;
-    transform: translateY(3px);
+.draw-btn[data-mode="magickers"]:hover { background-color: #9932cc; }
+.draw-btn[data-mode="magickers"]:active { box-shadow: 0 0 #4b0082; }
+
+.draw-btn[data-mode="striker"] {
+    background-color: #b22222; 
+    box-shadow: 0 3px #800000; 
+    color: white;
 }
+.draw-btn[data-mode="striker"]:hover { background-color: #dc143c; }
+.draw-btn[data-mode="striker"]:active { box-shadow: 0 0 #800000; }
+
+.draw-btn[data-mode="simple"] {
+    background-color: #333; 
+    box-shadow: 0 3px #000; 
+    color: white;
+}
+.draw-btn[data-mode="simple"]:hover { background-color: #555; }
+.draw-btn[data-mode="simple"]:active { box-shadow: 0 0 #000; }
+
 
 .hand-controls-top-wrapper > .hand-buttons .draw-btn {
     width: 100%;  
@@ -460,7 +468,6 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 
 .card-slot.stacked .thumbnail {
     transition: transform 0.2s ease-out, z-index 0s 0.2s, opacity 0.2s, box-shadow 0.2s ease-out;
-    
     pointer-events: auto; 
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 3px; 
@@ -527,11 +534,9 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    
     font-size: 2.5em; 
     font-weight: bold;
     color: white; 
-    
     text-shadow: 
         -2px -2px 0 #000,  
          2px -2px 0 #000,
@@ -541,42 +546,36 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
          2px  0   0 #000,
          0   -2px 0 #000,
          0    2px 0 #000;
-         
     background-color: rgba(0, 0, 0, 0.0); 
     padding: 5px;
     border-radius: 50%; 
-    
     display: flex;
     justify-content: center;
     align-items: center;
-    
     z-index: 15; 
     user-select: none;
     pointer-events: none; 
-    
     display: none; 
 }
 
 .random-result-display {
     width: 100%;
-    min-height: 50px; 
-    padding: 5px;
+    min-height: 30px;
+    padding: 3px;
     box-sizing: border-box;
     text-align: center;
-    font-size: 1em; 
+    font-size: 0.9em; 
     font-weight: bold;
     line-height: 1.2;
     display: flex;
     justify-content: center;
     align-items: center;
-    
     background-color: #444;
     border: 1px solid #666;
     color: #ccc;
-    
     border-radius: 5px;
     margin-top: 2px; 
-    margin-bottom: 5px; 
+    margin-bottom: 3px; 
 }
 
 .random-buttons {
@@ -588,8 +587,8 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 .random-buttons .counter-btn {
     flex-grow: 1;
     width: 50%;
-    padding: 4px 6px; 
-    font-size: 1em; 
+    padding: 2px 6px; 
+    font-size: 0.9em; 
 }
 
 .deck-zone .thumbnail,
@@ -605,12 +604,9 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     top: auto;
     bottom: auto;
     z-index: 501;
-    
     writing-mode: horizontal-tb;  
     text-orientation: mixed;
-    
     padding: 4px 10px;  
-
     background-color: #f0f0f0; 
     color: #333;
     border: none;
@@ -619,7 +615,6 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     font-size: 0.9em;
     font-weight: bold;
     font-family: 'Georgia', serif;
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 #common-drawer-toggle:hover {
@@ -657,17 +652,6 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     transform: translateY(2px);
 }
 
-#common-drawer #common-decoration-mode-btn {
-    background-color: #ffcc00;
-    box-shadow: 0 2px #997a00;
-}
-#common-drawer #common-decoration-mode-btn:hover {
-    background-color: #ffdb4d;
-}
-#common-drawer #common-decoration-mode-btn:active {
-    box-shadow: 0 0 #997a00;
-}
-
 #common-drawer #common-decoration-mode-btn[data-active="true"] {
      background-color: #cc0000;
      box-shadow: 0 2px #800000; 
@@ -693,11 +677,9 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     width: 600px;  
     max-width: 90vw;
     z-index: 1001; 
-
     background-color: #3a3a5e; 
     border: 1px solid #5a5a9a; 
     color: #e0e0e0;
-    
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
     font-family: 'Georgia', serif;
@@ -709,7 +691,6 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     font-size: 1.1em;
     font-weight: bold;
     padding: 10px 15px;
-    
     background-color: #2a2a4e; 
     border-bottom: 1px solid #5a5a9a;
     color: #a0a0e0; 
@@ -748,16 +729,13 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 .flavor-image-preview {
     width: 100%;
     height: 200px;  
-    
     background-color: #4a4a6e;
     border: 2px dashed #7a7aa0;
     border-radius: 5px;
-    
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    
     transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -776,18 +754,15 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 }
 
 .flavor-upload-btn {
-     
     padding: 4px 10px;
     font-size: 0.9em;
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #ffcc00;  
     color: #333;
     box-shadow: 0 2px #997a00; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-upload-btn:hover {
@@ -805,11 +780,9 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #cc0000;
     box-shadow: 0 2px #800000;
     color: white;
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-delete-btn:hover {
@@ -824,11 +797,9 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     width: 100%;
     height: 80px;  
     box-sizing: border-box;
-    
     background-color: #4a4a6e;
     border: 2px dashed #7a7aa0;
     border-radius: 5px;
-    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -836,7 +807,6 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     font-size: 0.9em;
     color: #a0a0e0;
     cursor: pointer;
-    
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
@@ -846,12 +816,10 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 }
 
 .flavor-editor-buttons {
-     
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     padding: 10px 15px;
-    
     background-color: #3a3a5e; 
     border-top: 1px solid #2a2a4e;  
     transition: background-color 0.3s, border-color 0.3s;
@@ -864,11 +832,9 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #f0f0f0; 
     color: #333;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-editor-buttons button:hover {
@@ -881,109 +847,266 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     box-shadow: 0 0 #997a00;
 }
 
-body.sm-mode-active .flavor-editor-modal {
-    background-color: #FFF0F5; 
-    border-color: #FF69B4; 
-    color: #333;
+/* Sadist Mode */
+.player-wrapper.player-sadist-mode, .opponent-wrapper.opponent-sadist-mode {
+    font-family: 'Georgia', serif;
+    background-color: transparent; 
+    color: #333; 
+    border-radius: 5px; 
+    box-sizing: border-box;
 }
-body.sm-mode-active .flavor-editor-header {
-    background-color: #FFECF5; 
-    border-bottom-color: #FFB6C1; 
-    color: #8B008B; 
+.player-wrapper.player-sadist-mode .game-board, .opponent-wrapper.opponent-sadist-mode .game-board {
+    background-color: #FFF0F5; border-color: #C71585; box-shadow: 0 4px 10px rgba(199, 21, 133, 0.4);
 }
- 
-body.sm-mode-active .flavor-slot-label {
-    color: #C71585;
+.player-wrapper.player-sadist-mode .zone, .opponent-wrapper.opponent-sadist-mode .zone {
+    background-color: #FFECF5; border-color: #FF69B4;
 }
-body.sm-mode-active .flavor-image-preview {
-    background-color: #FFF5FA;
-    border-color: #FFB6C1;
+.player-wrapper.player-sadist-mode .card-slot, .opponent-wrapper.opponent-sadist-mode .card-slot {
+    background-color: #FFF5FA; border: 1px dashed #FF69B4; box-shadow: 0 0 0 1px #C71585 inset;
 }
-body.sm-mode-active .flavor-drop-zone {
-    background-color: #FFF5FA;
-    border-color: #FFB6C1;
-    color: #C71585;
+.player-wrapper.player-sadist-mode .card-slot[data-has-card="false"], .opponent-wrapper.opponent-sadist-mode .card-slot[data-has-card="false"] {
+    background-color: #FFD9EC; 
 }
-body.sm-mode-active .flavor-drop-zone.drag-over {
-    background-color: #FFECF5;
-    border-color: #FF69B4;
+.player-wrapper.player-sadist-mode .zone-header, .opponent-wrapper.opponent-sadist-mode .zone-header {
+    background-color: #FFB6C1; color: #8B008B;
 }
-body.sm-mode-active .flavor-editor-buttons {
-    background-color: #FFF0F5; 
-    border-top-color: #FFECF5;
+.player-wrapper.player-sadist-mode .hand-controls-frame, .opponent-wrapper.opponent-sadist-mode .hand-controls-frame {
+    background-color: #FFF0F5; border-color: #FF69B4;
 }
-
-body.sm-mode-active .flavor-editor-buttons button,
- 
-body.sm-mode-active .flavor-delete-btn,
-body.sm-mode-active .flavor-upload-btn {  
-    background-color: #f0f0f0; 
-    color: #333;
-    box-shadow: 0 2px #b0b0b0; 
+.player-wrapper.player-sadist-mode .hand-zone-slots, .opponent-wrapper.opponent-sadist-mode .hand-zone-slots {
+    background-color: #C71585; border-color: #8B008B;
 }
-body.sm-mode-active .flavor-editor-buttons button:hover,
- 
-body.sm-mode-active .flavor-delete-btn:hover,
-body.sm-mode-active .flavor-upload-btn:hover {  
-    background-color: #d0d0d0;
-}
-body.sm-mode-active .flavor-editor-buttons button:active,
- 
-body.sm-mode-active .flavor-delete-btn:active,
-body.sm-mode-active .flavor-upload-btn:active {  
-    box-shadow: 0 0 #b0b0b0; 
-    background-color: #ffcc00;
-    box-shadow: 0 0 #997a00;
+.player-wrapper.player-sadist-mode .area-label, .opponent-wrapper.opponent-sadist-mode .area-label {
+    color: #C71585; text-shadow: 1px 1px 2px #FFB6C1;
 }
 
-body.sm-mode-active .flavor-upload-btn {
-    background-color: #ffcc00;
-    box-shadow: 0 2px #997a00;
+/* Magickers Mode */
+.player-wrapper.player-magickers-mode, .opponent-wrapper.opponent-magickers-mode {
+    font-family: 'Georgia', serif;
+    background-color: transparent; 
+    color: #e0aaff; 
+    border-radius: 5px;
+    box-sizing: border-box;
 }
-body.sm-mode-active .flavor-upload-btn:hover {
-    background-color: #ffdb4d;
+.player-wrapper.player-magickers-mode .game-board, .opponent-wrapper.opponent-magickers-mode .game-board {
+    background-color: #240046; border-color: #7b2cbf; box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
 }
-body.sm-mode-active .flavor-upload-btn:active {
-    box-shadow: 0 0 #997a00;
+.player-wrapper.player-magickers-mode .zone, .opponent-wrapper.opponent-magickers-mode .zone {
+    background-color: #3c096c; border-color: #9d4edd;
+}
+.player-wrapper.player-magickers-mode .card-slot, .opponent-wrapper.opponent-magickers-mode .card-slot {
+    background-color: #5a189a; border: 1px dashed #c77dff; box-shadow: 0 0 0 1px #9d4edd inset;
+}
+.player-wrapper.player-magickers-mode .card-slot[data-has-card="false"], .opponent-wrapper.opponent-magickers-mode .card-slot[data-has-card="false"] {
+    background-color: #2d00f7; 
+}
+.player-wrapper.player-magickers-mode .zone-header, .opponent-wrapper.opponent-magickers-mode .zone-header {
+    background-color: #7b2cbf; color: #e0aaff;
+}
+.player-wrapper.player-magickers-mode .hand-controls-frame, .opponent-wrapper.opponent-magickers-mode .hand-controls-frame {
+    background-color: #240046; border-color: #7b2cbf;
+}
+.player-wrapper.player-magickers-mode .hand-zone-slots, .opponent-wrapper.opponent-magickers-mode .hand-zone-slots {
+    background-color: #10002b; border-color: #5a189a;
+}
+.player-wrapper.player-magickers-mode .area-label, .opponent-wrapper.opponent-magickers-mode .area-label {
+    color: #c77dff; text-shadow: 1px 1px 2px #7b2cbf;
 }
 
-body.sm-mode-active .flavor-delete-btn {
-    background-color: #cc0000;
-    box-shadow: 0 2px #800000;
-    color: white;
+/* Striker Mode */
+.player-wrapper.player-striker-mode, .opponent-wrapper.opponent-striker-mode {
+    font-family: 'Georgia', serif;
+    background-color: transparent; 
+    color: #ffcccc; 
+    border-radius: 5px;
+    box-sizing: border-box;
 }
-body.sm-mode-active .flavor-delete-btn:hover {
-    background-color: #e60000;
+.player-wrapper.player-striker-mode .game-board, .opponent-wrapper.opponent-striker-mode .game-board {
+    background-color: #2b0505; border-color: #8b0000; box-shadow: 0 4px 15px rgba(139, 0, 0, 0.4);
 }
-body.sm-mode-active .flavor-delete-btn:active {
-    box-shadow: 0 0 #800000;
+.player-wrapper.player-striker-mode .zone, .opponent-wrapper.opponent-striker-mode .zone {
+    background-color: #4a0a0a; border-color: #b22222;
+}
+.player-wrapper.player-striker-mode .card-slot, .opponent-wrapper.opponent-striker-mode .card-slot {
+    background-color: #5c1010; border: 1px dashed #cd5c5c; box-shadow: 0 0 0 1px #8b0000 inset;
+}
+.player-wrapper.player-striker-mode .card-slot[data-has-card="false"], .opponent-wrapper.opponent-striker-mode .card-slot[data-has-card="false"] {
+    background-color: #3a0505; 
+}
+.player-wrapper.player-striker-mode .zone-header, .opponent-wrapper.opponent-striker-mode .zone-header {
+    background-color: #8b0000; color: #ffb6c1;
+}
+.player-wrapper.player-striker-mode .hand-controls-frame, .opponent-wrapper.opponent-striker-mode .hand-controls-frame {
+    background-color: #2b0505; border-color: #8b0000;
+}
+.player-wrapper.player-striker-mode .hand-zone-slots, .opponent-wrapper.opponent-striker-mode .hand-zone-slots {
+    background-color: #1a0303; border-color: #a52a2a;
+}
+.player-wrapper.player-striker-mode .area-label, .opponent-wrapper.opponent-striker-mode .area-label {
+    color: #cd5c5c; text-shadow: 1px 1px 2px #800000;
 }
 
-/* アニメーション定義 - 画像自体を輝かせる */
+/* Simple Mode */
+.player-wrapper.player-simple-mode, .opponent-wrapper.opponent-simple-mode {
+    background-color: transparent; 
+    color: #000; 
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+.player-wrapper.player-simple-mode .game-board, .opponent-wrapper.opponent-simple-mode .game-board {
+    background-color: #ffffff; border-color: #000000; box-shadow: none; border-width: 2px;
+}
+.player-wrapper.player-simple-mode .zone, .opponent-wrapper.opponent-simple-mode .zone {
+    background-color: #f5f5f5; border-color: #333;
+}
+.player-wrapper.player-simple-mode .card-slot, .opponent-wrapper.opponent-simple-mode .card-slot {
+    background-color: #ffffff; border: 1px solid #666; box-shadow: none;
+}
+.player-wrapper.player-simple-mode .card-slot[data-has-card="false"], .opponent-wrapper.opponent-simple-mode .card-slot[data-has-card="false"] {
+    background-color: #eeeeee; 
+}
+.player-wrapper.player-simple-mode .zone-header, .opponent-wrapper.opponent-simple-mode .zone-header {
+    background-color: #333; color: #fff; border-radius: 0;
+}
+.player-wrapper.player-simple-mode .hand-controls-frame, .opponent-wrapper.opponent-simple-mode .hand-controls-frame {
+    background-color: #ffffff; border-color: #000000;
+}
+.player-wrapper.player-simple-mode .hand-zone-slots, .opponent-wrapper.opponent-simple-mode .hand-zone-slots {
+    background-color: #f0f0f0; border-color: #333;
+}
+.player-wrapper.player-simple-mode .area-label, .opponent-wrapper.opponent-simple-mode .area-label {
+    color: #000; text-shadow: none;
+}
 
-/* オナニー (ピンク系) */
+/* Theme Active Helpers */
+.counter-wrapper.sadist-ui-active .area-label { color: #C71585; text-shadow: 1px 1px 2px #FFB6C1; }
+.counter-wrapper.sadist-ui-active .hand-counter-group { background-color: #FFF0F5; border-color: #FF69B4; }
+.counter-wrapper.sadist-ui-active .player-icon-slot { background-color: #FFF0F5; border-color: #C71585; }
+.counter-wrapper.sadist-ui-active .player-name-input { color: #C71585; background-color: #FFF5FA; border-color: #FFB6C1; }
+.counter-wrapper.sadist-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.sadist-ui-active .lp-counter-input, .counter-wrapper.sadist-ui-active .mana-counter-input { color: #C71585; background-color: #FFF5FA; border-color: #FFB6C1; }
+
+.counter-wrapper.masochist-ui-active .area-label { color: #00008B; text-shadow: 1px 1px 2px #B0C4DE; }
+.counter-wrapper.masochist-ui-active .hand-counter-group { background-color: #F0F8FF; border-color: #4169E1; }
+.counter-wrapper.masochist-ui-active .player-icon-slot { background-color: #F0F8FF; border-color: #00008B; }
+.counter-wrapper.masochist-ui-active .player-name-input { color: #00008B; background-color: #F0F8FF; border-color: #B0C4DE; }
+.counter-wrapper.masochist-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.masochist-ui-active .lp-counter-input, .counter-wrapper.masochist-ui-active .mana-counter-input { color: #00008B; background-color: #F0F8FF; border-color: #B0C4DE; }
+
+.counter-wrapper.magickers-ui-active .area-label { color: #c77dff; text-shadow: 1px 1px 2px #7b2cbf; }
+.counter-wrapper.magickers-ui-active .hand-counter-group { background-color: #240046; border-color: #7b2cbf; }
+.counter-wrapper.magickers-ui-active .player-icon-slot { background-color: #3c096c; border-color: #9d4edd; }
+.counter-wrapper.magickers-ui-active .player-name-input { color: #e0aaff; background-color: #240046; border-color: #9d4edd; }
+.counter-wrapper.magickers-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.magickers-ui-active .lp-counter-input, .counter-wrapper.magickers-ui-active .mana-counter-input { color: #e0aaff; background-color: #240046; border-color: #9d4edd; }
+
+.counter-wrapper.striker-ui-active .area-label { color: #cd5c5c; text-shadow: 1px 1px 2px #800000; }
+.counter-wrapper.striker-ui-active .hand-counter-group { background-color: #2b0505; border-color: #8b0000; }
+.counter-wrapper.striker-ui-active .player-icon-slot { background-color: #4a0a0a; border-color: #b22222; }
+.counter-wrapper.striker-ui-active .player-name-input { color: #ffcccc; background-color: #2b0505; border-color: #8b0000; }
+.counter-wrapper.striker-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.striker-ui-active .lp-counter-input, .counter-wrapper.striker-ui-active .mana-counter-input { color: #ffcccc; background-color: #2b0505; border-color: #8b0000; }
+
+.counter-wrapper.simple-ui-active .area-label { color: #000; text-shadow: none; }
+.counter-wrapper.simple-ui-active .hand-counter-group { background-color: #fff; border-color: #000; }
+.counter-wrapper.simple-ui-active .player-icon-slot { background-color: #fff; border-color: #000; }
+.counter-wrapper.simple-ui-active .player-name-input { color: #000; background-color: #fff; border-color: #ccc; font-family: sans-serif; }
+.counter-wrapper.simple-ui-active .simple-counter-buttons input[type="number"],
+.counter-wrapper.simple-ui-active .lp-counter-input, .counter-wrapper.simple-ui-active .mana-counter-input { color: #000; background-color: #fff; border-color: #ccc; }
+
+/* Modal & Tooltip Theme Support (Sadist & New Themes) */
+body.sm-mode-active .flavor-editor-modal, body.sm-mode-active .memo-editor-modal, body.sm-mode-active .memo-tooltip { background-color: #FFF0F5; border-color: #FF69B4; color: #333; }
+body.sm-mode-active .flavor-editor-header, body.sm-mode-active .memo-editor-header { background-color: #FFECF5; border-bottom-color: #FFB6C1; color: #8B008B; }
+body.sm-mode-active .flavor-image-preview, body.sm-mode-active .flavor-drop-zone, body.sm-mode-active .memo-editor-modal textarea { background-color: #FFF5FA; border-color: #FFB6C1; color: #333; }
+body.sm-mode-active .flavor-editor-buttons, body.sm-mode-active .memo-editor-buttons { background-color: #FFF0F5; border-top-color: #FFECF5; }
+
+body.magickers-mode-active .flavor-editor-modal, body.magickers-mode-active .memo-editor-modal, body.magickers-mode-active .memo-tooltip { background-color: #240046; border-color: #7b2cbf; color: #e0aaff; }
+body.magickers-mode-active .flavor-editor-header, body.magickers-mode-active .memo-editor-header { background-color: #10002b; border-bottom-color: #7b2cbf; color: #e0aaff; }
+body.magickers-mode-active .flavor-image-preview, body.magickers-mode-active .flavor-drop-zone, body.magickers-mode-active .memo-editor-modal textarea { background-color: #3c096c; border-color: #9d4edd; color: #e0aaff; }
+body.magickers-mode-active .flavor-editor-buttons, body.magickers-mode-active .memo-editor-buttons { background-color: #240046; border-top-color: #7b2cbf; }
+
+body.striker-mode-active .flavor-editor-modal, body.striker-mode-active .memo-editor-modal, body.striker-mode-active .memo-tooltip { background-color: #2b0505; border-color: #8b0000; color: #ffcccc; }
+body.striker-mode-active .flavor-editor-header, body.striker-mode-active .memo-editor-header { background-color: #1a0303; border-bottom-color: #8b0000; color: #ffcccc; }
+body.striker-mode-active .flavor-image-preview, body.striker-mode-active .flavor-drop-zone, body.striker-mode-active .memo-editor-modal textarea { background-color: #4a0a0a; border-color: #cd5c5c; color: #ffcccc; }
+body.striker-mode-active .flavor-editor-buttons, body.striker-mode-active .memo-editor-buttons { background-color: #2b0505; border-top-color: #8b0000; }
+
+body.simple-mode-active .flavor-editor-modal, body.simple-mode-active .memo-editor-modal, body.simple-mode-active .memo-tooltip { background-color: #fff; border-color: #000; color: #000; font-family: sans-serif; }
+body.simple-mode-active .flavor-editor-header, body.simple-mode-active .memo-editor-header { background-color: #f0f0f0; border-bottom-color: #ccc; color: #000; }
+body.simple-mode-active .flavor-image-preview, body.simple-mode-active .flavor-drop-zone, body.simple-mode-active .memo-editor-modal textarea { background-color: #fff; border-color: #666; color: #000; }
+body.simple-mode-active .flavor-editor-buttons, body.simple-mode-active .memo-editor-buttons { background-color: #fff; border-top-color: #ccc; }
+
+/* Drawer Theming */
+body.player-sadist-active #player-drawer, body.opponent-sadist-active #opponent-drawer { background-color: #FFF0F5; border-color: #C71585; color: #333; }
+body.player-sadist-active #player-drawer-toggle, body.opponent-sadist-active #opponent-drawer-toggle { background-color: #ffcc00; color: #333; box-shadow: 0 2px #997a00; }
+body.player-sadist-active #player-drawer .drawer-tabs, body.opponent-sadist-active #opponent-drawer .drawer-tabs { background-color: #FFECF5; border-bottom-color: #FF69B4; }
+body.player-sadist-active #player-drawer .drawer-tab-btn, body.opponent-sadist-active #opponent-drawer .drawer-tab-btn { color: #C71585; border-right-color: #FFB6C1; }
+body.player-sadist-active #player-drawer .drawer-tab-btn.active, body.opponent-sadist-active #opponent-drawer .drawer-tab-btn.active { background-color: #FF69B4; color: #FFF0F5; }
+body.player-sadist-active #player-drawer .drawer-panel .deck-back-slot-container, body.opponent-sadist-active #opponent-drawer .drawer-panel .deck-back-slot-container { background-color: #FFF5FA; border-color: #FFB6C1; }
+
+body.player-magickers-active #player-drawer, body.opponent-magickers-active #opponent-drawer { background-color: #240046; border-color: #7b2cbf; color: #e0aaff; }
+body.player-magickers-active #player-drawer-toggle, body.opponent-magickers-active #opponent-drawer-toggle { background-color: #9d4edd; color: #fff; box-shadow: 0 2px #5a189a; }
+body.player-magickers-active #player-drawer .drawer-tabs, body.opponent-magickers-active #opponent-drawer .drawer-tabs { background-color: #10002b; border-bottom-color: #5a189a; }
+body.player-magickers-active #player-drawer .drawer-tab-btn, body.opponent-magickers-active #opponent-drawer .drawer-tab-btn { color: #c77dff; border-right-color: #5a189a; }
+body.player-magickers-active #player-drawer .drawer-tab-btn.active, body.opponent-magickers-active #opponent-drawer .drawer-tab-btn.active { background-color: #7b2cbf; color: #fff; }
+body.player-magickers-active #player-drawer .drawer-panel .deck-back-slot-container, body.opponent-magickers-active #opponent-drawer .drawer-panel .deck-back-slot-container { background-color: #3c096c; border-color: #9d4edd; }
+
+body.player-striker-active #player-drawer, body.opponent-striker-active #opponent-drawer { background-color: #2b0505; border-color: #8b0000; color: #ffcccc; }
+body.player-striker-active #player-drawer-toggle, body.opponent-striker-active #opponent-drawer-toggle { background-color: #b22222; color: #fff; box-shadow: 0 2px #800000; }
+body.player-striker-active #player-drawer .drawer-tabs, body.opponent-striker-active #opponent-drawer .drawer-tabs { background-color: #1a0303; border-bottom-color: #8b0000; }
+body.player-striker-active #player-drawer .drawer-tab-btn, body.opponent-striker-active #opponent-drawer .drawer-tab-btn { color: #cd5c5c; border-right-color: #8b0000; }
+body.player-striker-active #player-drawer .drawer-tab-btn.active, body.opponent-striker-active #opponent-drawer .drawer-tab-btn.active { background-color: #a52a2a; color: #fff; }
+body.player-striker-active #player-drawer .drawer-panel .deck-back-slot-container, body.opponent-striker-active #opponent-drawer .drawer-panel .deck-back-slot-container { background-color: #4a0a0a; border-color: #cd5c5c; }
+
+body.player-simple-active #player-drawer, body.opponent-simple-active #opponent-drawer { background-color: #fff; border-color: #000; color: #000; }
+body.player-simple-active #player-drawer-toggle, body.opponent-simple-active #opponent-drawer-toggle { background-color: #eee; color: #000; box-shadow: 0 2px #ccc; }
+body.player-simple-active #player-drawer .drawer-tabs, body.opponent-simple-active #opponent-drawer .drawer-tabs { background-color: #f0f0f0; border-bottom-color: #000; }
+body.player-simple-active #player-drawer .drawer-tab-btn, body.opponent-simple-active #opponent-drawer .drawer-tab-btn { color: #333; border-right-color: #ccc; }
+body.player-simple-active #player-drawer .drawer-tab-btn.active, body.opponent-simple-active #opponent-drawer .drawer-tab-btn.active { background-color: #333; color: #fff; }
+body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container, body.opponent-simple-active #opponent-drawer .drawer-panel .deck-back-slot-container { background-color: #fff; border-color: #000; }
+
+/* Common Button Styles Overrides for Themes */
+.player-wrapper.player-magickers-mode .draw-btn, .player-wrapper.player-magickers-mode .counter-btn,
+.opponent-wrapper.opponent-magickers-mode .draw-btn, .opponent-wrapper.opponent-magickers-mode .counter-btn {
+    background-color: #9d4edd; color: #fff; box-shadow: 0 2px #5a189a;
+}
+.player-wrapper.player-magickers-mode .draw-btn:hover, .player-wrapper.player-magickers-mode .counter-btn:hover { background-color: #c77dff; }
+.player-wrapper.player-magickers-mode .draw-btn:active, .player-wrapper.player-magickers-mode .counter-btn:active { box-shadow: 0 0 #5a189a; }
+
+.player-wrapper.player-striker-mode .draw-btn, .player-wrapper.player-striker-mode .counter-btn,
+.opponent-wrapper.opponent-striker-mode .draw-btn, .opponent-wrapper.opponent-striker-mode .counter-btn {
+    background-color: #cd5c5c; color: #fff; box-shadow: 0 2px #8b0000;
+}
+.player-wrapper.player-striker-mode .draw-btn:hover, .player-wrapper.player-striker-mode .counter-btn:hover { background-color: #f08080; }
+.player-wrapper.player-striker-mode .draw-btn:active, .player-wrapper.player-striker-mode .counter-btn:active { box-shadow: 0 0 #8b0000; }
+
+.player-wrapper.player-simple-mode .draw-btn, .player-wrapper.player-simple-mode .counter-btn,
+.opponent-wrapper.opponent-simple-mode .draw-btn, .opponent-wrapper.opponent-simple-mode .counter-btn {
+    background-color: #eee; color: #000; box-shadow: 0 1px #ccc; border: 1px solid #999;
+}
+.player-wrapper.player-simple-mode .draw-btn:hover, .player-wrapper.player-simple-mode .counter-btn:hover { background-color: #ddd; }
+.player-wrapper.player-simple-mode .draw-btn:active, .player-wrapper.player-simple-mode .counter-btn:active { box-shadow: none; transform: translateY(1px); }
+
+/* Animations & Effects (Unchanged) */
 @keyframes masturbate-glow {
     0% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
     50% { filter: brightness(1.2) drop-shadow(0 0 10px #ff1493); }
     100% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
 }
 
-.thumbnail[data-is-masturbating="true"] .card-image {
+.thumbnail[data-is-masturbating="true"]:not(.effect-active):not(.attack-active):not(.target-active) .card-image {
     animation: masturbate-glow 2s infinite ease-in-out;
 }
 
-/* 常時発動 (シアン系) */
 @keyframes permanent-glow {
     0% { filter: brightness(1) drop-shadow(0 0 2px #00ffff); }
     50% { filter: brightness(1.2) drop-shadow(0 0 10px #00ced1); }
     100% { filter: brightness(1) drop-shadow(0 0 2px #00ffff); }
 }
 
-.thumbnail[data-is-permanent="true"] .card-image {
+.thumbnail[data-is-permanent="true"]:not(.effect-active):not(.attack-active):not(.target-active) .card-image {
     animation: permanent-glow 2s infinite ease-in-out;
 }
 
-/* 効果発動 (ゴールド/白金系 - 差別化のため維持) */
 @keyframes effect-flash {
     0% { filter: brightness(1); }
     25% { filter: brightness(2) drop-shadow(0 0 15px gold); }
@@ -994,10 +1117,9 @@ body.sm-mode-active .flavor-delete-btn:active {
     animation: effect-flash 0.6s ease-out;
 }
 
-/* アタック (攻撃的なオレンジ・黄色系 - 修正: 効果発動と差別化) */
 @keyframes attack-flash {
     0% { filter: brightness(1); }
-    25% { filter: brightness(1.7) drop-shadow(0 0 15px #FF4500); } /* OrangeRed系の強い発光 */
+    25% { filter: brightness(1.7) drop-shadow(0 0 15px #FF4500); } 
     100% { filter: brightness(1); }
 }
 
@@ -1006,7 +1128,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     z-index: 20;
 }
 
-/* 対象選択 (既存: 赤系) */
 @keyframes target-lock {
     0% { box-shadow: 0 0 0 rgba(255, 0, 0, 0); filter: sepia(0); }
     50% { box-shadow: 0 0 15px red; filter: sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -1017,7 +1138,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     animation: target-lock 0.8s ease-in-out;
 }
 
-/* 自動減少中の盤面エフェクト (全体を包むラッパーに適用) */
 .player-wrapper.auto-decrease-active,
 .opponent-wrapper.auto-decrease-active {
     box-shadow: 0 0 15px #ff1493, inset 0 0 15px #ff1493;
@@ -1077,7 +1197,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     color: white;
 }
 
-/* 設定パネル内のコントロール */
 #common-settings-panel .drawer-common-controls {
     align-items: stretch; 
 }
@@ -1118,7 +1237,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-/* 待機時間入力 */
 #replay-wait-time-input {
     width: 60px;
     text-align: center;
@@ -1129,7 +1247,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     padding: 2px;
 }
 
-/* BGM Selection Dropdown */
 .bgm-select {
     background-color: #333;
     color: #ccc;
@@ -1144,7 +1261,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     border-color: #888;
 }
 
-/* オーディオ設定の横並びレイアウト */
 .audio-settings-row {
     display: flex;
     flex-direction: row;
@@ -1157,7 +1273,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     align-items: center;
 }
 
-/* 設定用チェックボックスリスト */
 .settings-checkbox-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1183,4 +1298,367 @@ body.sm-mode-active .flavor-delete-btn:active {
 }
 .settings-checkbox-list input {
     margin-right: 5px;
+}
+
+/* Custom Context Menu - Fix */
+.custom-context-menu {
+    display: none;
+    position: absolute; 
+    width: 210px; 
+    font-size: 15px; 
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    color: #333; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 20000 !important; /* Fix for hidden behind modals */
+    border-radius: 5px;
+    overflow: visible; /* Changed from hidden to allow submenus */
+    font-family: 'Georgia', serif; 
+}
+.custom-context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.custom-context-menu li {
+    padding: 0px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;  
+}
+.custom-context-menu li:hover {
+    background-color: #007bff; 
+    color: white;
+}
+
+.custom-context-menu .has-submenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-context-menu .submenu {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-left: -1px;
+    width: 220px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 0;
+    list-style: none;
+    z-index: 1001;
+    transform: translateY(-50%);
+}
+
+.custom-context-menu .submenu li {
+    color: #333; 
+    padding: 3px 15px;
+}
+.custom-context-menu .submenu li:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.custom-context-menu .has-submenu:hover > .submenu {
+    display: block;
+}
+
+.custom-context-menu .submenu.open-left {
+    left: auto;
+    right: 100%;
+    margin-left: 0;
+    margin-right: -1px;
+}
+
+.custom-context-menu .submenu.open-top {
+    top: auto;
+    bottom: 0;
+    transform: none;
+}
+
+/* Memo Editor Updates */
+.memo-editor-modal {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px; 
+    max-width: 90vw;
+    max-height: 90vh;
+    z-index: 30000 !important; /* Increased to stay above context menu and other modals */
+    background-color: #3a3a5e; 
+    border: 1px solid #5a5a9a; 
+    color: #e0e0e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    
+    /* Resize logic */
+    display: flex; 
+    flex-direction: column;
+    resize: both;
+    overflow: hidden;
+}
+
+.memo-editor-header {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: #2a2a4e; 
+    border-bottom: 1px solid #5a5a9a;
+    color: #a0a0e0; 
+    cursor: move; /* Ensure draggable cursor */
+    flex-shrink: 0;
+}
+
+.memo-editor-modal textarea {
+    width: 100%;
+    box-sizing: border-box; 
+    padding: 10px 15px;
+    border: none;
+    resize: none; /* Disable internal resize, rely on window */
+    flex-grow: 1; /* Fill remaining space */
+    font-family: 'Georgia', serif;
+    font-size: 1em;
+    background-color: #4a4a6e; 
+    color: #e0e0e0;
+    border-bottom: 1px solid #2a2a4e;
+    height: auto;
+}
+
+.memo-editor-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 10px 15px;
+    background-color: #3a3a5e; 
+    flex-shrink: 0;
+}
+
+.memo-editor-buttons button {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.memo-editor-buttons button:hover { background-color: #d0d0d0; }
+.memo-editor-buttons button:active { background-color: #ffcc00; box-shadow: 0 0 #997a00; transform: translateY(2px); }
+
+.memo-editor-buttons button#memo-editor-cancel {
+    background-color: #cc0000; color: white; box-shadow: 0 2px #800000;
+}
+.memo-editor-buttons button#memo-editor-cancel:hover { background-color: #e60000; }
+.memo-editor-buttons button#memo-editor-cancel:active { box-shadow: 0 0 #800000; }
+
+.memo-editor-buttons button#memo-editor-save {
+    background-color: #f0f0f0; box-shadow: 0 2px #b0b0b0; 
+}
+.memo-editor-buttons button#memo-editor-save:hover { background-color: #d0d0d0; }
+.memo-editor-buttons button#memo-editor-save:active { background-color: #ffcc00; box-shadow: 0 0 #997a00; }
+
+.memo-tooltip {
+    display: none; 
+    position: absolute;
+    z-index: 1002; 
+    background-color: #3a3a5e; 
+    color: #e0e0e0;
+    border: 1px solid #5a5a9a; 
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    font-family: 'Georgia', serif;
+    font-size: 0.9em;
+    max-width: 250px;
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+    pointer-events: none; 
+}
+
+/* Decoration Settings Modal Styles */
+#decoration-settings-modal {
+    display: flex;
+    flex-direction: column;
+    resize: both;
+    overflow: hidden;
+    max-height: 90vh;
+}
+
+#decoration-settings-modal .custom-counter-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.decoration-settings-section {
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+.decoration-columns-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.decoration-column {
+    background-color: #2a2a4e;
+    border: 1px solid #5a5a9a;
+    border-radius: 5px;
+    min-width: 130px;
+    width: 130px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.column-header {
+    background-color: #3a3a5e;
+    color: #a0a0e0;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid #5a5a9a;
+    font-size: 0.9em;
+}
+
+.decoration-drop-zone {
+    height: 35px;
+    margin: 5px;
+    border: 1px dashed #7a7aa0;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #a0a0e0;
+    cursor: pointer;
+    font-size: 0.8em;
+    background-color: rgba(0,0,0,0.2);
+    transition: background-color 0.2s;
+}
+.decoration-drop-zone:hover {
+    background-color: #4a4a6e;
+}
+
+.decoration-stock-container {
+    flex-grow: 1;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    max-height: 250px;
+    min-height: 100px;
+}
+
+.decoration-stock-item {
+    width: 100%;
+    aspect-ratio: 67.2 / 119.712;
+    border: 1px solid #555;
+    border-radius: 3px;
+    cursor: grab;
+    position: relative;
+    background-color: #000;
+}
+.decoration-stock-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+.decoration-stock-item:active {
+    cursor: grabbing;
+}
+
+.decoration-delete-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    background-color: #cc0000;
+    color: white;
+    border-radius: 50%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+.decoration-stock-item:hover .decoration-delete-btn {
+    display: flex;
+}
+
+/* Battle Confirm Modal Styles */
+#battle-confirm-header {
+    text-align: center;
+    cursor: move;
+}
+
+/* 装飾設定モーダルのテーマ固定化 */
+#decoration-settings-modal,
+body.sm-mode-active #decoration-settings-modal,
+body.magickers-mode-active #decoration-settings-modal,
+body.striker-mode-active #decoration-settings-modal,
+body.simple-mode-active #decoration-settings-modal {
+    background-color: #3a3a5e !important;
+    border-color: #5a5a9a !important;
+    color: #e0e0e0 !important;
+}
+
+#decoration-settings-header,
+body.sm-mode-active #decoration-settings-header,
+body.magickers-mode-active #decoration-settings-header,
+body.striker-mode-active #decoration-settings-header,
+body.simple-mode-active #decoration-settings-header {
+    background-color: #2a2a4e !important;
+    border-bottom-color: #5a5a9a !important;
+    color: #a0a0e0 !important;
+}
+
+#decoration-settings-modal .column-header {
+    background-color: #3a3a5e !important;
+    color: #a0a0e0 !important;
+    border-bottom-color: #5a5a9a !important;
+}
+
+#decoration-settings-modal .decoration-drop-zone {
+    background-color: rgba(0,0,0,0.2) !important;
+    color: #a0a0e0 !important;
+    border-color: #7a7aa0 !important;
+}
+#decoration-settings-modal .decoration-drop-zone:hover {
+    background-color: #4a4a6e !important;
+}
+
+#decoration-settings-modal .decoration-stock-item {
+    border-color: #555 !important;
+    background-color: #000 !important;
+}
+
+#decoration-settings-close-btn {
+    color: #666 !important;
+    cursor: pointer;
+}
+#decoration-settings-close-btn:hover {
+    color: #fff !important;
+}
+
+#decoration-settings-modal .decoration-column {
+    background-color: #2a2a4e !important;
+    border-color: #5a5a9a !important;
+}
 }

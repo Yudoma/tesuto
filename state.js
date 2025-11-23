@@ -41,12 +41,15 @@ const seConfig = {
     'コイントス.mp3': true,
     '自動減少.mp3': true,
     '効果発動.mp3': true,
+    'スペル.mp3': true,
     '対象に取る.mp3': true,
     'アタック.mp3': true,
     '常時発動.mp3': true,
     'ブロッカー.mp3': true,
-    'O.mp3': true,
-    'ターン開始.mp3': true
+    'オナニー.mp3': true,
+    'ターン開始.mp3': true,
+    '破壊.mp3': true,
+    '被弾.mp3': true
 };
 
 // エフェクト個別設定 (初期値は全てtrue)
@@ -55,9 +58,32 @@ const effectConfig = {
     'permanent': true,    // 常時発動
     'attack': true,       // アタック
     'effect': true,       // 効果発動
-    'target': true,       // 対象に取る
-    'autoDecrease': true  // 自動減少(盤面全体)
+    'target': true,       // 対象選択
+    'autoDecrease': true  // 自動減少
 };
+
+// 自動処理設定
+const autoConfig = {
+    'autoManaTap': true,       // マナエリアでタップ時にマナ+1
+    'autoManaPlacement': true, // マナエリアにカード配置時マナ+1
+    'autoBattleCalc': true,    // 「アタック/攻撃」時のBP計算
+    'autoManaTapInZone': true, // マナゾーンに置いた際にタップ状態で置く
+    'autoAttackTap': true,     // 「アタック/攻撃」後タップ状態にする
+    'autoManaCost': true,      // カードを出す際、メモ内の「マナ:」に応じてマナ消費
+    'autoGameEnd': true,       // 降参/LP0/ドロー不可時の勝敗判定表示
+    'drawFlipped': false,      // 1ドローする際、カードが反転された状態で手札に加わる
+    'autoBpDestruction': true, // BP0以下で自動破壊
+    'autoMasturbateDrain': true // オナニー中のBP自動減少
+};
+
+// カスタムカウンター設定
+let customCounterTypes = []; // { id, name, icon }
+
+// バトル処理状態
+let isBattleTargetMode = false;
+let isBattleConfirmMode = false; // バトル確認画面の状態
+let currentAttacker = null;
+let currentBattleTarget = null; // バトル確認中のターゲット
 
 let currentDeleteHandler = null;
 let currentMoveToGraveHandler = null;
@@ -76,9 +102,11 @@ let currentPermanentHandler = null;
 let currentAddFlavorHandler = null;
 let currentMasturbateHandler = null;
 let currentBlockerHandler = null;
+let currentExportCardHandler = null;
+let currentImportCardHandler = null;
 let currentMemoTarget = null;
 let currentFlavorTarget = null;
 
-const nonRotatableZones = ['deck', 'grave', 'exclude', 'hand-zone', 'deck-back-slots', 'side-deck', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots', 'icon-zone'];
+const nonRotatableZones = ['deck', 'grave', 'exclude', 'hand-zone', 'deck-back-slots', 'side-deck', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots', 'icon-zone', 'token-zone-slots'];
 const decorationZones = ['exclude', 'side-deck', 'grave', 'deck', 'icon-zone'];
 const stackableZones = ['battle', 'spell', 'mana', 'special1', 'special2'];

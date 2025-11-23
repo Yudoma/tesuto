@@ -610,7 +610,7 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     border-radius: 5px;
-    overflow: hidden;
+    overflow: visible; 
     
     font-family: 'Georgia', serif; 
 }
@@ -620,15 +620,65 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     padding: 0;
 }
 .custom-context-menu li {
-    padding: 0px 15px;
+    padding: 3px 15px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
     white-space: nowrap;  
+    position: relative; 
 }
 
 .custom-context-menu li:hover {
     background-color: #007bff; 
     color: white;
+}
+
+.custom-context-menu .has-submenu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-context-menu .submenu {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-left: -1px;
+    width: 220px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    padding: 0;
+    list-style: none;
+    z-index: 1001;
+    transform: translateY(-50%);
+}
+
+.custom-context-menu .submenu li {
+    color: #333; 
+    padding: 3px 15px;
+}
+.custom-context-menu .submenu li:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.custom-context-menu .has-submenu:hover > .submenu {
+    display: block;
+}
+
+.custom-context-menu .submenu.open-left {
+    left: auto;
+    right: 100%;
+    margin-left: 0;
+    margin-right: -1px;
+}
+
+.custom-context-menu .submenu.open-top {
+    top: auto;
+    bottom: 0;
+    transform: none;
 }
 
 .memo-editor-modal {
@@ -637,7 +687,7 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 300px;
+    width: 500px;
     max-width: 90vw;
     z-index: 1001; 
     
@@ -658,7 +708,9 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     
     background-color: #2a2a4e; 
     border-bottom: 1px solid #5a5a9a;
-    color: #a0a0e0; 
+    color: #a0a0e0;
+    cursor: move;
+    user-select: none;
 }
 
 .memo-editor-modal textarea {
@@ -666,7 +718,7 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     box-sizing: border-box; 
     padding: 10px 15px;
     border: none;
-    resize: vertical; 
+    resize: both; 
     min-height: 80px;
     font-family: 'Georgia', serif;
     font-size: 1em;
@@ -708,7 +760,6 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     transform: translateY(2px); 
 }
 
-/* キャンセルボタンのオーバーライド: 赤色 */
 .memo-editor-buttons button#memo-editor-cancel {
     background-color: #cc0000;
     color: white;
@@ -945,13 +996,6 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     transform: translateY(2px);
 }
 
-#common-drawer #common-decoration-mode-btn {
-    background-color: #ffcc00;
-    box-shadow: 0 2px #997a00;
-}
-#common-drawer #common-decoration-mode-btn:hover {
-    background-color: #ffdb4d;
-}
 #common-drawer #common-decoration-mode-btn:active {
     box-shadow: 0 0 #997a00;
 }
@@ -1257,6 +1301,8 @@ body.sm-mode-active .flavor-editor-buttons button:active,
 body.sm-mode-active .flavor-delete-btn:active,
 body.sm-mode-active .flavor-upload-btn:active {  
     box-shadow: 0 0 #b0b0b0; 
+    background-color: #ffcc00;
+    box-shadow: 0 0 #997a00;
 }
 
 body.sm-mode-active .flavor-upload-btn {
@@ -1280,4 +1326,630 @@ body.sm-mode-active .flavor-delete-btn:hover {
 }
 body.sm-mode-active .flavor-delete-btn:active {
     box-shadow: 0 0 #800000;
+}
+
+/* アニメーション定義 */
+@keyframes masturbate-glow {
+    0% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
+    50% { filter: brightness(1.2) drop-shadow(0 0 10px #ff1493); }
+    100% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
+}
+
+.thumbnail[data-is-masturbating="true"]:not(.effect-active):not(.attack-active):not(.target-active) .card-image {
+    animation: masturbate-glow 2s infinite ease-in-out;
+}
+
+@keyframes permanent-glow {
+    0% { filter: brightness(1) drop-shadow(0 0 2px #00ffff); }
+    50% { filter: brightness(1.2) drop-shadow(0 0 10px #00ced1); }
+    100% { filter: brightness(1) drop-shadow(0 0 2px #00ffff); }
+}
+
+.thumbnail[data-is-permanent="true"]:not(.effect-active):not(.attack-active):not(.target-active) .card-image {
+    animation: permanent-glow 2s infinite ease-in-out;
+}
+
+@keyframes effect-flash {
+    0% { filter: brightness(1); }
+    25% { filter: brightness(2) drop-shadow(0 0 15px gold); }
+    100% { filter: brightness(1); }
+}
+
+.effect-active .card-image {
+    animation: effect-flash 0.6s ease-out;
+}
+
+@keyframes attack-flash {
+    0% { filter: brightness(1); }
+    25% { filter: brightness(1.7) drop-shadow(0 0 15px #FF4500); } 
+    100% { filter: brightness(1); }
+}
+
+.attack-active .card-image {
+    animation: attack-flash 0.6s ease-out;
+    z-index: 20;
+}
+
+@keyframes target-lock {
+    0% { box-shadow: 0 0 0 rgba(255, 0, 0, 0); filter: sepia(0); }
+    50% { box-shadow: 0 0 15px red; filter: sepia(1) hue-rotate(-50deg) saturate(5); }
+    100% { box-shadow: 0 0 0 rgba(255, 0, 0, 0); filter: sepia(0); }
+}
+
+.target-active .card-image {
+    animation: target-lock 0.8s ease-in-out;
+}
+
+.player-wrapper.auto-decrease-active,
+.opponent-wrapper.auto-decrease-active {
+    box-shadow: 0 0 15px #ff1493, inset 0 0 15px #ff1493;
+    transition: box-shadow 0.5s ease-in-out;
+}
+
+.blocker-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 6;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blocker-overlay img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.6;
+}
+
+/* リプレイUI */
+#replay-file-name-display {
+    width: 100%;
+    text-align: center;
+    padding: 2px;
+    border: 1px solid #555;
+    background-color: #222;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#record-stop-btn {
+    background-color: #cc0000;
+    color: white;
+    box-shadow: 0 2px #800000;
+}
+#record-stop-btn:hover {
+    background-color: #e60000;
+}
+
+#replay-pause-btn {
+    background-color: #ffcc00;
+    color: #333;
+}
+
+#replay-stop-btn {
+    background-color: #cc0000;
+    color: white;
+}
+
+#common-settings-panel .drawer-common-controls {
+    align-items: stretch; 
+}
+
+#common-settings-panel input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%; 
+    max-width: 200px;
+    height: 8px;
+    border-radius: 5px;
+    background: #555;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+}
+
+#common-settings-panel input[type="range"]:hover {
+    opacity: 1;
+}
+
+#common-settings-panel input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffcc00;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+#common-settings-panel input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffcc00;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+#replay-wait-time-input {
+    width: 60px;
+    text-align: center;
+    background-color: #444;
+    border: 1px solid #666;
+    color: #ccc;
+    border-radius: 4px;
+    padding: 2px;
+}
+
+.bgm-select {
+    background-color: #333;
+    color: #ccc;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 5px;
+    font-family: 'Georgia', serif;
+    font-size: 0.9em;
+    outline: none;
+}
+.bgm-select:focus {
+    border-color: #888;
+}
+
+.audio-settings-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+}
+.audio-settings-row .common-control-group {
+    flex: 1;
+    align-items: center;
+}
+
+.settings-checkbox-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+    width: 100%;
+    background-color: rgba(0,0,0,0.3);
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    box-sizing: border-box;
+}
+.settings-checkbox-list label {
+    font-size: 0.85em;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.settings-checkbox-list input {
+    margin-right: 5px;
+}
+
+#c-drawer {
+    background-color: #1e3a2e;
+    border-color: #4a8a6a;
+    color: #e0f0e8;
+}
+
+#c-drawer .drawer-header {
+    background-color: #152a20;
+    border-bottom-color: #4a8a6a;
+    color: #8abda0;
+}
+
+#c-drawer .drawer-tabs {
+    background-color: #152a20;
+    border-bottom-color: #4a8a6a;
+}
+
+#c-drawer .drawer-tab-btn {
+    color: #8abda0;
+    border-right-color: #2f5f4f;
+}
+
+#c-drawer .drawer-tab-btn:hover {
+    background-color: #2f5f4f;
+}
+
+#c-drawer .drawer-tab-btn.active {
+    background-color: #4a8a6a;
+    color: #e0f0e8;
+    border-bottom-color: #8abda0;
+}
+
+#c-drawer .drawer-free-space {
+    border-left-color: #4a8a6a;
+}
+
+#c-drawer .area-label {
+    color: #8abda0;
+    text-shadow: none;
+}
+
+#c-drawer .free-space-slot-container {
+    background-color: #152a20;
+    border-color: #4a8a6a;
+}
+
+#c-drawer-toggle {
+    background-color: #8abda0;
+    color: #0a1f15;
+    box-shadow: 0 2px #4a8a6a;
+}
+
+#c-drawer-toggle:active {
+    background-color: #4a8a6a;
+    box-shadow: 0 0 #2f5f4f;
+}
+
+#c-search-filter {
+    width: 95%;
+    padding: 5px;
+    margin: 0 auto 5px auto;
+    box-sizing: border-box;
+    background-color: #2f5f4f;
+    color: #fff;
+    border: 1px solid #4a8a6a;
+    border-radius: 3px;
+    display: block;
+}
+
+#c-search-filter::placeholder {
+    color: #8abda0;
+}
+
+/* Battle Target Selection - Revised Strategy: Darken non-targets */
+
+/* 1. Overlay is now strictly for the message container, background is transparent */
+.battle-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent; 
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 80px;
+    pointer-events: none; 
+}
+
+.battle-message-container {
+    background-color: rgba(40, 0, 0, 0.9);
+    padding: 15px 30px;
+    border-radius: 8px;
+    border: 2px solid #ff4444;
+    text-align: center;
+    pointer-events: auto;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.battle-message {
+    color: #ffcccc;
+    font-size: 1.4em;
+    font-weight: bold;
+    text-shadow: 0 0 5px #ff0000;
+    font-family: 'Georgia', serif;
+}
+
+/* Dim ANY thumbnail or icon slot that is NOT a candidate and NOT an attacker */
+body.battle-target-mode .thumbnail:not(.battle-target-candidate):not(.battle-attacker),
+body.battle-target-mode .player-icon-slot:not(.battle-target-candidate) {
+    filter: brightness(0.4) grayscale(0.5);
+    transition: filter 0.3s ease;
+}
+
+/* Ensure candidates pop out (no filter or specific glow) */
+body.battle-target-mode .thumbnail.battle-target-candidate,
+body.battle-target-mode .player-icon-slot.battle-target-candidate {
+    filter: drop-shadow(0 0 5px #ffae00) !important;
+    cursor: crosshair !important;
+    z-index: 100;
+    position: relative; /* Ensure z-index applies */
+}
+
+/* Ensure attacker pops out */
+body.battle-target-mode .thumbnail.battle-attacker {
+    filter: drop-shadow(0 0 5px #00ccff) !important;
+    z-index: 101;
+    position: relative;
+}
+
+/* Hover effects for candidates */
+body.battle-target-mode .thumbnail.battle-target-candidate:hover,
+body.battle-target-mode .player-icon-slot.battle-target-candidate:hover {
+    filter: drop-shadow(0 0 15px #ff4400) !important;
+    transform: scale(1.05);
+    transition: transform 0.1s ease-in-out;
+}
+
+/* Disable interactions with non-targets or UI elements */
+body.battle-target-mode .hand-buttons button,
+body.battle-target-mode .drawer-toggle,
+body.battle-target-mode .step-btn,
+body.battle-target-mode .turn-btn,
+body.battle-target-mode .counter-btn {
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+body.battle-target-mode #battle-cancel-btn {
+    pointer-events: auto;
+    opacity: 1;
+}
+
+/* --- Custom Counter Styles --- */
+.custom-counter-container {
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap-reverse; 
+    gap: 1px;
+    z-index: 25; 
+    pointer-events: none;
+    padding: 0 2px;
+    box-sizing: border-box;
+}
+
+.custom-counter-item {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.1s;
+}
+.custom-counter-item:hover { transform: scale(1.2); z-index: 30; }
+.custom-counter-item:active { transform: scale(0.9); }
+.custom-counter-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.8));
+}
+
+.counter-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    background-color: #ff0000;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 12px;
+    height: 12px;
+    padding: 0 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+/* 相手側の反転対応 */
+.opponent-wrapper .counter-badge {
+    transform: scaleY(-1);
+}
+body.board-flipped .player-wrapper .counter-badge {
+    transform: scaleY(-1);
+}
+body.board-flipped .opponent-wrapper .counter-badge {
+    transform: scaleY(1);
+}
+
+/* --- Custom Counter Modal Styles --- */
+.custom-counter-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    max-width: 90vw;
+    z-index: 1005; 
+    background-color: #3a3a5e;
+    border: 1px solid #5a5a9a;
+    color: #e0e0e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+}
+
+.custom-counter-header {
+    padding: 10px 15px;
+    background-color: #2a2a4e;
+    border-bottom: 1px solid #5a5a9a;
+    font-weight: bold;
+    color: #a0a0e0;
+    cursor: move;
+    user-select: none;
+}
+
+.custom-counter-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.counter-creation-area {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #5a5a9a;
+}
+
+#new-counter-name {
+    padding: 5px;
+    background-color: #4a4a6e;
+    border: 1px solid #5a5a9a;
+    color: white;
+    border-radius: 3px;
+}
+
+.custom-counter-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.counter-list-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 5px;
+    background-color: #2a2a4e;
+    border: 1px solid #5a5a9a;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+}
+.counter-list-item:hover {
+    background-color: #4a4a6e;
+}
+.counter-list-item img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+.counter-list-item span {
+    font-size: 0.8em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+}
+
+.counter-delete-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    background-color: #cc0000;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.custom-counter-footer {
+    padding: 10px;
+    text-align: right;
+    background-color: #2a2a4e;
+    border-top: 1px solid #5a5a9a;
+}
+
+/* Theme Adaptations for Custom Counter Modal */
+body.sm-mode-active .custom-counter-modal { background-color: #FFF0F5; border-color: #FF69B4; color: #333; }
+body.sm-mode-active .custom-counter-header { background-color: #FFECF5; border-bottom-color: #FFB6C1; color: #8B008B; }
+body.sm-mode-active #new-counter-name { background-color: #FFF5FA; border-color: #FFB6C1; color: #333; }
+body.sm-mode-active .counter-creation-area { border-bottom-color: #FF69B4; }
+body.sm-mode-active .counter-list-item { background-color: #FFF5FA; border-color: #FFB6C1; color: #333; }
+body.sm-mode-active .counter-list-item:hover { background-color: #FFECF5; }
+body.sm-mode-active .custom-counter-footer { background-color: #FFF0F5; border-top-color: #FF69B4; }
+
+body.magickers-mode-active .custom-counter-modal { background-color: #240046; border-color: #7b2cbf; color: #e0aaff; }
+body.magickers-mode-active .custom-counter-header { background-color: #10002b; border-bottom-color: #7b2cbf; color: #e0aaff; }
+body.magickers-mode-active #new-counter-name { background-color: #3c096c; border-color: #9d4edd; color: #e0aaff; }
+body.magickers-mode-active .counter-creation-area { border-bottom-color: #7b2cbf; }
+body.magickers-mode-active .counter-list-item { background-color: #3c096c; border-color: #9d4edd; color: #e0aaff; }
+body.magickers-mode-active .counter-list-item:hover { background-color: #5a189a; }
+body.magickers-mode-active .custom-counter-footer { background-color: #240046; border-top-color: #7b2cbf; }
+
+body.striker-mode-active .custom-counter-modal { background-color: #2b0505; border-color: #8b0000; color: #ffcccc; }
+body.striker-mode-active .custom-counter-header { background-color: #1a0303; border-bottom-color: #8b0000; color: #ffcccc; }
+body.striker-mode-active #new-counter-name { background-color: #4a0a0a; border-color: #cd5c5c; color: #ffcccc; }
+body.striker-mode-active .counter-creation-area { border-bottom-color: #8b0000; }
+body.striker-mode-active .counter-list-item { background-color: #4a0a0a; border-color: #cd5c5c; color: #ffcccc; }
+body.striker-mode-active .counter-list-item:hover { background-color: #5c1010; }
+body.striker-mode-active .custom-counter-footer { background-color: #2b0505; border-top-color: #8b0000; }
+
+body.simple-mode-active .custom-counter-modal { background-color: #fff; border-color: #000; color: #000; font-family: sans-serif; }
+body.simple-mode-active .custom-counter-header { background-color: #f0f0f0; border-bottom-color: #ccc; color: #000; }
+body.simple-mode-active #new-counter-name { background-color: #fff; border-color: #666; color: #000; }
+body.simple-mode-active .counter-creation-area { border-bottom-color: #ccc; }
+body.simple-mode-active .counter-list-item { background-color: #fff; border-color: #666; color: #000; }
+body.simple-mode-active .counter-list-item:hover { background-color: #eee; }
+body.simple-mode-active .custom-counter-footer { background-color: #fff; border-top-color: #ccc; }
+
+/* --- Game Result Overlay Styles --- */
+.game-result-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 3000; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.game-result-content {
+    text-align: center;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.game-result-message {
+    font-size: 5em;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 20px #ff8c00, 0 0 10px #fff;
+    margin-bottom: 30px;
+    font-family: 'Georgia', serif;
+}
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* --- Battle Confirm Modal Styles --- */
+#battle-confirm-attacker-img,
+#battle-confirm-target-img {
+    background-color: #222;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+#battle-confirm-modal {
+    width: 700px !important;
 }
