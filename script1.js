@@ -438,9 +438,6 @@ function executeAction(action) {
                     const toBase = getBaseId(getParentZoneId(toSlot));
                     if (toBase === 'grave' || toBase === 'grave-back-slots') playSe('墓地に送る.mp3');
                     else if (toBase === 'exclude' || toBase === 'exclude-back-slots') playSe('除外する.mp3');
-                    else if (toBase.startsWith('mana')) playSe('マナ配置.mp3');
-                    else if (toBase === 'battle') playSe('バトル配置.mp3');
-                    else if (toBase.startsWith('special')) playSe('特殊配置.mp3');
                     else playSe('カードを配置する.mp3');
 
                     updatePreviewForAction(action.toZone, action.toSlotIndex);
@@ -454,12 +451,7 @@ function executeAction(action) {
                 const prefix = getPrefixFromZoneId(action.zoneId);
                 createCardThumbnail(action.cardData, slot, false, false, prefix);
                 updateSlotStackState(slot);
-                
-                const toBase = getBaseId(getParentZoneId(slot));
-                if (toBase.startsWith('mana')) playSe('マナ配置.mp3');
-                else if (toBase === 'battle') playSe('バトル配置.mp3');
-                else if (toBase.startsWith('special')) playSe('特殊配置.mp3');
-                else playSe('カードを配置する.mp3');
+                playSe('カードを配置する.mp3');
                 
                 const zId = getParentZoneId(slot);
                 if (zId && zId.endsWith('-back-slots')) arrangeSlots(zId);
@@ -745,79 +737,4 @@ function getSlotByIndex(zoneId, index) {
     const container = zone.querySelector('.slot-container, .deck-back-slot-container, .free-space-slot-container, .token-slot-container, .hand-zone-slots') || zone;
     const slots = container.querySelectorAll('.card-slot');
     return slots[index] || null;
-}
-
-function setupHorizontalScroll() {
-    const containers = document.querySelectorAll('.hand-zone-slots, .deck-back-slot-container, .free-space-slot-container, .token-slot-container, .decoration-columns-container');
-    containers.forEach(container => {
-        container.addEventListener('wheel', (e) => {
-            // 修正: 装飾設定の各列（縦スクロール）の上では横スクロールさせない
-            if (container.classList.contains('decoration-columns-container') && e.target.closest('.decoration-stock-container')) {
-                return; // 縦スクロールを優先（デフォルトの挙動に任せる）
-            }
-
-            if (e.deltaY !== 0) {
-                e.preventDefault();
-                container.scrollLeft += e.deltaY;
-            }
-        });
-    });
-}
-
-function activateDrawerTab(targetId, drawerElement) {
-    if (!drawerElement) return;
-    
-    const tabs = drawerElement.querySelectorAll('.drawer-tab-btn');
-    tabs.forEach(t => {
-        if (t.dataset.target === targetId) {
-            t.classList.add('active');
-        } else {
-            t.classList.remove('active');
-        }
-    });
-
-    const allContentAreas = drawerElement.querySelectorAll('.drawer-panel, .drawer-free-space, .drawer-token-space');
-    allContentAreas.forEach(area => {
-         if (area.id === targetId || area.querySelector(`#${targetId}`)) {
-             area.style.display = 'flex';
-             area.classList.add('active');
-         } else {
-             area.style.display = 'none';
-             area.classList.remove('active');
-         }
-    });
-}
-
-function setupDrawerResize() {
-    const drawers = document.querySelectorAll('.drawer-wrapper, #common-drawer');
-    drawers.forEach(drawer => {
-        let handle = drawer.querySelector('.resize-handle');
-        if (!handle) {
-            handle = document.createElement('div');
-            handle.className = 'resize-handle';
-            drawer.appendChild(handle);
-        }
-        
-        handle.addEventListener('mousedown', initResize);
-        
-        function initResize(e) {
-            window.addEventListener('mousemove', resize);
-            window.addEventListener('mouseup', stopResize);
-            e.preventDefault();
-            isResizingDrawer = true;
-        }
-        
-        function resize(e) {
-            const newWidth = e.clientX - drawer.getBoundingClientRect().left;
-            const newHeight = e.clientY - drawer.getBoundingClientRect().top;
-            if (newWidth > 200) drawer.style.width = newWidth + 'px';
-            if (newHeight > 200) drawer.style.height = newHeight + 'px';
-        }
-        
-        function stopResize() {
-            window.removeEventListener('mousemove', resize);
-            window.removeEventListener('mouseup', stopResize);
-            isResizingDrawer = false;
-        }
-    });
 }

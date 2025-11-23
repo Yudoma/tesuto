@@ -1,12 +1,3 @@
-// UI内でもデフォルトメモを使用するため定義
-const UI_DEFAULT_CARD_MEMO = `[カード名:-]/#e0e0e0/#555/1.0/非表示/
-[属性:-]/#e0e0e0/#555/1.0/非表示/
-[マナ:-]/#e0e0e0/#555/1.0/非表示/
-[BP:-]/#e0e0e0/#555/1.0/非表示/
-[スペル:-]/#e0e0e0/#555/1.0/非表示/
-[フレーバーテキスト:-]/#fff/#555/1.0/非表示/
-[効果:-]/#e0e0e0/#555/0.7/非表示/`;
-
 let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem, masturbateMenuItem, blockerMenuItem, permanentMenuItem, attackMenuItem;
 let actionMenuItem, targetMenuItem, addFlavorMenuItem;
 let customCounterMenuItem, changeStyleMenuItem; 
@@ -236,6 +227,7 @@ function openDecorationSettingsModal() {
     
     const currentMode = document.getElementById('sm-toggle-btn')?.dataset.mode || 'simple';
     
+    // 共通の装飾デフォルト
     const defaultDecorationsCommon = {
         'deck': ['./decoration/デッキ.png'],
         'side-deck': ['./decoration/EXデッキ.png'],
@@ -243,6 +235,7 @@ function openDecorationSettingsModal() {
         'exclude': ['./decoration/除外エリア.png']
     };
 
+    // アイコンのデフォルト設定 (Player/Opponentで異なる順序)
     const defaultIconsPlayer = [
         './decoration/マゾヒスト.png',
         './decoration/マジッカーズ.png',
@@ -272,15 +265,18 @@ function openDecorationSettingsModal() {
 
                 if (targetType === 'icon') {
                     let stock = customIconStocks[owner][currentMode] || [];
+                    // ストックが空ならデフォルトアイコン群をセット
                     if (!Array.isArray(stock) || stock.length === 0) {
                         stock = (owner === 'player') ? defaultIconsPlayer : defaultIconsOpponent;
                         customIconStocks[owner][currentMode] = stock;
                     }
                     
+                    // ストックを描画
                     stock.forEach(imgSrc => {
                         addDecorationToStock(imgSrc, targetType, owner, container, false);
                     });
                 } else {
+                    // デッキ等は共通デフォルト
                     const defaults = defaultDecorationsCommon[targetType] || [];
                     defaults.forEach(imgSrc => {
                         addDecorationToStock(imgSrc, targetType, owner, container, false);
@@ -354,6 +350,7 @@ function setupDecorationDropZones() {
 }
 
 function addDecorationToStock(imageSrc, targetType, owner, container, isNew = true) {
+    // 重複チェック
     const existingItems = Array.from(container.querySelectorAll('img')).map(img => img.src);
     if (!isNew) {
         const isDuplicate = existingItems.some(src => src.includes(imageSrc) || imageSrc.includes(src));
@@ -366,18 +363,25 @@ function addDecorationToStock(imageSrc, targetType, owner, container, isNew = tr
     item.dataset.targetType = targetType;
     item.dataset.owner = owner;
     
+    // デフォルトメモ定義
+    const defaultMemo = `[カード名:-]/#e0e0e0/#555/1.0/非表示/
+[属性:-]/#e0e0e0/#555/1.0/非表示/
+[マナ:-]/#e0e0e0/#555/1.0/非表示/
+[BP:-]/#e0e0e0/#555/1.0/非表示/
+[スペル:-]/#e0e0e0/#555/1.0/非表示/
+[フレーバーテキスト:-]/#fff/#555/1.0/非表示/
+[効果:-]/#e0e0e0/#555/0.7/非表示/`;
+
     if (isNew || targetType === 'icon') {
-        item.dataset.memo = UI_DEFAULT_CARD_MEMO;
+        item.dataset.memo = defaultMemo;
     }
 
     const img = document.createElement('img');
     img.src = imageSrc;
-    
     // 画像読み込みエラー時に要素を削除する
     img.onerror = () => {
         item.remove();
     };
-    
     item.appendChild(img);
 
     const deleteBtn = document.createElement('div');
@@ -385,21 +389,27 @@ function addDecorationToStock(imageSrc, targetType, owner, container, isNew = tr
     deleteBtn.textContent = '×';
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        // まず削除
         item.remove();
         playSe('ボタン共通.mp3');
+        
+        // 削除後に残ったリストの先頭を反映させる
         updateZoneDecorationFromStock(targetType, owner, container);
         saveIconStock(targetType, owner, container);
     });
     item.appendChild(deleteBtn);
 
+    // 並び替え用イベント
     item.addEventListener('dragstart', handleStockItemDragStart);
     item.addEventListener('dragover', handleStockItemDragOver);
     item.addEventListener('drop', handleStockItemDrop);
     
+    // 右クリックでコンテキストメニュー
     item.addEventListener('contextmenu', (e) => {
         handleStockItemContextMenu(e, item, targetType, owner, container);
     });
 
+    // 新規の場合は先頭に
     if (isNew) {
         container.insertBefore(item, container.firstChild);
         playSe('ボタン共通.mp3');
@@ -416,28 +426,34 @@ function handleStockItemContextMenu(e, item, targetType, owner, container) {
     
     if (!contextMenu) return;
 
+    // 通常のメニュー項目を非表示にする
     const allItems = contextMenu.querySelectorAll('li');
     allItems.forEach(li => li.style.display = 'none');
     
     const topItems = contextMenu.querySelectorAll('#custom-context-menu > ul > li');
     topItems.forEach(li => li.style.display = 'none');
 
+    // 装飾設定用の項目を表示
     if (memoMenuItem) memoMenuItem.style.display = 'block'; 
     if (setAsTopMenuItem) setAsTopMenuItem.style.display = 'block';
     
+    // 「削除」は赤×があるのでコンテキストメニューからは隠す
     if (deleteMenuItem) deleteMenuItem.style.display = 'none';
     
+    // ハンドラ設定
     currentMemoHandler = () => {
         currentMemoTarget = item;
         memoTextarea.value = item.dataset.memo || '';
         openMemoEditor(); 
     };
     
+    // 「この画像に設定する」処理
     currentStockItemTarget = () => setDecorationAsTop(item, targetType, owner, container);
 
+    // メニュー表示位置調整
     contextMenu.style.display = 'block';
     contextMenu.style.visibility = 'hidden';
-    contextMenu.style.zIndex = '10005'; 
+    contextMenu.style.zIndex = '10005'; // モーダルより手前に表示
     
     const menuWidth = contextMenu.offsetWidth;
     const menuHeight = contextMenu.offsetHeight;
@@ -456,6 +472,7 @@ function handleStockItemContextMenu(e, item, targetType, owner, container) {
 }
 
 function setDecorationAsTop(item, targetType, owner, container) {
+    // アイテムをコンテナの先頭に移動
     if (container.firstChild !== item) {
         container.insertBefore(item, container.firstChild);
         updateZoneDecorationFromStock(targetType, owner, container);
@@ -544,7 +561,7 @@ function updateZoneDecorationFromStock(targetType, owner, container) {
              createCardThumbnail({
                 src: imgSrc,
                 isDecoration: true,
-                memo: memo || UI_DEFAULT_CARD_MEMO, // メモがない場合はデフォルトを使用
+                memo: memo || '',
                 ownerPrefix: idPrefix
             }, zoneElement, true, false, idPrefix);
         }
@@ -952,7 +969,7 @@ function makeDraggable(headerElement, containerElement) {
         }
     }
 
-    function dragEnd() {
+    function dragEnd(e) {
         initialX = currentX;
         initialY = currentY;
         isDragging = false;
@@ -1268,10 +1285,12 @@ function setupUI() {
             return;
         }
 
+        // コンテキストメニュー表示中に、メニュー外をクリックしたら閉じる（モーダル内でも有効にする）
         if (contextMenu.style.display === 'block' && !e.target.closest('#custom-context-menu')) {
             closeContextMenu();
         }
 
+        // モーダルやメニュー内でのクリック伝播防止（コンテキストメニュー以外）
         const isInteractionTarget = 
             e.target.closest('#custom-context-menu') ||
             (memoEditorModal.style.display === 'flex' && e.target.closest('.memo-editor-modal')) || 
@@ -1294,6 +1313,7 @@ function setupUI() {
             commonDrawer.classList.remove('open');
         }
 
+        // 装飾設定モーダルを閉じる判定: モーダル自体(オーバーレイ)をクリックした場合のみ
         if (decorationSettingsModal.style.display === 'flex' && e.target === decorationSettingsModal) {
             closeDecorationSettingsModal();
         }
@@ -1485,7 +1505,7 @@ function setupUI() {
 
     if (battleConfirmExecuteBtn) {
         battleConfirmExecuteBtn.addEventListener('click', () => {
-            // playSe削除
+            playSe('ボタン共通.mp3');
             if (typeof resolveBattle === 'function') {
                 const aBp = parseInt(battleConfirmAttackerBpInput.value);
                 const tBp = parseInt(battleConfirmTargetBpInput.value);
@@ -1834,20 +1854,6 @@ function setupUI() {
         });
     });
 
-    // テキスト読み込みボタンの設定
-    const readmeBtn = document.getElementById('common-tab-readme');
-    if (readmeBtn) {
-        readmeBtn.addEventListener('click', () => {
-            loadTextToDrawer('./txt/仕様説明.txt');
-        });
-    }
-    const smAboutBtn = document.getElementById('common-tab-sm-about');
-    if (smAboutBtn) {
-        smAboutBtn.addEventListener('click', () => {
-            loadTextToDrawer('./txt/S＆Mとは.txt');
-        });
-    }
-
     const playerDrawer = document.getElementById('player-drawer');
     if (playerDrawer) activateDrawerTab('deck-back-slots', playerDrawer);
     const opponentDrawer = document.getElementById('opponent-drawer');
@@ -1990,26 +1996,154 @@ function setupUI() {
     }
 }
 
-function loadTextToDrawer(filePath) {
-    const textArea = document.querySelector('#common-text-panel .text-content-area');
-    if (!textArea) return;
-    
-    // パネル切り替え
-    activateDrawerTab('common-text-panel', document.getElementById('common-drawer'));
+function startBattleTargetSelection(attackerThumbnail) {
+    if (!attackerThumbnail) return;
+    isBattleTargetMode = true;
+    currentAttacker = attackerThumbnail;
+    document.body.classList.add('battle-target-mode');
+    battleTargetOverlay.style.display = 'flex';
+    attackerThumbnail.classList.add('battle-attacker');
 
-    fetch(filePath)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    const allThumbnails = document.querySelectorAll('.card-slot .thumbnail');
+    allThumbnails.forEach(thumb => {
+        const zone = getParentZoneId(thumb.parentNode);
+        const base = getBaseId(zone);
+        // 除外対象: デッキ、墓地、除外、EXデッキ、手札、トークン、バンク
+        // 装飾画像は上記ゾーンにあるため、自動的に弾かれる
+        if (['deck', 'grave', 'exclude', 'side-deck', 'hand-zone', 'token-zone-slots', 'c-free-space'].includes(base)) return;
+        
+        thumb.classList.add('battle-target-candidate');
+    });
+
+    const iconZone = document.getElementById('icon-zone');
+    const oppIconZone = document.getElementById('opponent-icon-zone');
+    
+    if(iconZone) {
+        const playerIconSlot = iconZone.closest('.player-icon-slot');
+        if(playerIconSlot) playerIconSlot.classList.add('battle-target-candidate');
+    }
+    if(oppIconZone) {
+        const oppIconSlot = oppIconZone.closest('.player-icon-slot');
+        if(oppIconSlot) oppIconSlot.classList.add('battle-target-candidate');
+    }
+}
+
+window.cancelBattleTargetSelection = function() {
+    isBattleTargetMode = false;
+    document.body.classList.remove('battle-target-mode');
+    battleTargetOverlay.style.display = 'none';
+    if (currentAttacker) {
+        currentAttacker.classList.remove('battle-attacker');
+        currentAttacker = null;
+    }
+
+    const candidates = document.querySelectorAll('.battle-target-candidate');
+    candidates.forEach(el => el.classList.remove('battle-target-candidate'));
+}
+
+function activateDrawerTab(targetId, drawerElement) {
+    if (!drawerElement) return;
+    const drawerPanels = drawerElement.querySelectorAll('.drawer-panel');
+    const drawerTabs = drawerElement.querySelectorAll('.drawer-tab-btn');
+    
+    drawerPanels.forEach(p => p.classList.toggle('active', p.id === targetId));
+    drawerTabs.forEach(t => t.classList.toggle('active', t.dataset.target === targetId));
+
+    if (targetId === 'common-spec-panel') {
+        loadTextContent('txt/仕様説明.txt', 'spec-text-content');
+    } else if (targetId === 'common-about-panel') {
+        loadTextContent('txt/S＆Mとは.txt', 'about-text-content');
+    }
+}
+
+async function loadTextContent(filePath, elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    if (!element.textContent.includes('読み込み中...')) return;
+
+    try {
+        const response = await fetch(filePath);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const text = await response.text();
+        element.textContent = text;
+    } catch (error) {
+        element.textContent = `読み込みに失敗しました:\n${error.message}\n\n(ローカル環境の場合、ブラウザのセキュリティ制限によりテキストファイルを読み込めない場合があります。Webサーバー経由で実行してください)`;
+        console.error("Text load failed:", error);
+    }
+}
+
+function setupHorizontalScroll() {
+    const scrollableContainers = document.querySelectorAll('.deck-back-slot-container, .free-space-slot-container, .token-slot-container');
+
+    scrollableContainers.forEach(container => {
+        container.addEventListener('wheel', (e) => {
+            if (container.scrollWidth <= container.clientWidth) {
+                return;
             }
-            return response.text();
-        })
-        .then(text => {
-            textArea.textContent = text;
-        })
-        .catch(e => {
-            textArea.textContent = "読み込みエラー: " + e.message;
+            e.preventDefault();
+            container.scrollLeft += e.deltaY;
         });
+    });
+}
+
+function setupDrawerResize() {
+    const drawer = document.getElementById('common-drawer');
+    const handle = drawer ? drawer.querySelector('.resize-handle') : null;
+    
+    if (!drawer || !handle) return;
+
+    let isResizing = false;
+    let startW, startH, startX, startY;
+
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        isResizing = true;
+        isResizingDrawer = true;
+        startW = drawer.offsetWidth;
+        startH = drawer.offsetHeight;
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+
+    function handleMouseMove(e) {
+        if (!isResizing) return;
+        
+        let newW = startW + (e.clientX - startX);
+        let newH = startH + (e.clientY - startY);
+
+        const rect = drawer.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        
+        const maxWidth = 2 * Math.min(centerX, vw - centerX);
+        const maxHeight = 2 * Math.min(centerY, vh - centerY);
+        
+        newW = Math.max(500, Math.min(newW, maxWidth));
+        newH = Math.max(400, Math.min(newH, maxHeight));
+        
+        drawer.style.width = `${newW}px`;
+        drawer.style.height = `${newH}px`;
+    }
+
+    function handleMouseUp(e) {
+        isResizing = false;
+        setTimeout(() => {
+            isResizingDrawer = false;
+        }, 100);
+
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    }
 }
 
 window.updateSettingsUIFromState = function() {
@@ -2054,55 +2188,4 @@ window.updateSettingsUIFromState = function() {
             }
         });
     }
-};
-
-window.startBattleTargetSelection = function(attacker) {
-    if (!attacker) return;
-    isBattleTargetMode = true;
-    currentAttacker = attacker;
-    document.body.classList.add('battle-target-mode');
-    
-    if (battleTargetOverlay) {
-        battleTargetOverlay.style.display = 'flex';
-    }
-    
-    attacker.classList.add('battle-attacker');
-    
-    const allSlots = document.querySelectorAll('.card-slot, .player-icon-slot');
-    allSlots.forEach(slot => {
-        // 山札・墓地・除外・EXデッキ・手札などのカードはターゲット不可
-        const zoneId = getParentZoneId(slot);
-        const baseId = getBaseId(zoneId);
-        if (['deck', 'grave', 'exclude', 'side-deck', 'hand-zone', 'deck-back-slots', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots', 'token-zone-slots', 'c-free-space'].includes(baseId)) {
-            return;
-        }
-
-        const hasCard = slot.querySelector('.thumbnail');
-        const isIcon = slot.classList.contains('player-icon-slot') || slot.id === 'icon-zone' || slot.id === 'opponent-icon-zone';
-        
-        // 装飾カードもターゲット不可（ただしアイコンゾーンは例外）
-        if (hasCard && hasCard.dataset.isDecoration === 'true' && !isIcon) {
-            return;
-        }
-        
-        if (hasCard || isIcon) {
-            if (hasCard === attacker) return;
-            
-            if (hasCard) hasCard.classList.add('battle-target-candidate');
-            else slot.classList.add('battle-target-candidate'); 
-        }
-    });
-};
-
-window.cancelBattleTargetSelection = function() {
-    isBattleTargetMode = false;
-    currentAttacker = null;
-    document.body.classList.remove('battle-target-mode');
-    if (battleTargetOverlay) battleTargetOverlay.style.display = 'none';
-    
-    const candidates = document.querySelectorAll('.battle-target-candidate');
-    candidates.forEach(el => el.classList.remove('battle-target-candidate'));
-    
-    const attackers = document.querySelectorAll('.battle-attacker');
-    attackers.forEach(el => el.classList.remove('battle-attacker'));
 };

@@ -1387,10 +1387,10 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 400px; 
+    width: 400px; /* Increased from 300px */
     max-width: 90vw;
     max-height: 90vh;
-    z-index: 30000 !important; /* Increased to stay above context menu and other modals */
+    z-index: 1001; 
     background-color: #3a3a5e; 
     border: 1px solid #5a5a9a; 
     color: #e0e0e0;
@@ -1660,5 +1660,4 @@ body.simple-mode-active #decoration-settings-header {
 #decoration-settings-modal .decoration-column {
     background-color: #2a2a4e !important;
     border-color: #5a5a9a !important;
-}
 }

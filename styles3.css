@@ -1656,8 +1656,8 @@ body.sm-mode-active .flavor-delete-btn:active {
 }
 
 /* Dim ANY thumbnail or icon slot that is NOT a candidate and NOT an attacker */
-/* Player/Opponent icon selector removed to prevent "black shadow" effect */
-body.battle-target-mode .thumbnail:not(.battle-target-candidate):not(.battle-attacker) {
+body.battle-target-mode .thumbnail:not(.battle-target-candidate):not(.battle-attacker),
+body.battle-target-mode .player-icon-slot:not(.battle-target-candidate) {
     filter: brightness(0.4) grayscale(0.5);
     transition: filter 0.3s ease;
 }
@@ -1952,27 +1952,4 @@ body.simple-mode-active .custom-counter-footer { background-color: #fff; border-
 
 #battle-confirm-modal {
     width: 700px !important;
-}
-
-/* BP増減アニメーション */
-@keyframes bp-increase-anim {
-    0% { box-shadow: 0 0 15px #00ff00 inset; background-color: rgba(0, 255, 0, 0.4); }
-    50% { box-shadow: 0 0 25px #00ff00 inset; background-color: rgba(0, 255, 0, 0.2); }
-    100% { box-shadow: 0 0 0 transparent inset; background-color: transparent; }
-}
-
-@keyframes bp-decrease-anim {
-    0% { box-shadow: 0 0 15px #ff0000 inset; background-color: rgba(255, 0, 0, 0.4); transform: translateX(-2px); }
-    25% { transform: translateX(2px); }
-    50% { box-shadow: 0 0 25px #ff0000 inset; background-color: rgba(255, 0, 0, 0.2); transform: translateX(-2px); }
-    75% { transform: translateX(2px); }
-    100% { box-shadow: 0 0 0 transparent inset; background-color: transparent; transform: translateX(0); }
-}
-
-.bp-increase {
-    animation: bp-increase-anim 1.0s ease-out;
-}
-
-.bp-decrease {
-    animation: bp-decrease-anim 1.0s ease-out;
 }

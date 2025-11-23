@@ -2,7 +2,6 @@ function initializeBoard(wrapperSelector, idPrefix) {
     const wrapperElement = document.querySelector(wrapperSelector);
     if (!wrapperElement) return;
 
-    // 1. イベントリスナーの設定
     const boardSlots = wrapperElement.querySelectorAll('.card-slot');
     boardSlots.forEach(addSlotEventListeners);
 
@@ -15,6 +14,7 @@ function initializeBoard(wrapperSelector, idPrefix) {
         drawerWrapper.querySelectorAll('.card-slot').forEach(addSlotEventListeners);
     }
     
+    // バンク (旧C-Navi) のイベントリスナー設定 (Player初期化時に一度だけ行う)
     if (idPrefix === '') {
         const cDrawerWrapper = document.getElementById('c-drawer');
         if(cDrawerWrapper) {
@@ -22,37 +22,19 @@ function initializeBoard(wrapperSelector, idPrefix) {
         }
     }
     
-    // 2. UIコンポーネントのセットアップ
     setupBoardUI(idPrefix);
     setupBoardButtons(idPrefix);
     setupCounters(idPrefix);
 
-    // 3. テーマの初期適用
-    const smBtn = document.getElementById(idPrefix + 'sm-toggle-btn');
-    let initialMode = smBtn ? smBtn.dataset.mode : null;
-    if (!initialMode) {
-        initialMode = idPrefix ? 'striker' : 'magickers';
-    }
-    updateSmTheme(idPrefix, initialMode);
-
-    // 4. 装飾画像の初期適用
-    applyInitialDecorations(idPrefix);
-}
-
-function applyInitialDecorations(idPrefix) {
     const addDecorationWithErrorHandler = (path, zoneId) => {
         const container = document.getElementById(idPrefix + zoneId);
-        if (!container) return;
-
-        const slot = container.classList.contains('card-slot') ? container : container.querySelector('.card-slot');
-        
+        const slot = container?.querySelector('.card-slot');
         if (slot) {
-            // 既存の装飾があれば削除
+            // 既存の装飾があれば削除（重複防止）
             const existing = slot.querySelector('.thumbnail[data-is-decoration="true"]');
             if (existing) existing.remove();
 
             const thumbnail = createCardThumbnail(path, slot, true, false, idPrefix);
-            
             // アイコンの場合はデフォルトメモを設定
             if (zoneId === 'icon-zone') {
                 thumbnail.dataset.memo = `[カード名:-]/#e0e0e0/#555/1.0/非表示/
@@ -67,9 +49,10 @@ function applyInitialDecorations(idPrefix) {
             const img = thumbnail.querySelector('img');
             if (img) {
                 img.onerror = () => {
-                    // 画像が見つからない場合でも要素は残す（削除しない）
-                    // 必要に応じてプレースホルダー画像やスタイルを適用する処理をここに追加可能
-                    console.warn(`Decoration image not found: ${path}`);
+                    thumbnail.remove();
+                    if (zoneId !== 'icon-zone') {
+                        syncMainZoneImage(zoneId, idPrefix);
+                    }
                 };
             }
         }
@@ -80,14 +63,19 @@ function applyInitialDecorations(idPrefix) {
     addDecorationWithErrorHandler('./decoration/墓地エリア.png', 'grave');
     addDecorationWithErrorHandler('./decoration/除外エリア.png', 'exclude');
     
+    // アイコン初期設定
     const defaultIconPath = idPrefix ? './decoration/サディスト.png' : './decoration/マゾヒスト.png';
     addDecorationWithErrorHandler(defaultIconPath, 'icon-zone');
 
-    ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => {
-        if (typeof syncMainZoneImage === 'function') {
-            syncMainZoneImage(zone, idPrefix);
-        }
-    });
+    ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => syncMainZoneImage(zone, idPrefix));
+
+    // 初期テーマ適用
+    const smBtn = document.getElementById(idPrefix + 'sm-toggle-btn');
+    let initialMode = smBtn ? smBtn.dataset.mode : null;
+    if (!initialMode) {
+        initialMode = idPrefix ? 'striker' : 'magickers';
+    }
+    updateSmTheme(idPrefix, initialMode);
 }
 
 function setupBoardUI(idPrefix) {
@@ -96,15 +84,13 @@ function setupBoardUI(idPrefix) {
     if (!drawerWrapper) return;
     
     const drawerToggleBtn = document.getElementById(idPrefix === 'opponent-' ? 'opponent-drawer-toggle' : 'player-drawer-toggle');
-    if (drawerToggleBtn) {
-        drawerToggleBtn.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
-            const isOpen = drawerWrapper.classList.toggle('open');
-            if (isOpen) {
-                activateDrawerTab(idPrefix + 'deck-back-slots', drawerWrapper);
-            }
-        });
-    }
+    drawerToggleBtn?.addEventListener('click', () => {
+        playSe('ボタン共通.mp3');
+        const isOpen = drawerWrapper.classList.toggle('open');
+        if (isOpen) {
+            activateDrawerTab(idPrefix + 'deck-back-slots', drawerWrapper);
+        }
+    });
 
     const zoneSlotSelectors = {'deck': 'deck-back-slots', 'grave': 'grave-back-slots', 'exclude': 'exclude-back-slots', 'side-deck': 'side-deck-back-slots'};
     Object.keys(zoneSlotSelectors).forEach(zoneBaseId => {
@@ -130,54 +116,35 @@ function setupBoardUI(idPrefix) {
 
 
 function setupBoardButtons(idPrefix) {
-    const addListener = (id, handler) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('click', handler);
-    };
-
-    addListener(idPrefix + 'draw-card', () => {
-        // 成功時のみSE再生（敗北時はshowGameResult側でSEが鳴るため）
-        if (drawCardFromDeck(idPrefix)) {
-            playSe('1枚ドロー＆5枚ドロー.mp3');
-        }
+    document.getElementById(idPrefix + 'draw-card')?.addEventListener('click', () => {
+        playSe('1枚ドロー＆5枚ドロー.mp3');
+        drawCardFromDeck(idPrefix);
     });
-    
-    addListener(idPrefix + 'draw-5-card', () => {
-        let successCount = 0;
-        for (let i = 0; i < 5; i++) {
-            if (drawCardFromDeck(idPrefix)) {
-                successCount++;
-            } else {
-                break; 
-            }
-        }
-        // 1枚でも引けたらSE再生
-        if (successCount > 0) {
-            playSe('1枚ドロー＆5枚ドロー.mp3');
-        }
+    document.getElementById(idPrefix + 'draw-5-card')?.addEventListener('click', () => {
+        playSe('1枚ドロー＆5枚ドロー.mp3');
+        for (let i = 0; i < 5; i++) if (!drawCardFromDeck(idPrefix)) break;
     });
-
-    addListener(idPrefix + 'shuffle-deck', () => {
+    document.getElementById(idPrefix + 'shuffle-deck')?.addEventListener('click', () => {
         playSe('シャッフル.mp3');
         shuffleDeck(idPrefix);
     });
     
-    addListener(idPrefix + 'reset-and-draw', () => {
+    document.getElementById(idPrefix + 'reset-and-draw')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         resetBoard(idPrefix);
     });
-    
-    addListener(idPrefix + 'delete-deck-btn', () => {
+    document.getElementById(idPrefix + 'delete-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
-        // デッキ削除ボタンだが、盤面全体のカードを削除する仕様に変更
-        deleteAllCards(idPrefix);
+        deleteDeck(idPrefix);
     });
     
-    addListener(idPrefix + 'sm-toggle-btn', (e) => {
+    // テーマ切り替えボタン
+    document.getElementById(idPrefix + 'sm-toggle-btn')?.addEventListener('click', (e) => {
         playSe('ボタン共通.mp3');
         const btn = e.currentTarget;
         const currentMode = btn.dataset.mode;
         
+        // 切り替え順序: マジッカーズ -> マゾヒスト -> ストライカー -> シンプル -> サディスト -> マジッカーズ...
         const themeOrder = ['magickers', 'masochist', 'striker', 'sadist', 'simple'];
         let nextIndex = themeOrder.indexOf(currentMode) + 1;
         if (nextIndex >= themeOrder.length) nextIndex = 0;
@@ -186,8 +153,9 @@ function setupBoardButtons(idPrefix) {
         updateSmTheme(idPrefix, nextMode);
     });
 
-    addListener(idPrefix + 'surrender-btn', () => {
+    document.getElementById(idPrefix + 'surrender-btn')?.addEventListener('click', () => {
         playSe('降参.mp3');
+        // 降参時の敗北表示
         if (typeof autoConfig !== 'undefined' && autoConfig.autoGameEnd) {
              const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
              if (typeof window.showGameResult === 'function') {
@@ -196,7 +164,7 @@ function setupBoardButtons(idPrefix) {
         }
     });
     
-    addListener(idPrefix + 'export-deck-btn', () => {
+    document.getElementById(idPrefix + 'export-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         const defaultName = (idPrefix ? 'opponent' : 'player') + '_deck';
         const fileName = prompt("保存するファイル名を入力してください", defaultName);
@@ -205,7 +173,7 @@ function setupBoardButtons(idPrefix) {
         }
     });
     
-    addListener(idPrefix + 'import-deck-btn', () => {
+    document.getElementById(idPrefix + 'import-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         importDeck(idPrefix);
     });
@@ -257,6 +225,7 @@ function setupCounters(idPrefix) {
                     const newVal = Math.max(0, (parseInt(counter.value) || 0) - 1);
                     counter.value = newVal;
                     
+                    // LP0時の敗北判定
                     if (newVal === 0 && counter.classList.contains('lp-counter-input') && autoConfig.autoGameEnd) {
                         clearInterval(timerId);
                         timerId = null;
@@ -283,65 +252,50 @@ function setupCounters(idPrefix) {
     const counterWrapperId = idPrefix ? idPrefix + 'counter-wrapper' : 'player-counter-wrapper';
     const counterWrapper = document.getElementById(counterWrapperId);
     
-    if (counterWrapper) {
-        counterWrapper.querySelectorAll('.counter-btn[data-value]').forEach(button => {
-            const value = parseInt(button.dataset.value);
-            const targetCounter = button.closest('.hand-counter-group').querySelector('input');
+    counterWrapper?.querySelectorAll('.counter-btn[data-value]').forEach(button => {
+        const value = parseInt(button.dataset.value);
+        const targetCounter = button.closest('.hand-counter-group').querySelector('input');
+        
+        let repeatTimer = null;
+        let initialTimer = null;
+        const startAction = (e) => {
+            if (e.button !== undefined && e.button !== 0) return;
+            playSe('ボタン共通.mp3');
+            if(!targetCounter) return;
             
-            let repeatTimer = null;
-            let initialTimer = null;
-            const startAction = (e) => {
-                if (e.button !== undefined && e.button !== 0) return;
-                playSe('ボタン共通.mp3');
-                if(!targetCounter) return;
-                
-                const updateVal = () => {
-                    const newVal = Math.max(0, (parseInt(targetCounter.value) || 0) + value);
-                    targetCounter.value = newVal;
-                    if (newVal === 0 && targetCounter.classList.contains('lp-counter-input') && autoConfig.autoGameEnd) {
-                        const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
-                        if (typeof window.showGameResult === 'function') window.showGameResult(msg);
-                    }
-                };
-                
-                updateVal();
-                initialTimer = setTimeout(() => {
-                    repeatTimer = setInterval(updateVal, 200);
-                }, 300);
+            const updateVal = () => {
+                const newVal = Math.max(0, (parseInt(targetCounter.value) || 0) + value);
+                targetCounter.value = newVal;
+                // LP手動操作時の敗北判定
+                if (newVal === 0 && targetCounter.classList.contains('lp-counter-input') && autoConfig.autoGameEnd) {
+                    const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
+                    if (typeof window.showGameResult === 'function') window.showGameResult(msg);
+                }
             };
-            const stopAction = () => {
-                clearTimeout(initialTimer);
-                clearInterval(repeatTimer);
-            };
+            
+            updateVal();
+            initialTimer = setTimeout(() => {
+                repeatTimer = setInterval(updateVal, 200);
+            }, 300);
+        };
+        const stopAction = () => {
+            clearTimeout(initialTimer);
+            clearInterval(repeatTimer);
+        };
 
-            button.addEventListener('mousedown', startAction);
-            button.addEventListener('mouseup', stopAction);
-            button.addEventListener('mouseleave', stopAction);
-            button.addEventListener('touchstart', startAction);
-            button.addEventListener('touchend', stopAction);
-        });
-    }
+        button.addEventListener('mousedown', startAction);
+        button.addEventListener('mouseup', stopAction);
+        button.addEventListener('mouseleave', stopAction);
+        button.addEventListener('touchstart', startAction);
+        button.addEventListener('touchend', stopAction);
+    });
 }
 
 function drawCardFromDeck(idPrefix) {
-    const deckContainerId = idPrefix + 'deck-back-slots';
-    const deckContainer = document.getElementById(deckContainerId);
-    if (!deckContainer) return false;
-
-    // コンテナ内のスロットを探す（drawer-panelの構造に合わせる）
-    const slotsContainer = deckContainer.querySelector('.deck-back-slot-container') || deckContainer;
-    const deckSlots = slotsContainer.querySelectorAll('.card-slot');
+    const deckSlots = document.querySelectorAll(`#${idPrefix}deck-back-slots .card-slot`);
+    const cardToDraw = Array.from(deckSlots).map(s => s.querySelector('.thumbnail')).find(t => t);
     
-    // 装飾以外のカードを探す
-    let cardToDraw = null;
-    for (const slot of deckSlots) {
-        const thumb = slot.querySelector('.thumbnail');
-        if (thumb && thumb.dataset.isDecoration !== 'true') {
-            cardToDraw = thumb;
-            break;
-        }
-    }
-    
+    // デッキ切れの場合の敗北判定
     if (!cardToDraw) {
         if (typeof autoConfig !== 'undefined' && autoConfig.autoGameEnd) {
              const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
@@ -360,11 +314,13 @@ function drawCardFromDeck(idPrefix) {
     sourceSlot.removeChild(cardToDraw);
     emptyHandSlot.appendChild(cardToDraw);
 
+    // ドロー時の反転設定 (drawFlipped)
     if (typeof autoConfig !== 'undefined' && autoConfig.drawFlipped) {
         const imgElement = cardToDraw.querySelector('.card-image');
         const deckZone = document.getElementById(idPrefix + 'deck');
         let deckImgSrc = './decoration/デッキ.png';
         
+        // 現在のデッキ装飾画像を取得
         if (deckZone) {
             const decoratedThumbnail = deckZone.querySelector('.thumbnail[data-is-decoration="true"]');
             if (decoratedThumbnail) {
@@ -373,6 +329,7 @@ function drawCardFromDeck(idPrefix) {
             }
         }
         
+        // 既に裏側でなければ裏側にする
         if (cardToDraw.dataset.isFlipped !== 'true') {
             cardToDraw.dataset.originalSrc = imgElement.src;
             imgElement.src = deckImgSrc;
@@ -382,52 +339,32 @@ function drawCardFromDeck(idPrefix) {
         resetCardFlipState(cardToDraw);
     }
 
-    arrangeSlots(deckContainerId);
+    arrangeSlots(idPrefix + 'deck-back-slots');
     syncMainZoneImage('deck', idPrefix);
     return true;
 }
 
 function shuffleDeck(idPrefix) {
-    const deckContainerId = idPrefix + 'deck-back-slots';
-    const container = document.getElementById(deckContainerId);
-    if (!container) return;
-    
-    const slotsContainer = container.querySelector('.deck-back-slot-container') || container;
-    const slots = slotsContainer.querySelectorAll('.card-slot');
-    
+    const deckContainer = document.getElementById(idPrefix + 'deck-back-slots');
+    if (!deckContainer) return;
+    const slots = deckContainer.querySelectorAll('.card-slot');
     let thumbnails = [];
     slots.forEach(s => {
-        // 装飾以外のカードを収集してスロットから削除
-        s.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => {
-            thumbnails.push(t);
-            s.removeChild(t);
-        });
+        s.querySelectorAll('.thumbnail').forEach(t => thumbnails.push(s.removeChild(t)));
     });
-    
     shuffleArray(thumbnails);
-    
-    // 再配置
-    thumbnails.forEach((t, i) => {
-        if (slots[i]) slots[i].appendChild(t);
-    });
-    
-    arrangeSlots(deckContainerId);
+    thumbnails.forEach((t, i) => slots[i]?.appendChild(t));
     syncMainZoneImage('deck', idPrefix);
 }
 
+// 手札シャッフル機能
 window.shuffleHand = function(idPrefix) {
-    const handContainerId = idPrefix + 'hand-zone';
-    const container = document.getElementById(handContainerId);
-    if (!container) return;
-    
-    const slots = container.querySelectorAll('.card-slot');
+    const handContainer = document.getElementById(idPrefix + 'hand-zone');
+    if (!handContainer) return;
+    const slots = handContainer.querySelectorAll('.card-slot');
     let thumbnails = [];
-    
     slots.forEach(s => {
-        s.querySelectorAll('.thumbnail').forEach(t => {
-            thumbnails.push(t);
-            s.removeChild(t);
-        });
+        s.querySelectorAll('.thumbnail').forEach(t => thumbnails.push(s.removeChild(t)));
     });
     
     shuffleArray(thumbnails);
@@ -444,9 +381,7 @@ function resetBoard(idPrefix) {
 
     allSlots.forEach(slot => {
         const baseParentZoneId = getBaseId(getParentZoneId(slot));
-        // リセット対象外のゾーン
         if (['free-space-slots', 'icon-zone', 'side-deck', 'side-deck-back-slots', 'token-zone-slots'].includes(baseParentZoneId)) return;
-        
         slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => {
             cardThumbnails.push(slot.removeChild(t));
             resetCardFlipState(t);
@@ -458,22 +393,16 @@ function resetBoard(idPrefix) {
     document.getElementById(idPrefix + 'counter-value').value = 30; 
     document.getElementById(idPrefix + 'mana-counter-value').value = 0;
 
-    const deckContainerId = idPrefix + 'deck-back-slots';
-    const deckContainer = document.getElementById(deckContainerId);
-    const slotsContainer = deckContainer ? (deckContainer.querySelector('.deck-back-slot-container') || deckContainer) : null;
-    
-    if (slotsContainer) {
-        const deckSlots = slotsContainer.querySelectorAll('.card-slot');
-        shuffleArray(cardThumbnails);
-        cardThumbnails.forEach((t, i) => {
-            if (deckSlots[i]) deckSlots[i].appendChild(t);
-        });
-    }
+    const deckSlots = document.querySelectorAll(`#${idPrefix}deck-back-slots .card-slot`);
+    shuffleArray(cardThumbnails);
+    cardThumbnails.forEach((t, i) => deckSlots[i]?.appendChild(t));
 
     ['deck', 'grave', 'exclude'].forEach(zone => syncMainZoneImage(zone, idPrefix));
     
+    // 勝敗表示を消す
     if (typeof closeGameResult === 'function') closeGameResult();
     
+    // テーマリセット
     const defaultTheme = idPrefix ? 'simple' : 'simple';
     updateSmTheme(idPrefix, defaultTheme);
     
@@ -481,40 +410,30 @@ function resetBoard(idPrefix) {
     document.getElementById(drawerId)?.classList.remove('open');
 }
 
-// デッキ削除ボタン用関数（全カード削除）
-function deleteAllCards(idPrefix) {
-    const zones = [
-        'hand-zone', 
-        'deck-back-slots', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots',
-        'battle', 'spell', 'special1', 'special2', 'mana-left', 'mana-right'
-    ];
-    
-    zones.forEach(zoneId => {
-        const container = document.getElementById(idPrefix + zoneId);
-        if (!container) return;
-        
-        // 入れ子構造に対応（ドロワー系などはコンテナが深い場合がある）
-        const slots = container.querySelectorAll('.card-slot');
-        
-        slots.forEach(slot => {
-            const thumbs = slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])');
-            thumbs.forEach(t => t.remove());
-            resetSlotToDefault(slot);
-            slot.classList.remove('stacked');
-        });
-    });
-    
-    // 盤面更新
-    ['deck', 'grave', 'exclude', 'side-deck'].forEach(z => syncMainZoneImage(z, idPrefix));
-}
-
-// 旧関数互換（念のため残すか、deleteAllCardsに置き換える）
 function deleteDeck(idPrefix) {
-    deleteAllCards(idPrefix);
+    const wrapperSelector = idPrefix ? '.opponent-wrapper' : '.player-wrapper';
+    const allSlots = document.querySelectorAll(`${wrapperSelector} .card-slot, #${idPrefix}drawer .card-slot`);
+    allSlots.forEach(slot => {
+        const baseParentZoneId = getBaseId(getParentZoneId(slot));
+        if (['free-space-slots', 'icon-zone', 'side-deck', 'side-deck-back-slots', 'token-zone-slots'].includes(baseParentZoneId)) return;
+        slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => slot.removeChild(t));
+        resetSlotToDefault(slot);
+        slot.classList.remove('stacked');
+    });
+     ['deck', 'grave', 'exclude'].forEach(zone => syncMainZoneImage(zone, idPrefix));
 }
 
 function clearAllBoard(idPrefix) {
-    deleteAllCards(idPrefix);
+    const wrapperSelector = idPrefix ? '.opponent-wrapper' : '.player-wrapper';
+    const drawerId = idPrefix ? 'opponent-drawer' : 'player-drawer';
+    const allSlots = document.querySelectorAll(`${wrapperSelector} .card-slot, #${drawerId} .card-slot`);
+    
+    allSlots.forEach(slot => {
+        slot.querySelectorAll('.thumbnail').forEach(t => slot.removeChild(t));
+        resetSlotToDefault(slot);
+        slot.classList.remove('stacked');
+    });
+    ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => syncMainZoneImage(zone, idPrefix));
 }
 
 
@@ -727,7 +646,7 @@ function getAllBoardState() {
             isBoardFlipped: document.body.classList.contains('board-flipped'),
             currentStepIndex: (typeof currentStepIndex !== 'undefined') ? currentStepIndex : 0,
             cNavi: extractZoneData('c-free-space'),
-            customCounterTypes: customCounterTypes || [], 
+            customCounterTypes: customCounterTypes || [], // カスタムカウンターの定義も保存
             settings: {
                 bgmVolume: typeof bgmVolume !== 'undefined' ? bgmVolume : 5,
                 seVolume: typeof seVolume !== 'undefined' ? seVolume : 5,
@@ -808,6 +727,7 @@ function restoreAllBoardState(state) {
             applyDataToZone('c-free-space', state.common.cNavi);
         }
         
+        // カスタムカウンター定義の復元
         if (state.common.customCounterTypes) {
             customCounterTypes = state.common.customCounterTypes;
         }
