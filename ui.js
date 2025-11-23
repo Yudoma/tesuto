@@ -1485,7 +1485,7 @@ function setupUI() {
 
     if (battleConfirmExecuteBtn) {
         battleConfirmExecuteBtn.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
+            // playSe削除
             if (typeof resolveBattle === 'function') {
                 const aBp = parseInt(battleConfirmAttackerBpInput.value);
                 const tBp = parseInt(battleConfirmTargetBpInput.value);
@@ -1834,6 +1834,20 @@ function setupUI() {
         });
     });
 
+    // テキスト読み込みボタンの設定
+    const readmeBtn = document.getElementById('common-tab-readme');
+    if (readmeBtn) {
+        readmeBtn.addEventListener('click', () => {
+            loadTextToDrawer('./txt/仕様説明.txt');
+        });
+    }
+    const smAboutBtn = document.getElementById('common-tab-sm-about');
+    if (smAboutBtn) {
+        smAboutBtn.addEventListener('click', () => {
+            loadTextToDrawer('./txt/S＆Mとは.txt');
+        });
+    }
+
     const playerDrawer = document.getElementById('player-drawer');
     if (playerDrawer) activateDrawerTab('deck-back-slots', playerDrawer);
     const opponentDrawer = document.getElementById('opponent-drawer');
@@ -1976,6 +1990,28 @@ function setupUI() {
     }
 }
 
+function loadTextToDrawer(filePath) {
+    const textArea = document.querySelector('#common-text-panel .text-content-area');
+    if (!textArea) return;
+    
+    // パネル切り替え
+    activateDrawerTab('common-text-panel', document.getElementById('common-drawer'));
+
+    fetch(filePath)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            textArea.textContent = text;
+        })
+        .catch(e => {
+            textArea.textContent = "読み込みエラー: " + e.message;
+        });
+}
+
 window.updateSettingsUIFromState = function() {
     if (bgmVolumeSlider && bgmVolumeVal) {
         bgmVolumeSlider.value = bgmVolume;
@@ -2034,8 +2070,20 @@ window.startBattleTargetSelection = function(attacker) {
     
     const allSlots = document.querySelectorAll('.card-slot, .player-icon-slot');
     allSlots.forEach(slot => {
+        // 山札・墓地・除外・EXデッキ・手札などのカードはターゲット不可
+        const zoneId = getParentZoneId(slot);
+        const baseId = getBaseId(zoneId);
+        if (['deck', 'grave', 'exclude', 'side-deck', 'hand-zone', 'deck-back-slots', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots', 'token-zone-slots', 'c-free-space'].includes(baseId)) {
+            return;
+        }
+
         const hasCard = slot.querySelector('.thumbnail');
         const isIcon = slot.classList.contains('player-icon-slot') || slot.id === 'icon-zone' || slot.id === 'opponent-icon-zone';
+        
+        // 装飾カードもターゲット不可（ただしアイコンゾーンは例外）
+        if (hasCard && hasCard.dataset.isDecoration === 'true' && !isIcon) {
+            return;
+        }
         
         if (hasCard || isIcon) {
             if (hasCard === attacker) return;

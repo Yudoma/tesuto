@@ -49,7 +49,12 @@ const seConfig = {
     'オナニー.mp3': true,
     'ターン開始.mp3': true,
     '破壊.mp3': true,
-    '被弾.mp3': true
+    '被弾.mp3': true,
+    'マナ配置.mp3': true,
+    'バトル配置.mp3': true,
+    '特殊配置.mp3': true,
+    'BPプラス.mp3': true,
+    'BPマイナス.mp3': true
 };
 
 // エフェクト個別設定 (初期値は全てtrue)

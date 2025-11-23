@@ -594,7 +594,7 @@ body.nav-hidden .zone-header {
     right: 10px;      
     z-index: 501;     
     writing-mode: vertical-rl;
-    text-orientation: upright; /* 修正: mixed -> upright (文字を正立させる) */
+    text-orientation: upright; 
     padding: 10px 5px;
     background-color: #f0f0f0;
     color: #333;
@@ -665,27 +665,34 @@ body.nav-hidden .zone-header {
 }
 
 .drawer-free-space {
-    display: flex;
+    display: none; /* 初期状態は非表示（.activeで表示） */
     flex-direction: column;
     flex-shrink: 0;
     width: 400px;  
-    height: auto;
+    height: 100%; /* 高さ確保 */
     padding: 5px;  
     box-sizing: border-box;
     border-left: 2px solid #5a5a9a;
     transition: border-color 0.3s;
+    overflow-y: auto; /* スクロール確保 */
 }
 
 .drawer-token-space {
-    display: flex;
+    display: none; /* 初期状態は非表示（.activeで表示） */
     flex-direction: column;
     flex-shrink: 0;
     width: 220px; 
-    height: auto;
+    height: 100%; /* 高さ確保 */
     padding: 5px;
     box-sizing: border-box;
     border-left: 2px solid #5a5a9a;
     transition: border-color 0.3s;
+    overflow-y: auto; /* スクロール確保 */
+}
+
+.drawer-free-space.active,
+.drawer-token-space.active {
+    display: flex;
 }
 
 .drawer-tabs {
@@ -1297,4 +1304,27 @@ body.opponent-sadist-active #opponent-drawer .drawer-free-space .free-space-slot
 body.opponent-sadist-active #opponent-drawer .drawer-token-space .token-slot-container {
     background-color: #FFF5FA;
     border-color: #FFB6C1;
+}
+
+/* BP増減アニメーション */
+@keyframes bp-increase-anim {
+    0% { box-shadow: 0 0 15px #00ff00 inset; background-color: rgba(0, 255, 0, 0.4); }
+    50% { box-shadow: 0 0 25px #00ff00 inset; background-color: rgba(0, 255, 0, 0.2); }
+    100% { box-shadow: 0 0 0 transparent inset; background-color: transparent; }
+}
+
+@keyframes bp-decrease-anim {
+    0% { box-shadow: 0 0 15px #ff0000 inset; background-color: rgba(255, 0, 0, 0.4); transform: translateX(-2px); }
+    25% { transform: translateX(2px); }
+    50% { box-shadow: 0 0 25px #ff0000 inset; background-color: rgba(255, 0, 0, 0.2); transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+    100% { box-shadow: 0 0 0 transparent inset; background-color: transparent; transform: translateX(0); }
+}
+
+.bp-increase {
+    animation: bp-increase-anim 1.0s ease-out;
+}
+
+.bp-decrease {
+    animation: bp-decrease-anim 1.0s ease-out;
 }

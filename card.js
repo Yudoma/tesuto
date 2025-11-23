@@ -301,9 +301,8 @@ function handleCardContextMenu(e) {
             
             if (newState) {
                 playSe('常時発動.mp3');
-            } else {
-                playSe('ボタン共通.mp3');
-            }
+            } 
+            // 解除時のSEはUI側のクリック音に任せて削除（重複防止）
             
             if (isRecording && typeof recordAction === 'function') {
                 recordAction({ 
@@ -388,7 +387,6 @@ function handleCardContextMenu(e) {
     toSideDeckMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
     flipMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
     
-    // サブメニューを持つ親要素の取得方法を堅牢にする
     const moveItem = document.getElementById('context-menu-to-grave');
     const moveParentLi = moveItem ? moveItem.closest('.has-submenu') : null;
     
@@ -406,11 +404,9 @@ function handleCardContextMenu(e) {
     memoMenuItem.style.display = 'block';
     addFlavorMenuItem.style.display = 'block';
     
-    // カウンター操作の親liを特定
     const addCounterItem = document.getElementById('context-menu-add-counter');
     const counterParent = addCounterItem ? addCounterItem.closest('.has-submenu') : null;
     
-    // BP操作の親liを特定（クラスで取得）
     const bpItem = document.querySelector('.bp-modify-btn');
     const bpParent = bpItem ? bpItem.closest('.has-submenu') : null;
     
@@ -908,6 +904,16 @@ window.modifyCardBP = function(thumbnailElement, amount, isAuto = false) {
         
         const newMemo = memo.replace(bpMatch[0], `[BP:${newBP}]`);
         thumbnailElement.dataset.memo = newMemo;
+        
+        if (amount > 0) {
+            playSe('BPプラス.mp3');
+            thumbnailElement.classList.add('bp-increase');
+            setTimeout(() => thumbnailElement.classList.remove('bp-increase'), 1000);
+        } else if (amount < 0) {
+            playSe('BPマイナス.mp3');
+            thumbnailElement.classList.add('bp-decrease');
+            setTimeout(() => thumbnailElement.classList.remove('bp-decrease'), 1000);
+        }
         
         if (typeof window.updateCardPreview === 'function') {
             if (typeof lastHoveredElement !== 'undefined' && lastHoveredElement === thumbnailElement) {

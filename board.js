@@ -22,8 +22,7 @@ function initializeBoard(wrapperSelector, idPrefix) {
         }
     }
     
-    // 2. UIコンポーネントのセットアップ (ボタン、ドロワー、カウンター)
-    // 装飾処理の前に実行することで、画像エラー等でボタンが機能しなくなるのを防ぐ
+    // 2. UIコンポーネントのセットアップ
     setupBoardUI(idPrefix);
     setupBoardButtons(idPrefix);
     setupCounters(idPrefix);
@@ -68,12 +67,9 @@ function applyInitialDecorations(idPrefix) {
             const img = thumbnail.querySelector('img');
             if (img) {
                 img.onerror = () => {
-                    thumbnail.remove();
-                    if (zoneId !== 'icon-zone') {
-                        if (typeof syncMainZoneImage === 'function') {
-                            syncMainZoneImage(zoneId, idPrefix);
-                        }
-                    }
+                    // 画像が見つからない場合でも要素は残す（削除しない）
+                    // 必要に応じてプレースホルダー画像やスタイルを適用する処理をここに追加可能
+                    console.warn(`Decoration image not found: ${path}`);
                 };
             }
         }
@@ -140,13 +136,27 @@ function setupBoardButtons(idPrefix) {
     };
 
     addListener(idPrefix + 'draw-card', () => {
-        playSe('1枚ドロー＆5枚ドロー.mp3');
-        drawCardFromDeck(idPrefix);
+        // 成功時のみSE再生（敗北時はshowGameResult側でSEが鳴るため）
+        if (drawCardFromDeck(idPrefix)) {
+            playSe('1枚ドロー＆5枚ドロー.mp3');
+        }
     });
+    
     addListener(idPrefix + 'draw-5-card', () => {
-        playSe('1枚ドロー＆5枚ドロー.mp3');
-        for (let i = 0; i < 5; i++) if (!drawCardFromDeck(idPrefix)) break;
+        let successCount = 0;
+        for (let i = 0; i < 5; i++) {
+            if (drawCardFromDeck(idPrefix)) {
+                successCount++;
+            } else {
+                break; 
+            }
+        }
+        // 1枚でも引けたらSE再生
+        if (successCount > 0) {
+            playSe('1枚ドロー＆5枚ドロー.mp3');
+        }
     });
+
     addListener(idPrefix + 'shuffle-deck', () => {
         playSe('シャッフル.mp3');
         shuffleDeck(idPrefix);
@@ -156,9 +166,11 @@ function setupBoardButtons(idPrefix) {
         playSe('ボタン共通.mp3');
         resetBoard(idPrefix);
     });
+    
     addListener(idPrefix + 'delete-deck-btn', () => {
         playSe('ボタン共通.mp3');
-        deleteDeck(idPrefix);
+        // デッキ削除ボタンだが、盤面全体のカードを削除する仕様に変更
+        deleteAllCards(idPrefix);
     });
     
     addListener(idPrefix + 'sm-toggle-btn', (e) => {
@@ -312,8 +324,23 @@ function setupCounters(idPrefix) {
 }
 
 function drawCardFromDeck(idPrefix) {
-    const deckSlots = document.querySelectorAll(`#${idPrefix}deck-back-slots .card-slot`);
-    const cardToDraw = Array.from(deckSlots).map(s => s.querySelector('.thumbnail')).find(t => t);
+    const deckContainerId = idPrefix + 'deck-back-slots';
+    const deckContainer = document.getElementById(deckContainerId);
+    if (!deckContainer) return false;
+
+    // コンテナ内のスロットを探す（drawer-panelの構造に合わせる）
+    const slotsContainer = deckContainer.querySelector('.deck-back-slot-container') || deckContainer;
+    const deckSlots = slotsContainer.querySelectorAll('.card-slot');
+    
+    // 装飾以外のカードを探す
+    let cardToDraw = null;
+    for (const slot of deckSlots) {
+        const thumb = slot.querySelector('.thumbnail');
+        if (thumb && thumb.dataset.isDecoration !== 'true') {
+            cardToDraw = thumb;
+            break;
+        }
+    }
     
     if (!cardToDraw) {
         if (typeof autoConfig !== 'undefined' && autoConfig.autoGameEnd) {
@@ -355,31 +382,52 @@ function drawCardFromDeck(idPrefix) {
         resetCardFlipState(cardToDraw);
     }
 
-    arrangeSlots(idPrefix + 'deck-back-slots');
+    arrangeSlots(deckContainerId);
     syncMainZoneImage('deck', idPrefix);
     return true;
 }
 
 function shuffleDeck(idPrefix) {
-    const deckContainer = document.getElementById(idPrefix + 'deck-back-slots');
-    if (!deckContainer) return;
-    const slots = deckContainer.querySelectorAll('.card-slot');
+    const deckContainerId = idPrefix + 'deck-back-slots';
+    const container = document.getElementById(deckContainerId);
+    if (!container) return;
+    
+    const slotsContainer = container.querySelector('.deck-back-slot-container') || container;
+    const slots = slotsContainer.querySelectorAll('.card-slot');
+    
     let thumbnails = [];
     slots.forEach(s => {
-        s.querySelectorAll('.thumbnail').forEach(t => thumbnails.push(s.removeChild(t)));
+        // 装飾以外のカードを収集してスロットから削除
+        s.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => {
+            thumbnails.push(t);
+            s.removeChild(t);
+        });
     });
+    
     shuffleArray(thumbnails);
-    thumbnails.forEach((t, i) => slots[i]?.appendChild(t));
+    
+    // 再配置
+    thumbnails.forEach((t, i) => {
+        if (slots[i]) slots[i].appendChild(t);
+    });
+    
+    arrangeSlots(deckContainerId);
     syncMainZoneImage('deck', idPrefix);
 }
 
 window.shuffleHand = function(idPrefix) {
-    const handContainer = document.getElementById(idPrefix + 'hand-zone');
-    if (!handContainer) return;
-    const slots = handContainer.querySelectorAll('.card-slot');
+    const handContainerId = idPrefix + 'hand-zone';
+    const container = document.getElementById(handContainerId);
+    if (!container) return;
+    
+    const slots = container.querySelectorAll('.card-slot');
     let thumbnails = [];
+    
     slots.forEach(s => {
-        s.querySelectorAll('.thumbnail').forEach(t => thumbnails.push(s.removeChild(t)));
+        s.querySelectorAll('.thumbnail').forEach(t => {
+            thumbnails.push(t);
+            s.removeChild(t);
+        });
     });
     
     shuffleArray(thumbnails);
@@ -396,7 +444,9 @@ function resetBoard(idPrefix) {
 
     allSlots.forEach(slot => {
         const baseParentZoneId = getBaseId(getParentZoneId(slot));
+        // リセット対象外のゾーン
         if (['free-space-slots', 'icon-zone', 'side-deck', 'side-deck-back-slots', 'token-zone-slots'].includes(baseParentZoneId)) return;
+        
         slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => {
             cardThumbnails.push(slot.removeChild(t));
             resetCardFlipState(t);
@@ -408,9 +458,17 @@ function resetBoard(idPrefix) {
     document.getElementById(idPrefix + 'counter-value').value = 30; 
     document.getElementById(idPrefix + 'mana-counter-value').value = 0;
 
-    const deckSlots = document.querySelectorAll(`#${idPrefix}deck-back-slots .card-slot`);
-    shuffleArray(cardThumbnails);
-    cardThumbnails.forEach((t, i) => deckSlots[i]?.appendChild(t));
+    const deckContainerId = idPrefix + 'deck-back-slots';
+    const deckContainer = document.getElementById(deckContainerId);
+    const slotsContainer = deckContainer ? (deckContainer.querySelector('.deck-back-slot-container') || deckContainer) : null;
+    
+    if (slotsContainer) {
+        const deckSlots = slotsContainer.querySelectorAll('.card-slot');
+        shuffleArray(cardThumbnails);
+        cardThumbnails.forEach((t, i) => {
+            if (deckSlots[i]) deckSlots[i].appendChild(t);
+        });
+    }
 
     ['deck', 'grave', 'exclude'].forEach(zone => syncMainZoneImage(zone, idPrefix));
     
@@ -423,30 +481,40 @@ function resetBoard(idPrefix) {
     document.getElementById(drawerId)?.classList.remove('open');
 }
 
-function deleteDeck(idPrefix) {
-    const wrapperSelector = idPrefix ? '.opponent-wrapper' : '.player-wrapper';
-    const allSlots = document.querySelectorAll(`${wrapperSelector} .card-slot, #${idPrefix}drawer .card-slot`);
-    allSlots.forEach(slot => {
-        const baseParentZoneId = getBaseId(getParentZoneId(slot));
-        if (['free-space-slots', 'icon-zone', 'side-deck', 'side-deck-back-slots', 'token-zone-slots'].includes(baseParentZoneId)) return;
-        slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => slot.removeChild(t));
-        resetSlotToDefault(slot);
-        slot.classList.remove('stacked');
+// デッキ削除ボタン用関数（全カード削除）
+function deleteAllCards(idPrefix) {
+    const zones = [
+        'hand-zone', 
+        'deck-back-slots', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots',
+        'battle', 'spell', 'special1', 'special2', 'mana-left', 'mana-right'
+    ];
+    
+    zones.forEach(zoneId => {
+        const container = document.getElementById(idPrefix + zoneId);
+        if (!container) return;
+        
+        // 入れ子構造に対応（ドロワー系などはコンテナが深い場合がある）
+        const slots = container.querySelectorAll('.card-slot');
+        
+        slots.forEach(slot => {
+            const thumbs = slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])');
+            thumbs.forEach(t => t.remove());
+            resetSlotToDefault(slot);
+            slot.classList.remove('stacked');
+        });
     });
-     ['deck', 'grave', 'exclude'].forEach(zone => syncMainZoneImage(zone, idPrefix));
+    
+    // 盤面更新
+    ['deck', 'grave', 'exclude', 'side-deck'].forEach(z => syncMainZoneImage(z, idPrefix));
+}
+
+// 旧関数互換（念のため残すか、deleteAllCardsに置き換える）
+function deleteDeck(idPrefix) {
+    deleteAllCards(idPrefix);
 }
 
 function clearAllBoard(idPrefix) {
-    const wrapperSelector = idPrefix ? '.opponent-wrapper' : '.player-wrapper';
-    const drawerId = idPrefix ? 'opponent-drawer' : 'player-drawer';
-    const allSlots = document.querySelectorAll(`${wrapperSelector} .card-slot, #${drawerId} .card-slot`);
-    
-    allSlots.forEach(slot => {
-        slot.querySelectorAll('.thumbnail').forEach(t => slot.removeChild(t));
-        resetSlotToDefault(slot);
-        slot.classList.remove('stacked');
-    });
-    ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => syncMainZoneImage(zone, idPrefix));
+    deleteAllCards(idPrefix);
 }
 
 
