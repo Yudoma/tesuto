@@ -1998,15 +1998,8 @@ body.simple-mode-active #common-drawer .counter-btn:hover {
 }
 
 #common-drawer .draw-btn:active,
-#common-drawer .counter-btn:active,
-body.sm-mode-active #common-drawer .draw-btn:active,
-body.sm-mode-active #common-drawer .counter-btn:active,
-body.magickers-mode-active #common-drawer .draw-btn:active,
-body.magickers-mode-active #common-drawer .counter-btn:active,
-body.striker-mode-active #common-drawer .draw-btn:active,
-body.striker-mode-active #common-drawer .counter-btn:active,
-body.simple-mode-active #common-drawer .draw-btn:active,
-body.simple-mode-active #common-drawer .counter-btn:active {
+
+#common-drawer .drawer-tab-btn:active {
     box-shadow: 0 0 #997a00 !important;
     background-color: #ffcc00 !important;
     transform: translateY(2px) !important;
@@ -2091,4 +2084,17 @@ body.simple-mode-active #decoration-settings-header {
 #decoration-settings-modal .decoration-column {
     background-color: #2a2a4e !important;
     border-color: #5a5a9a !important;
+}
+
+#credit-text-content,
+#spec-text-content,
+#about-text-content {
+    white-space: pre-wrap;
+    padding: 15px;
+    height: 500px;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    border: 1px solid #5a5a9a;
+    color: #e0e0e0;
 }
