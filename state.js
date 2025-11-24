@@ -51,7 +51,7 @@ const seConfig = {
     'アタック.mp3': true,
     '常時発動.mp3': true,
     'ブロッカー.wav': true,
-    'オナニー.mp3': true,
+    'オナニー.wav': true,
     'ターン開始.mp3': true,
     'BPプラス.mp3': true,
     'BPマイナス.mp3': true
