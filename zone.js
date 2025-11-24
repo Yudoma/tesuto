@@ -14,6 +14,8 @@ function playPlacementSe(baseZoneId) {
         playSe('バトル配置.mp3');
     } else if (baseZoneId === 'special1' || baseZoneId === 'special2') {
         playSe('特殊配置.mp3');
+    } else if (baseZoneId && baseZoneId.startsWith('mana')) {
+        playSe('マナ配置.mp3');
     } else {
         playSe('カードを配置する.mp3');
     }
@@ -198,7 +200,7 @@ function importCardToSlot(slot) {
                 }
 
                 if (isMana) {
-                    playSe('スペル.mp3');
+                    playSe('マナ配置.mp3');
                     // 自動処理設定チェック: マナ配置時+1
                     if (autoConfig.autoManaPlacement) {
                         const manaInput = document.getElementById(idPrefix + 'mana-counter-value');
@@ -332,7 +334,7 @@ function handleSlotClick(e) {
 
                     const isMana = baseParentZoneId.startsWith('mana');
                     if (isMana) {
-                        playSe('スペル.mp3');
+                        playSe('マナ配置.mp3');
                         // 自動処理設定チェック
                         if (autoConfig.autoManaPlacement) {
                             const manaInput = document.getElementById(idPrefix + 'mana-counter-value');
@@ -577,7 +579,7 @@ function handleFileDrop(e, targetSlot, idPrefix) {
 
                 const isMana = targetParentBaseId.startsWith('mana');
                 if (isMana) {
-                    playSe('スペル.mp3');
+                    playSe('マナ配置.mp3');
                     const manaInput = document.getElementById(idPrefix + 'mana-counter-value');
                     if (manaInput) {
                         manaInput.value = parseInt(manaInput.value || 0) + 1;
@@ -814,7 +816,7 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
                 }
             }
             tryAutoManaTapIn(destSlot, idPrefix, destZoneId);
-            playSe('スペル.mp3');
+            playSe('マナ配置.mp3');
         } else {
             playPlacementSe(targetBaseZoneId);
         }
@@ -865,7 +867,7 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
     } else if (isExclude) {
         playSe('除外する.mp3');
     } else if (isMana) {
-        playSe('スペル.mp3');
+        playSe('マナ配置.mp3');
     } else {
         playPlacementSe(targetBaseZoneId);
     }

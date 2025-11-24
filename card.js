@@ -299,10 +299,9 @@ function handleCardContextMenu(e) {
             const newState = !isPermanent;
             thumbnailElement.dataset.isPermanent = newState;
             
+            // 常時発動ON時のみSEを再生（OFF時はUI側の共通音のみにする）
             if (newState) {
                 playSe('常時発動.mp3');
-            } else {
-                playSe('ボタン共通.mp3');
             }
             
             if (isRecording && typeof recordAction === 'function') {
@@ -882,7 +881,17 @@ function toggleMasturbation(thumbnailElement, newState) {
                     masturbateTimers.delete(thumbnailElement);
                     return;
                 }
-                modifyCardBP(thumbnailElement, -100, true); 
+                modifyCardBP(thumbnailElement, -100, true);
+                
+                // BPが0以下になったら自動停止
+                const memo = thumbnailElement.dataset.memo || '';
+                const match = memo.match(/\[BP:(.*?)\]/);
+                if (match) {
+                    const bp = parseInt(match[1]);
+                    if (bp <= 0) {
+                        toggleMasturbation(thumbnailElement, false);
+                    }
+                }
             }, 1000);
             masturbateTimers.set(thumbnailElement, timerId);
         }
@@ -976,7 +985,7 @@ function checkBpDestruction(thumbnailElement) {
              if (typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
         }
         
-        playSe('被弾.mp3');
+        // 「被弾.mp3」は削除
         thumbnailElement.classList.add('target-active');
         
         setTimeout(() => {

@@ -1621,23 +1621,32 @@ function setupUI() {
             closeDecorationSettingsModal();
         }
 
-        if (!clickedInsideCommon) {
+        // Pカード、Oカード、バンク（c-drawer）は、それぞれの領域内または他のドロワーの領域内をクリックした場合は閉じない
+        // つまり、「全てのドロワーの外側（盤面など）」をクリックした場合のみ閉じる
+        const clickedInsideSideDrawers = e.target.closest('#player-drawer') || 
+                                         e.target.closest('#opponent-drawer') || 
+                                         e.target.closest('#c-drawer');
+
+        if (!clickedInsideCommon) { 
+            
             const playerDrawer = document.getElementById('player-drawer');
             if (playerDrawer && playerDrawer.classList.contains('open')) {
-                if (!e.target.closest('#player-drawer')) {
+                // Pカードが開いている時、ドロワー群のいずれもクリックしていなければ閉じる
+                if (!clickedInsideSideDrawers) {
                     playerDrawer.classList.remove('open');
                 }
             }
 
             const opponentDrawer = document.getElementById('opponent-drawer');
             if (opponentDrawer && opponentDrawer.classList.contains('open')) {
-                if (!e.target.closest('#opponent-drawer')) {
+                if (!clickedInsideSideDrawers) {
                     opponentDrawer.classList.remove('open');
                 }
             }
             
+            const cDrawer = document.getElementById('c-drawer');
             if (cDrawer && cDrawer.classList.contains('open')) {
-                if (!e.target.closest('#c-drawer')) {
+                if (!clickedInsideSideDrawers) {
                     cDrawer.classList.remove('open');
                 }
             }
@@ -1648,15 +1657,24 @@ function setupUI() {
     
     actionMenuItem.addEventListener('click', () => { 
         let isMana = false;
+        let isSpell = false;
+        
         if (lastRightClickedElement) {
             const zoneId = getParentZoneId(lastRightClickedElement);
-            if (zoneId && (zoneId.includes('mana') || getBaseId(zoneId).startsWith('mana'))) {
-                isMana = true;
+            if (zoneId) {
+                const baseId = getBaseId(zoneId);
+                if (zoneId.includes('mana') || baseId.startsWith('mana')) {
+                    isMana = true;
+                } else if (baseId === 'spell') {
+                    isSpell = true;
+                }
             }
         }
         
         if (isMana) {
-            playSe('スペル.mp3');
+            // マナエリアならSEなし
+        } else if (isSpell) {
+            playSe('スペル効果発動.mp3');
         } else {
             playSe('効果発動.mp3');
         }
@@ -1671,18 +1689,18 @@ function setupUI() {
     });
     
     attackMenuItem.addEventListener('click', () => {
-        playSe('ボタン共通.mp3'); 
+        // playSe('ボタン共通.mp3'); // 削除: 他のSEとの重複回避
         startBattleTargetSelection(lastRightClickedElement);
         closeContextMenu();
     });
 
     permanentMenuItem.addEventListener('click', () => { 
-        playSe('ボタン共通.mp3');
+        // playSe('ボタン共通.mp3'); // 削除: card.js側でON時のみ再生、OFF時はボタン共通音無しで統一
         if (typeof currentPermanentHandler === 'function') currentPermanentHandler(); 
         closeContextMenu(); 
     });
     blockerMenuItem.addEventListener('click', () => {
-        playSe('ブロッカー.mp3');
+        playSe('ブロッカー.wav');
         if (typeof currentBlockerHandler === 'function') currentBlockerHandler();
         closeContextMenu();
     });
@@ -1757,7 +1775,7 @@ function setupUI() {
 
     if (duplicateMenuItem) {
         duplicateMenuItem.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
+            // playSe('ボタン共通.mp3'); // 削除: 複製先で配置SEが鳴るため重複回避
             if (lastRightClickedElement) {
                 duplicateCardToFreeSpace(lastRightClickedElement);
             }
@@ -1811,7 +1829,7 @@ function setupUI() {
     bpModifyBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation(); 
-            playSe('ボタン共通.mp3');
+            // playSe('ボタン共通.mp3'); // 削除: BP増減SEと重複するため
             const val = parseInt(btn.dataset.value);
             if (lastRightClickedElement && typeof modifyCardBP === 'function') {
                 modifyCardBP(lastRightClickedElement, val);
@@ -1825,7 +1843,7 @@ function setupUI() {
 
     if (battleConfirmExecuteBtn) {
         battleConfirmExecuteBtn.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
+            // playSe('ボタン共通.mp3'); // 削除: resolveBattle内のアタックSEと重複するため
             if (typeof resolveBattle === 'function') {
                 const aBp = parseInt(battleConfirmAttackerBpInput.value);
                 const tBp = parseInt(battleConfirmTargetBpInput.value);
@@ -1945,7 +1963,8 @@ function setupUI() {
         document.body.removeChild(fileInput);
     });
 
-    decorationSettingsCloseBtn.addEventListener('click', () => {
+    decorationSettingsCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // 修正: 親要素（Common Menu）への伝播を防止
         playSe('ボタン共通.mp3');
         closeDecorationSettingsModal();
     });
@@ -1970,19 +1989,30 @@ function setupUI() {
         });
     }
     
-    // システムボタンのハンドラ
+    // システムボタンのハンドラ (トグル化)
     if (systemBtn) {
-        systemBtn.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
-            commonDrawer.classList.add('open');
-            activateDrawerTab('common-spec-panel', commonDrawer);
+        systemBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // playSe('ボタン共通.mp3'); // 重複回避のため削除 (commonDrawerの開閉SEに任せるか、ここで鳴らすならtoggleのロジック次第)
+            if (commonDrawer.classList.contains('open')) {
+                commonDrawer.classList.remove('open');
+            } else {
+                playSe('ボタン共通.mp3'); // 開く時だけ鳴らす
+                commonDrawer.classList.add('open');
+                activateDrawerTab('common-spec-panel', commonDrawer);
+            }
         });
     }
     if (opponentSystemBtn) {
-        opponentSystemBtn.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
-            commonDrawer.classList.add('open');
-            activateDrawerTab('common-spec-panel', commonDrawer);
+        opponentSystemBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (commonDrawer.classList.contains('open')) {
+                commonDrawer.classList.remove('open');
+            } else {
+                playSe('ボタン共通.mp3');
+                commonDrawer.classList.add('open');
+                activateDrawerTab('common-spec-panel', commonDrawer);
+            }
         });
     }
 
@@ -2091,37 +2121,41 @@ function setupUI() {
     const openOpponentDrawerBtn = document.getElementById('common-open-opponent-drawer');
     const openBankDrawerBtn = document.getElementById('common-open-bank-drawer');
 
+    // Drawer Toggle Logic Helper
+    const toggleDrawerWithTab = (drawerId, tabId) => {
+        const drawer = document.getElementById(drawerId);
+        if (drawer) {
+            // 既に開いていて、かつ指定のタブが表示されている場合は閉じる
+            const activePanel = drawer.querySelector('.drawer-panel.active');
+            if (drawer.classList.contains('open') && activePanel && activePanel.id === tabId) {
+                drawer.classList.remove('open');
+            } else {
+                // それ以外（閉じている、または別のタブが開いている）は開いてタブをアクティブ化
+                drawer.classList.add('open');
+                activateDrawerTab(tabId, drawer);
+            }
+        }
+    };
+
     if (openPlayerDrawerBtn) {
         openPlayerDrawerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             playSe('ボタン共通.mp3');
-            const drawer = document.getElementById('player-drawer');
-            if (drawer) {
-                drawer.classList.add('open');
-                activateDrawerTab('deck-back-slots', drawer);
-            }
+            toggleDrawerWithTab('player-drawer', 'deck-back-slots');
         });
     }
     if (openOpponentDrawerBtn) {
         openOpponentDrawerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             playSe('ボタン共通.mp3');
-            const drawer = document.getElementById('opponent-drawer');
-            if (drawer) {
-                drawer.classList.add('open');
-                activateDrawerTab('opponent-deck-back-slots', drawer);
-            }
+            toggleDrawerWithTab('opponent-drawer', 'opponent-deck-back-slots');
         });
     }
     if (openBankDrawerBtn) {
         openBankDrawerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             playSe('ボタン共通.mp3');
-            const drawer = document.getElementById('c-drawer');
-            if (drawer) {
-                drawer.classList.add('open');
-                activateDrawerTab('c-free-space', drawer);
-            }
+            toggleDrawerWithTab('c-drawer', 'c-free-space');
         });
     }
 
@@ -2194,7 +2228,7 @@ function setupUI() {
     
     if (battleCancelBtn) {
         battleCancelBtn.addEventListener('click', () => {
-            playSe('ボタン共通.mp3');
+            // playSe('ボタン共通.mp3'); // 削除: 他のSEと重なる可能性があるため（バトル中断時の混乱を防ぐ）
             if (typeof cancelBattleTargetSelection === 'function') cancelBattleTargetSelection();
         });
     }
@@ -2408,7 +2442,7 @@ function activateDrawerTab(targetId, drawerElement) {
     drawerTabs.forEach(t => t.classList.toggle('active', t.dataset.target === targetId));
 
     if (targetId === 'common-spec-panel') {
-        loadTextContent('txt/仕様説明.txt', 'spec-text-content');
+        loadTextContent('txt/機能説明.txt', 'spec-text-content');
     } else if (targetId === 'common-about-panel') {
         loadTextContent('txt/S＆Mとは.txt', 'about-text-content');
     } else if (targetId === 'common-credit-panel') {
@@ -2581,6 +2615,7 @@ function duplicateCardToFreeSpace(sourceCard) {
         if (typeof updateSlotStackState === 'function') updateSlotStackState(emptySlot);
         playSe('カードを配置する.mp3');
         
+        // 自動オープン処理 (トグルではないので直接操作)
         const drawer = document.getElementById('player-drawer');
         if (drawer) {
             drawer.classList.add('open');

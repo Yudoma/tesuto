@@ -52,6 +52,21 @@ function getParentZoneId(element) {
     return closestZone ? closestZone.id : null;
 }
 
+// 配置SE再生ヘルパー (リプレイなどでも使用)
+function playPlacementSe(baseZoneId) {
+    if (baseZoneId === 'spell') {
+        playSe('スペル配置.mp3');
+    } else if (baseZoneId === 'battle') {
+        playSe('バトル配置.mp3');
+    } else if (baseZoneId === 'special1' || baseZoneId === 'special2') {
+        playSe('特殊配置.mp3');
+    } else if (baseZoneId && baseZoneId.startsWith('mana')) {
+        playSe('マナ配置.mp3');
+    } else {
+        playSe('カードを配置する.mp3');
+    }
+}
+
 // --- オーディオ機能 (BGM/SE) ---
 
 const loopSeInstances = {};
@@ -438,7 +453,7 @@ function executeAction(action) {
                     const toBase = getBaseId(getParentZoneId(toSlot));
                     if (toBase === 'grave' || toBase === 'grave-back-slots') playSe('墓地に送る.mp3');
                     else if (toBase === 'exclude' || toBase === 'exclude-back-slots') playSe('除外する.mp3');
-                    else playSe('カードを配置する.mp3');
+                    else playPlacementSe(toBase); // 変更: ゾーンに応じた配置SE
 
                     updatePreviewForAction(action.toZone, action.toSlotIndex);
                 }
@@ -451,11 +466,14 @@ function executeAction(action) {
                 const prefix = getPrefixFromZoneId(action.zoneId);
                 createCardThumbnail(action.cardData, slot, false, false, prefix);
                 updateSlotStackState(slot);
-                playSe('カードを配置する.mp3');
+                
+                // 配置SEをゾーンに応じて再生
+                const baseId = getBaseId(getParentZoneId(slot));
+                playPlacementSe(baseId);
                 
                 const zId = getParentZoneId(slot);
                 if (zId && zId.endsWith('-back-slots')) arrangeSlots(zId);
-                const baseId = getBaseId(zId);
+                
                 if (decorationZones.includes(baseId)) syncMainZoneImage(baseId, prefix);
                 
                 updatePreviewForAction(action.zoneId, action.slotIndex);
@@ -560,8 +578,8 @@ function executeAction(action) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
                     card.dataset.isMasturbating = action.isMasturbating;
-                    if(action.isMasturbating) playSe('O.mp3', true);
-                    else stopSe('O.mp3');
+                    if(action.isMasturbating) playSe('オナニー.mp3', true);
+                    else stopSe('オナニー.mp3');
                     updatePreviewForAction(action.zoneId, action.slotIndex);
                 }
             }
@@ -591,7 +609,7 @@ function executeAction(action) {
                     if (action.isBlocker) {
                         card.dataset.isBlocker = 'true';
                         addBlockerOverlay(card);
-                        playSe('ブロッカー.mp3');
+                        playSe('ブロッカー.wav');
                     } else {
                         card.dataset.isBlocker = 'false';
                         removeBlockerOverlay(card);
@@ -608,10 +626,23 @@ function executeAction(action) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
                     triggerEffect(card, action.subType);
-                    // エフェクトの種類に応じてSE再生
-                    if(action.subType === 'attack') playSe('アタック.mp3');
-                    else if(action.subType === 'effect') playSe('効果発動.mp3');
-                    else playSe('対象に取る.mp3');
+                    
+                    if(action.subType === 'attack') {
+                        playSe('アタック.mp3');
+                    } else if(action.subType === 'effect') {
+                        // 効果発動時のエリア別SE分岐
+                        const zoneId = getParentZoneId(card.parentNode);
+                        const baseZoneId = getBaseId(zoneId);
+                        if (baseZoneId.startsWith('mana')) {
+                            // マナエリアはSEなし
+                        } else if (baseZoneId === 'spell') {
+                            playSe('スペル効果発動.mp3');
+                        } else {
+                            playSe('効果発動.mp3');
+                        }
+                    } else {
+                        playSe('対象に取る.mp3');
+                    }
                     
                     updatePreviewForAction(action.zoneId, action.slotIndex);
                 }

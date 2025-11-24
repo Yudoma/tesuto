@@ -713,9 +713,9 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     box-sizing: border-box; 
     padding: 10px 15px;
     border: none;
-    resize: both; 
+    resize: none; 
     min-height: 80px;
-    font-size: 1em;
+    font-size: 2em;
     background-color: #4a4a6e; 
     color: #e0e0e0;
     border-bottom: 1px solid #2a2a4e;

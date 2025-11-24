@@ -186,7 +186,7 @@ function setupBoardButtons(idPrefix) {
     });
 
     document.getElementById(idPrefix + 'surrender-btn')?.addEventListener('click', () => {
-        playSe('降参.mp3');
+        playSe('敗北.mp3'); // 降参SEを敗北に変更
         // 降参時の敗北表示
         if (typeof autoConfig !== 'undefined' && autoConfig.autoGameEnd) {
              const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
@@ -196,12 +196,15 @@ function setupBoardButtons(idPrefix) {
         }
     });
     
-    // システムボタン (新規追加 + 修正: stopPropagation追加)
+    // システムボタン (stopPropagation追加)
     document.getElementById(idPrefix + 'system-btn')?.addEventListener('click', (e) => {
         e.stopPropagation();
         playSe('ボタン共通.mp3');
         const commonDrawer = document.getElementById('common-drawer');
         if (commonDrawer) {
+            // トグル動作はui.js側で制御するか、ここでもトグルにする
+            // ここではシンプルにopenクラスを付与するだけに留め、ui.js側で競合しないようにする
+            // ※ui.jsのトグル化対応に合わせて、ここでは単純な開く動作、またはui.jsのロジックに任せる
             commonDrawer.classList.add('open');
             if (typeof activateDrawerTab === 'function') {
                 activateDrawerTab('common-spec-panel', commonDrawer);
@@ -701,7 +704,7 @@ function getAllBoardState() {
             isBoardFlipped: document.body.classList.contains('board-flipped'),
             currentStepIndex: (typeof currentStepIndex !== 'undefined') ? currentStepIndex : 0,
             cNavi: extractZoneData('c-free-space'),
-            customCounterTypes: customCounterTypes || [], // カスタムカウンターの定義も保存
+            customCounterTypes: customCounterTypes || [], // カスタムカウンターの定義(画像含む)も保存
             settings: {
                 bgmVolume: typeof bgmVolume !== 'undefined' ? bgmVolume : 5,
                 seVolume: typeof seVolume !== 'undefined' ? seVolume : 5,
@@ -940,7 +943,7 @@ window.resolveBattle = function(attackerBP, targetBP) {
     }
 
     const playHitEffect = (element) => {
-        playSe('被弾.mp3');
+        // playSe('被弾.mp3'); // 削除
         element.classList.add('target-active');
         setTimeout(() => element.classList.remove('target-active'), 1000);
     };
