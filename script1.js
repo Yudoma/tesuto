@@ -578,8 +578,8 @@ function executeAction(action) {
                 const card = slot.querySelector('.thumbnail');
                 if (card) {
                     card.dataset.isMasturbating = action.isMasturbating;
-                    if(action.isMasturbating) playSe('オナニー.mp3', true);
-                    else stopSe('オナニー.mp3');
+                    if(action.isMasturbating) playSe('オナニー.wav', true);
+                    else stopSe('オナニー.wav');
                     updatePreviewForAction(action.zoneId, action.slotIndex);
                 }
             }
