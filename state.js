@@ -26,6 +26,9 @@ const bgmFileList = [
 const seConfig = {
     'ボタン共通.mp3': true,
     'カードを配置する.mp3': true,
+    'スペル配置.mp3': true,
+    'バトル配置.mp3': true,
+    '特殊配置.mp3': true,
     'タップ.mp3': true,
     'マナ増加.mp3': true,
     'シャッフル.mp3': true,
@@ -48,8 +51,9 @@ const seConfig = {
     'ブロッカー.mp3': true,
     'オナニー.mp3': true,
     'ターン開始.mp3': true,
-    '破壊.mp3': true,
-    '被弾.mp3': true
+    '被弾.mp3': true,
+    'BPプラス.mp3': true,
+    'BPマイナス.mp3': true
 };
 
 // エフェクト個別設定 (初期値は全てtrue)
@@ -59,7 +63,9 @@ const effectConfig = {
     'attack': true,       // アタック
     'effect': true,       // 効果発動
     'target': true,       // 対象選択
-    'autoDecrease': true  // 自動減少
+    'autoDecrease': true, // 自動減少
+    'blocker': true,      // ブロッカー表示
+    'bpChange': true      // BP変動エフェクト
 };
 
 // 自動処理設定
@@ -106,6 +112,8 @@ let currentExportCardHandler = null;
 let currentImportCardHandler = null;
 let currentMemoTarget = null;
 let currentFlavorTarget = null;
+let currentStockItemTarget = null;
+let currentPreviewExportHandler = null; // プレビューエクスポート用
 
 const nonRotatableZones = ['deck', 'grave', 'exclude', 'hand-zone', 'deck-back-slots', 'side-deck', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots', 'icon-zone', 'token-zone-slots'];
 const decorationZones = ['exclude', 'side-deck', 'grave', 'deck', 'icon-zone'];

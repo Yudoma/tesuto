@@ -45,7 +45,7 @@
     font-size: 0.95em;
     font-weight: bold;
     text-align: center;
-    font-family: 'Georgia', serif;
+    
     background-color: #3a3a5e;
     border: 1px solid #5a5a9a;
     color: #e0e0e0;
@@ -146,7 +146,7 @@
 }
 
 .hand-area-container {
-    width: 100%; 
+    width: auto; 
     height: auto;
     flex-grow: 1;
     flex-shrink: 1;
@@ -154,12 +154,14 @@
     display: flex; 
     flex-direction: column;
     overflow: hidden;
+    box-sizing: border-box;
+    padding-left: 100px;
 }
 
 .hand-controls-top-wrapper {
     display: flex;
     flex-direction: row; 
-    justify-content: space-between; 
+    justify-content: flex-start; 
     align-items: stretch;
     gap: 2px;
     width: 100%; 
@@ -170,27 +172,27 @@
 .hand-controls-frame {
     border: 1px solid #555;
     background-color: #333;
-    padding: 3px;
+    padding: 2px;
     border-radius: 5px;
     display: flex;
-    flex-grow: 1; 
+    flex-grow: 0; 
     flex-shrink: 1;
     align-items: flex-start; 
     height: 100%;
     gap: 2px;
-    padding-top: 5px; 
+    padding-top: 1px; 
     transition: background-color 0.3s, border-color 0.3s;
     min-height: 0;
 }
 
 .hand-controls-top-wrapper > .deck-zone {
-    flex-shrink: 1; 
-    flex-grow: 1;
+    flex-shrink: 0; 
+    flex-grow: 0;
     width: auto;
     height: 100%;
     aspect-ratio: 67.2 / 119.712; 
-    min-width: 40px;
-    max-width: 80px;
+    min-width: 80px;
+    max-width: 100px;
     padding: 1px;
     box-sizing: border-box;
     display: flex;
@@ -241,12 +243,12 @@
 
 .hand-zone-slots {
     display: flex;
-    gap: 1px;
+    gap: 2px;
     height: 100%;
     min-height: 0;
     border: 1px solid #555; 
     background-color: #222; 
-    padding: 1px;
+    padding: 2px;
     border-radius: 5px;
     flex-wrap: nowrap; 
     overflow-x: auto; 
@@ -286,8 +288,8 @@
 }
 
 .draw-btn {
-    padding: 2px 8px;
-    font-size: 0.85em;
+    padding: 5px 8px;
+    font-size: 1em;
     font-weight: bold;
     color: #333;
     background-color: #f0f0f0; 
@@ -614,7 +616,7 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     box-shadow: 0 2px #b0b0b0; 
     font-size: 0.9em;
     font-weight: bold;
-    font-family: 'Georgia', serif;
+    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 #common-drawer-toggle:hover {
@@ -630,7 +632,7 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     padding: 4px 10px;
     font-size: 0.9em;
     font-weight: bold;
-    font-family: 'Georgia', serif;
+    
     background-color: #f0f0f0;
     color: #333;
     border: none;
@@ -682,7 +684,7 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     color: #e0e0e0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
-    font-family: 'Georgia', serif;
+    
     overflow: hidden; 
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
@@ -695,6 +697,8 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     border-bottom: 1px solid #5a5a9a;
     color: #a0a0e0; 
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    cursor: move;
+    user-select: none;
 }
 
 .flavor-editor-content {
@@ -849,7 +853,7 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 
 /* Sadist Mode */
 .player-wrapper.player-sadist-mode, .opponent-wrapper.opponent-sadist-mode {
-    font-family: 'Georgia', serif;
+    
     background-color: transparent; 
     color: #333; 
     border-radius: 5px; 
@@ -882,7 +886,7 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 
 /* Magickers Mode */
 .player-wrapper.player-magickers-mode, .opponent-wrapper.opponent-magickers-mode {
-    font-family: 'Georgia', serif;
+    
     background-color: transparent; 
     color: #e0aaff; 
     border-radius: 5px;
@@ -915,7 +919,7 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 
 /* Striker Mode */
 .player-wrapper.player-striker-mode, .opponent-wrapper.opponent-striker-mode {
-    font-family: 'Georgia', serif;
+    
     background-color: transparent; 
     color: #ffcccc; 
     border-radius: 5px;
@@ -984,35 +988,35 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
 .counter-wrapper.sadist-ui-active .player-icon-slot { background-color: #FFF0F5; border-color: #C71585; }
 .counter-wrapper.sadist-ui-active .player-name-input { color: #C71585; background-color: #FFF5FA; border-color: #FFB6C1; }
 .counter-wrapper.sadist-ui-active .simple-counter-buttons input[type="number"],
-.counter-wrapper.sadist-ui-active .lp-counter-input, .counter-wrapper.sadist-ui-active .mana-counter-input { color: #C71585; background-color: #FFF5FA; border-color: #FFB6C1; }
+.counter-wrapper.sadist-ui-active .lp-counter-input, .counter-wrapper.sadist-ui-active .mana-counter-input, .counter-wrapper.sadist-ui-active .hyphen-counter-input { color: #C71585; background-color: #FFF5FA; border-color: #FFB6C1; }
 
 .counter-wrapper.masochist-ui-active .area-label { color: #00008B; text-shadow: 1px 1px 2px #B0C4DE; }
 .counter-wrapper.masochist-ui-active .hand-counter-group { background-color: #F0F8FF; border-color: #4169E1; }
 .counter-wrapper.masochist-ui-active .player-icon-slot { background-color: #F0F8FF; border-color: #00008B; }
 .counter-wrapper.masochist-ui-active .player-name-input { color: #00008B; background-color: #F0F8FF; border-color: #B0C4DE; }
 .counter-wrapper.masochist-ui-active .simple-counter-buttons input[type="number"],
-.counter-wrapper.masochist-ui-active .lp-counter-input, .counter-wrapper.masochist-ui-active .mana-counter-input { color: #00008B; background-color: #F0F8FF; border-color: #B0C4DE; }
+.counter-wrapper.masochist-ui-active .lp-counter-input, .counter-wrapper.masochist-ui-active .mana-counter-input, .counter-wrapper.masochist-ui-active .hyphen-counter-input { color: #00008B; background-color: #F0F8FF; border-color: #B0C4DE; }
 
 .counter-wrapper.magickers-ui-active .area-label { color: #c77dff; text-shadow: 1px 1px 2px #7b2cbf; }
 .counter-wrapper.magickers-ui-active .hand-counter-group { background-color: #240046; border-color: #7b2cbf; }
 .counter-wrapper.magickers-ui-active .player-icon-slot { background-color: #3c096c; border-color: #9d4edd; }
 .counter-wrapper.magickers-ui-active .player-name-input { color: #e0aaff; background-color: #240046; border-color: #9d4edd; }
 .counter-wrapper.magickers-ui-active .simple-counter-buttons input[type="number"],
-.counter-wrapper.magickers-ui-active .lp-counter-input, .counter-wrapper.magickers-ui-active .mana-counter-input { color: #e0aaff; background-color: #240046; border-color: #9d4edd; }
+.counter-wrapper.magickers-ui-active .lp-counter-input, .counter-wrapper.magickers-ui-active .mana-counter-input, .counter-wrapper.magickers-ui-active .hyphen-counter-input { color: #e0aaff; background-color: #240046; border-color: #9d4edd; }
 
 .counter-wrapper.striker-ui-active .area-label { color: #cd5c5c; text-shadow: 1px 1px 2px #800000; }
 .counter-wrapper.striker-ui-active .hand-counter-group { background-color: #2b0505; border-color: #8b0000; }
 .counter-wrapper.striker-ui-active .player-icon-slot { background-color: #4a0a0a; border-color: #b22222; }
 .counter-wrapper.striker-ui-active .player-name-input { color: #ffcccc; background-color: #2b0505; border-color: #8b0000; }
 .counter-wrapper.striker-ui-active .simple-counter-buttons input[type="number"],
-.counter-wrapper.striker-ui-active .lp-counter-input, .counter-wrapper.striker-ui-active .mana-counter-input { color: #ffcccc; background-color: #2b0505; border-color: #8b0000; }
+.counter-wrapper.striker-ui-active .lp-counter-input, .counter-wrapper.striker-ui-active .mana-counter-input, .counter-wrapper.striker-ui-active .hyphen-counter-input { color: #ffcccc; background-color: #2b0505; border-color: #8b0000; }
 
 .counter-wrapper.simple-ui-active .area-label { color: #000; text-shadow: none; }
 .counter-wrapper.simple-ui-active .hand-counter-group { background-color: #fff; border-color: #000; }
 .counter-wrapper.simple-ui-active .player-icon-slot { background-color: #fff; border-color: #000; }
 .counter-wrapper.simple-ui-active .player-name-input { color: #000; background-color: #fff; border-color: #ccc; font-family: sans-serif; }
 .counter-wrapper.simple-ui-active .simple-counter-buttons input[type="number"],
-.counter-wrapper.simple-ui-active .lp-counter-input, .counter-wrapper.simple-ui-active .mana-counter-input { color: #000; background-color: #fff; border-color: #ccc; }
+.counter-wrapper.simple-ui-active .lp-counter-input, .counter-wrapper.simple-ui-active .mana-counter-input, .counter-wrapper.simple-ui-active .hyphen-counter-input { color: #000; background-color: #fff; border-color: #ccc; }
 
 /* Modal & Tooltip Theme Support (Sadist & New Themes) */
 body.sm-mode-active .flavor-editor-modal, body.sm-mode-active .memo-editor-modal, body.sm-mode-active .memo-tooltip { background-color: #FFF0F5; border-color: #FF69B4; color: #333; }
@@ -1253,7 +1257,7 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
     border: 1px solid #555;
     border-radius: 5px;
     padding: 5px;
-    font-family: 'Georgia', serif;
+    
     font-size: 0.9em;
     outline: none;
 }
@@ -1313,7 +1317,7 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
     z-index: 20000 !important; /* Fix for hidden behind modals */
     border-radius: 5px;
     overflow: visible; /* Changed from hidden to allow submenus */
-    font-family: 'Georgia', serif; 
+     
 }
 .custom-context-menu ul {
     list-style: none;
@@ -1390,13 +1394,13 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
     width: 400px; /* Increased from 300px */
     max-width: 90vw;
     max-height: 90vh;
-    z-index: 1001; 
+    z-index: 11000; /* Increased z-index for higher priority */
     background-color: #3a3a5e; 
     border: 1px solid #5a5a9a; 
     color: #e0e0e0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
-    font-family: 'Georgia', serif;
+    
     
     /* Resize logic */
     display: flex; 
@@ -1423,8 +1427,8 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
     border: none;
     resize: none; /* Disable internal resize, rely on window */
     flex-grow: 1; /* Fill remaining space */
-    font-family: 'Georgia', serif;
-    font-size: 1em;
+    
+    font-size: 1.2em;
     background-color: #4a4a6e; 
     color: #e0e0e0;
     border-bottom: 1px solid #2a2a4e;
@@ -1477,7 +1481,7 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     padding: 8px 12px;
-    font-family: 'Georgia', serif;
+    
     font-size: 0.9em;
     max-width: 250px;
     white-space: pre-wrap; 
@@ -1606,6 +1610,12 @@ body.player-simple-active #player-drawer .drawer-panel .deck-back-slot-container
 #battle-confirm-header {
     text-align: center;
     cursor: move;
+}
+
+/* バトル確認モーダルのレイアウト修正 */
+#battle-confirm-modal {
+    display: flex;
+    flex-direction: column;
 }
 
 /* 装飾設定モーダルのテーマ固定化 */

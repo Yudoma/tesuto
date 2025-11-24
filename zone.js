@@ -6,6 +6,19 @@ const DEFAULT_CARD_MEMO = `[カード名:-]/#e0e0e0/#555/1.0/非表示/
 [フレーバーテキスト:-]/#fff/#555/1.0/非表示/
 [効果:-]/#e0e0e0/#555/0.7/非表示/`;
 
+// 配置SE再生ヘルパー
+function playPlacementSe(baseZoneId) {
+    if (baseZoneId === 'spell') {
+        playSe('スペル配置.mp3');
+    } else if (baseZoneId === 'battle') {
+        playSe('バトル配置.mp3');
+    } else if (baseZoneId === 'special1' || baseZoneId === 'special2') {
+        playSe('特殊配置.mp3');
+    } else {
+        playSe('カードを配置する.mp3');
+    }
+}
+
 // マナコスト自動消費ヘルパー
 function tryAutoManaCost(memo, idPrefix) {
     if (typeof autoConfig === 'undefined' || !autoConfig.autoManaCost) return;
@@ -203,7 +216,7 @@ function importCardToSlot(slot) {
                     // 自動処理設定チェック: マナ配置時タップイン
                     tryAutoManaTapIn(slot, idPrefix, zoneId);
                 } else {
-                    playSe('カードを配置する.mp3');
+                    playPlacementSe(baseZoneId);
                 }
                 
                 if (isRecording && typeof recordAction === 'function') {
@@ -337,7 +350,7 @@ function handleSlotClick(e) {
                         // 自動処理設定チェック: マナ配置時タップイン
                         tryAutoManaTapIn(slot, idPrefix, parentZoneId);
                     } else {
-                        playSe('カードを配置する.mp3');
+                        playPlacementSe(baseParentZoneId);
                     }
 
                     if (isRecording && typeof recordAction === 'function') {
@@ -579,7 +592,7 @@ function handleFileDrop(e, targetSlot, idPrefix) {
                     // マナ配置時タップイン
                     tryAutoManaTapIn(targetSlot, idPrefix, targetParentZoneId);
                 } else {
-                    playSe('カードを配置する.mp3');
+                    playPlacementSe(targetParentBaseId);
                 }
 
                 if (isRecording && typeof recordAction === 'function') {
@@ -643,7 +656,8 @@ function handleFileDrop(e, targetSlot, idPrefix) {
             });
 
             if (fileList.length > 0) {
-                playSe('カードを配置する.mp3');
+                const baseId = getBaseId(containerId).replace('-back-slots', '');
+                playPlacementSe(baseId);
             }
 
             setTimeout(() => {
@@ -784,10 +798,7 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
             tryAutoManaCost(memo, idPrefix);
         }
 
-        playSe('カードを配置する.mp3');
-        updateSlotStackState(destSlot);
-        
-        // マナ配置時タップイン (複製先がマナなら)
+        // 配置SE分岐
         if (targetBaseZoneId.startsWith('mana')) {
              if (autoConfig.autoManaPlacement) {
                 const manaInput = document.getElementById(idPrefix + 'mana-counter-value');
@@ -803,7 +814,12 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
                 }
             }
             tryAutoManaTapIn(destSlot, idPrefix, destZoneId);
+            playSe('スペル.mp3');
+        } else {
+            playPlacementSe(targetBaseZoneId);
         }
+        
+        updateSlotStackState(destSlot);
         
         if (isRecording && typeof recordAction === 'function') {
             recordAction({
@@ -851,7 +867,7 @@ function handleCardDrop(draggedItem, targetSlot, idPrefix) {
     } else if (isMana) {
         playSe('スペル.mp3');
     } else {
-        playSe('カードを配置する.mp3');
+        playPlacementSe(targetBaseZoneId);
     }
 
     if (isMana && !sourceBaseZoneId.startsWith('mana')) {

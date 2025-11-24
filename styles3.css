@@ -23,6 +23,26 @@ body.common-decoration-mode-active .player-wrapper .hand-area-container #surrend
     transition: opacity 0.3s ease;
 }
 
+.header-input {
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 2px;
+    outline: none;
+    cursor: text;
+}
+.header-input:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
 .opponent-wrapper .counter-btn:active,
 .opponent-wrapper .card-rotate-btn:active,
 .opponent-wrapper .simple-counter-buttons button:active {
@@ -56,6 +76,11 @@ body:not(.board-flipped) .common-preview-wrapper #opponent-counter-wrapper .oppo
     transform: scaleY(1); 
 }
 
+.opponent-wrapper .zone-header,
+.opponent-wrapper .hand-zone-wrapper .zone-header {
+    transform: translate(-50%, -50%) scaleY(-1);
+}
+
 body.board-flipped .game-area-container {
     flex-direction: column-reverse;
 }
@@ -66,12 +91,10 @@ body.board-flipped .common-preview-wrapper {
 
 body.board-flipped .opponent-wrapper {
     transform: scaleY(1);
-    margin-bottom: 0;
 }
 
 body.board-flipped .common-preview-wrapper #opponent-counter-wrapper {
     transform: scaleY(1);
-     
 }
 
 body.board-flipped .opponent-wrapper .counter-btn:active,
@@ -98,11 +121,8 @@ body.board-flipped .opponent-wrapper .count-overlay {
     transform: translate(-50%, -50%); 
 }
 
-
-
 body.board-flipped .player-wrapper {
     transform: scaleY(-1);
-    margin-bottom: -10px;  
 }
 
 body.board-flipped .common-preview-wrapper #player-counter-wrapper .area-label,
@@ -111,7 +131,6 @@ body.board-flipped .common-preview-wrapper #player-counter-wrapper .mana-counter
 body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-icon-slot,  
 body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-name-input,  
 body.board-flipped .common-preview-wrapper #common-card-preview p,
-
 body.board-flipped .player-wrapper .draw-btn,
 body.board-flipped .common-preview-wrapper #player-counter-wrapper .counter-btn,
 body.board-flipped .player-wrapper .card-rotate-btn,
@@ -130,7 +149,6 @@ body.board-flipped .common-preview-wrapper #player-counter-wrapper .mana-counter
 body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-icon-slot,  
 body.board-flipped .common-preview-wrapper #player-counter-wrapper .player-name-input,  
 body.board-flipped .common-preview-wrapper #common-card-preview p {
-
     transform: scaleY(1); 
 }
 
@@ -171,7 +189,7 @@ body.board-flipped #opponent-drawer {
     bottom: auto;
     top: 10px;
 }
- 
+
 body.board-flipped #player-drawer-toggle {
     top: auto;
     bottom: 60px;  
@@ -202,11 +220,7 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
 
 .player-wrapper,
 .opponent-wrapper {
-
-    font-family: 'Georgia', serif; 
-
     padding: 0px;
-
 }
 
 .common-preview-wrapper .card-preview-area {
@@ -217,9 +231,6 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
     color: #e0e0e0;
 }
 
-.common-preview-wrapper .card-preview-area .preview-info-wrapper {
-       
-}
 .common-preview-wrapper .card-preview-area .preview-stat {
     color: #e0e0e0;
     background-color: #555;  
@@ -287,7 +298,6 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
 .player-wrapper .area-label,
 .opponent-wrapper .area-label,
 .common-preview-wrapper .area-label,
- 
 #common-drawer .area-label {
     color: #a0a0e0; 
 }
@@ -301,7 +311,6 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
 .player-wrapper .hand-counter-group,
 .opponent-wrapper .hand-counter-group,
 .common-preview-wrapper .hand-counter-group,
-
 #common-drawer .hand-counter-group {
     border: 2px solid #888;
     background-color: #555;
@@ -320,7 +329,6 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
 .player-wrapper .random-result-display,
 .opponent-wrapper .random-result-display,
 .common-preview-wrapper .random-result-display,
- 
 #common-drawer .random-result-display {
     background-color: #3a3a5e; 
     border-color: #5a5a9a; 
@@ -329,13 +337,9 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
 
 .player-sadist-mode,
 .opponent-sadist-mode {
-    font-family: 'Georgia', serif;
-
     background-color: transparent; 
     color: #333; 
-
     border-radius: 5px; 
-     
     box-sizing: border-box;
 }
 
@@ -464,7 +468,7 @@ body.opponent-sadist-active #opponent-drawer {
     border-color: #C71585;
     color: #333;
 }
- 
+
 body.player-sadist-active #player-drawer .drawer-free-space,
 body.opponent-sadist-active #opponent-drawer .drawer-free-space {
     border-left-color: #FF69B4; 
@@ -507,7 +511,7 @@ body.opponent-sadist-active #opponent-drawer .drawer-free-space .area-label {
     color: #C71585; 
     text-shadow: 1px 1px 2px #FFB6C1; 
 }
- 
+
 body.player-sadist-active #player-drawer .drawer-panel .deck-back-slot-container,
 body.player-sadist-active #player-drawer .drawer-free-space .free-space-slot-container,
 body.opponent-sadist-active #opponent-drawer .drawer-panel .deck-back-slot-container,
@@ -599,20 +603,15 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
 .custom-context-menu {
     display: none;
     position: absolute; 
-
     width: 210px; 
     font-size: 15px; 
-    
     background-color: #f0f0f0;
     border: 1px solid #ccc;
     color: #333; 
-    
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     border-radius: 5px;
     overflow: visible; 
-    
-    font-family: 'Georgia', serif; 
 }
 .custom-context-menu ul {
     list-style: none;
@@ -689,15 +688,12 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     transform: translate(-50%, -50%);
     width: 500px;
     max-width: 90vw;
-    z-index: 1001; 
-    
+    z-index: 11000; 
     background-color: #3a3a5e; 
     border: 1px solid #5a5a9a; 
     color: #e0e0e0;
-    
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
-    font-family: 'Georgia', serif;
     overflow: hidden; 
 }
 
@@ -705,7 +701,6 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     font-size: 1.1em;
     font-weight: bold;
     padding: 10px 15px;
-    
     background-color: #2a2a4e; 
     border-bottom: 1px solid #5a5a9a;
     color: #a0a0e0;
@@ -720,9 +715,7 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     border: none;
     resize: both; 
     min-height: 80px;
-    font-family: 'Georgia', serif;
     font-size: 1em;
-    
     background-color: #4a4a6e; 
     color: #e0e0e0;
     border-bottom: 1px solid #2a2a4e;
@@ -733,7 +726,6 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     justify-content: flex-end;
     gap: 10px;
     padding: 10px 15px;
-    
     background-color: #3a3a5e; 
 }
 
@@ -744,11 +736,9 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #f0f0f0; 
     color: #333;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .memo-editor-buttons button:hover {
@@ -788,15 +778,12 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     display: none; 
     position: absolute;
     z-index: 1002; 
-    
     background-color: #3a3a5e; 
     color: #e0e0e0;
     border: 1px solid #5a5a9a; 
-    
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     padding: 8px 12px;
-    font-family: 'Georgia', serif;
     font-size: 0.9em;
     max-width: 250px;
     white-space: pre-wrap; 
@@ -808,7 +795,6 @@ body.sm-mode-active .memo-editor-modal {
     background-color: #FFF0F5; 
     border-color: #FF69B4; 
     color: #333;
-    font-family: 'Georgia', serif;
 }
 body.sm-mode-active .memo-editor-header {
     background-color: #FFECF5; 
@@ -819,7 +805,6 @@ body.sm-mode-active .memo-editor-modal textarea {
     background-color: #FFF5FA; 
     color: #333;
     border-bottom-color: #FFECF5;
-    font-family: 'Georgia', serif;
 }
 body.sm-mode-active .memo-editor-buttons {
     background-color: #FFF0F5; 
@@ -867,7 +852,6 @@ body.sm-mode-active .memo-tooltip {
     background-color: #FFF0F5; 
     color: #8B008B; 
     border-color: #FF69B4; 
-    font-family: 'Georgia', serif;
 }
 
 .lightbox-overlay {
@@ -877,14 +861,11 @@ body.sm-mode-active .memo-tooltip {
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.85);
-    
     display: flex;
     justify-content: center;
     align-items: center;
-    
     z-index: 2000;
     cursor: pointer;
-    
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -944,12 +925,9 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     top: auto;
     bottom: auto;
     z-index: 501;
-    
     writing-mode: horizontal-tb;  
     text-orientation: mixed;
-    
     padding: 4px 10px;  
-
     background-color: #f0f0f0; 
     color: #333;
     border: none;
@@ -957,8 +935,6 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     box-shadow: 0 2px #b0b0b0; 
     font-size: 0.9em;
     font-weight: bold;
-    font-family: 'Georgia', serif;
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 #common-drawer-toggle:hover {
@@ -974,7 +950,6 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     padding: 4px 10px;
     font-size: 0.9em;
     font-weight: bold;
-    font-family: 'Georgia', serif;
     background-color: #f0f0f0;
     color: #333;
     border: none;
@@ -1050,14 +1025,11 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     width: 600px;  
     max-width: 90vw;
     z-index: 1001; 
-
     background-color: #3a3a5e; 
     border: 1px solid #5a5a9a; 
     color: #e0e0e0;
-    
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
-    font-family: 'Georgia', serif;
     overflow: hidden; 
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
@@ -1066,7 +1038,6 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     font-size: 1.1em;
     font-weight: bold;
     padding: 10px 15px;
-    
     background-color: #2a2a4e; 
     border-bottom: 1px solid #5a5a9a;
     color: #a0a0e0; 
@@ -1105,16 +1076,13 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
 .flavor-image-preview {
     width: 100%;
     height: 200px;  
-    
     background-color: #4a4a6e;
     border: 2px dashed #7a7aa0;
     border-radius: 5px;
-    
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    
     transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -1133,18 +1101,15 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
 }
 
 .flavor-upload-btn {
-     
     padding: 4px 10px;
     font-size: 0.9em;
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #ffcc00;  
     color: #333;
     box-shadow: 0 2px #997a00; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-upload-btn:hover {
@@ -1156,18 +1121,15 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
 }
 
 .flavor-delete-btn {
-     
     padding: 4px 10px;
     font-size: 0.9em;
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #f0f0f0; 
     color: #333;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-delete-btn:hover {
@@ -1177,7 +1139,7 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     box-shadow: 0 0 #b0b0b0; 
     transform: translateY(2px); 
 }
- 
+
 .flavor-delete-btn {
     background-color: #cc0000;
     box-shadow: 0 2px #800000;
@@ -1194,11 +1156,9 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     width: 100%;
     height: 80px;  
     box-sizing: border-box;
-    
     background-color: #4a4a6e;
     border: 2px dashed #7a7aa0;
     border-radius: 5px;
-    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1206,7 +1166,6 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
     font-size: 0.9em;
     color: #a0a0e0;
     cursor: pointer;
-    
     transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
@@ -1216,30 +1175,25 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
 }
 
 .flavor-editor-buttons {
-     
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     padding: 10px 15px;
-    
     background-color: #3a3a5e; 
     border-top: 1px solid #2a2a4e;  
     transition: background-color 0.3s, border-color 0.3s;
 }
 
 .flavor-editor-buttons button {
-     
     padding: 8px 12px;
     font-size: 0.9em;
     font-weight: bold;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    
     background-color: #f0f0f0; 
     color: #333;
     box-shadow: 0 2px #b0b0b0; 
-    
     transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-editor-buttons button:hover {
@@ -1260,7 +1214,7 @@ body.sm-mode-active .flavor-editor-header {
     border-bottom-color: #FFB6C1; 
     color: #8B008B; 
 }
- 
+
 body.sm-mode-active .flavor-slot-label {
     color: #C71585;
 }
@@ -1283,7 +1237,6 @@ body.sm-mode-active .flavor-editor-buttons {
 }
 
 body.sm-mode-active .flavor-editor-buttons button,
- 
 body.sm-mode-active .flavor-delete-btn,
 body.sm-mode-active .flavor-upload-btn {  
     background-color: #f0f0f0; 
@@ -1291,13 +1244,11 @@ body.sm-mode-active .flavor-upload-btn {
     box-shadow: 0 2px #b0b0b0; 
 }
 body.sm-mode-active .flavor-editor-buttons button:hover,
- 
 body.sm-mode-active .flavor-delete-btn:hover,
 body.sm-mode-active .flavor-upload-btn:hover {  
     background-color: #d0d0d0;
 }
 body.sm-mode-active .flavor-editor-buttons button:active,
- 
 body.sm-mode-active .flavor-delete-btn:active,
 body.sm-mode-active .flavor-upload-btn:active {  
     box-shadow: 0 0 #b0b0b0; 
@@ -1328,7 +1279,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     box-shadow: 0 0 #800000;
 }
 
-/* アニメーション定義 */
 @keyframes masturbate-glow {
     0% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
     50% { filter: brightness(1.2) drop-shadow(0 0 10px #ff1493); }
@@ -1380,6 +1330,24 @@ body.sm-mode-active .flavor-delete-btn:active {
     animation: target-lock 0.8s ease-in-out;
 }
 
+@keyframes bp-increase-flash {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5) drop-shadow(0 0 10px #00ff00); } 
+    100% { filter: brightness(1); }
+}
+.bp-increase-active .card-image {
+    animation: bp-increase-flash 0.8s ease-out;
+}
+
+@keyframes bp-decrease-flash {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(0.7) drop-shadow(0 0 10px #ff0000) sepia(1) hue-rotate(-50deg); } 
+    100% { filter: brightness(1); }
+}
+.bp-decrease-active .card-image {
+    animation: bp-decrease-flash 0.8s ease-out;
+}
+
 .player-wrapper.auto-decrease-active,
 .opponent-wrapper.auto-decrease-active {
     box-shadow: 0 0 15px #ff1493, inset 0 0 15px #ff1493;
@@ -1406,7 +1374,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     opacity: 0.6;
 }
 
-/* リプレイUI */
 #replay-file-name-display {
     width: 100%;
     text-align: center;
@@ -1495,7 +1462,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     border: 1px solid #555;
     border-radius: 5px;
     padding: 5px;
-    font-family: 'Georgia', serif;
     font-size: 0.9em;
     outline: none;
 }
@@ -1615,9 +1581,6 @@ body.sm-mode-active .flavor-delete-btn:active {
     color: #8abda0;
 }
 
-/* Battle Target Selection - Revised Strategy: Darken non-targets */
-
-/* 1. Overlay is now strictly for the message container, background is transparent */
 .battle-overlay {
     position: fixed;
     top: 0;
@@ -1652,33 +1615,28 @@ body.sm-mode-active .flavor-delete-btn:active {
     font-size: 1.4em;
     font-weight: bold;
     text-shadow: 0 0 5px #ff0000;
-    font-family: 'Georgia', serif;
 }
 
-/* Dim ANY thumbnail or icon slot that is NOT a candidate and NOT an attacker */
 body.battle-target-mode .thumbnail:not(.battle-target-candidate):not(.battle-attacker),
 body.battle-target-mode .player-icon-slot:not(.battle-target-candidate) {
     filter: brightness(0.4) grayscale(0.5);
     transition: filter 0.3s ease;
 }
 
-/* Ensure candidates pop out (no filter or specific glow) */
 body.battle-target-mode .thumbnail.battle-target-candidate,
 body.battle-target-mode .player-icon-slot.battle-target-candidate {
     filter: drop-shadow(0 0 5px #ffae00) !important;
     cursor: crosshair !important;
     z-index: 100;
-    position: relative; /* Ensure z-index applies */
+    position: relative; 
 }
 
-/* Ensure attacker pops out */
 body.battle-target-mode .thumbnail.battle-attacker {
     filter: drop-shadow(0 0 5px #00ccff) !important;
     z-index: 101;
     position: relative;
 }
 
-/* Hover effects for candidates */
 body.battle-target-mode .thumbnail.battle-target-candidate:hover,
 body.battle-target-mode .player-icon-slot.battle-target-candidate:hover {
     filter: drop-shadow(0 0 15px #ff4400) !important;
@@ -1686,7 +1644,6 @@ body.battle-target-mode .player-icon-slot.battle-target-candidate:hover {
     transition: transform 0.1s ease-in-out;
 }
 
-/* Disable interactions with non-targets or UI elements */
 body.battle-target-mode .hand-buttons button,
 body.battle-target-mode .drawer-toggle,
 body.battle-target-mode .step-btn,
@@ -1701,7 +1658,6 @@ body.battle-target-mode #battle-cancel-btn {
     opacity: 1;
 }
 
-/* --- Custom Counter Styles --- */
 .custom-counter-container {
     position: absolute;
     bottom: 2px;
@@ -1754,7 +1710,6 @@ body.battle-target-mode #battle-cancel-btn {
     pointer-events: none;
 }
 
-/* 相手側の反転対応 */
 .opponent-wrapper .counter-badge {
     transform: scaleY(-1);
 }
@@ -1765,7 +1720,6 @@ body.board-flipped .opponent-wrapper .counter-badge {
     transform: scaleY(1);
 }
 
-/* --- Custom Counter Modal Styles --- */
 .custom-counter-modal {
     display: none;
     position: fixed;
@@ -1780,7 +1734,6 @@ body.board-flipped .opponent-wrapper .counter-badge {
     color: #e0e0e0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     border-radius: 8px;
-    font-family: 'Georgia', serif;
     overflow: hidden;
 }
 
@@ -1878,7 +1831,6 @@ body.board-flipped .opponent-wrapper .counter-badge {
     border-top: 1px solid #5a5a9a;
 }
 
-/* Theme Adaptations for Custom Counter Modal */
 body.sm-mode-active .custom-counter-modal { background-color: #FFF0F5; border-color: #FF69B4; color: #333; }
 body.sm-mode-active .custom-counter-header { background-color: #FFECF5; border-bottom-color: #FFB6C1; color: #8B008B; }
 body.sm-mode-active #new-counter-name { background-color: #FFF5FA; border-color: #FFB6C1; color: #333; }
@@ -1911,7 +1863,6 @@ body.simple-mode-active .counter-list-item { background-color: #fff; border-colo
 body.simple-mode-active .counter-list-item:hover { background-color: #eee; }
 body.simple-mode-active .custom-counter-footer { background-color: #fff; border-top-color: #ccc; }
 
-/* --- Game Result Overlay Styles --- */
 .game-result-overlay {
     position: fixed;
     top: 0;
@@ -1935,14 +1886,12 @@ body.simple-mode-active .custom-counter-footer { background-color: #fff; border-
     color: #ffd700;
     text-shadow: 0 0 20px #ff8c00, 0 0 10px #fff;
     margin-bottom: 30px;
-    font-family: 'Georgia', serif;
 }
 @keyframes popIn {
     0% { transform: scale(0); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* --- Battle Confirm Modal Styles --- */
 #battle-confirm-attacker-img,
 #battle-confirm-target-img {
     background-color: #222;
@@ -1952,4 +1901,194 @@ body.simple-mode-active .custom-counter-footer { background-color: #fff; border-
 
 #battle-confirm-modal {
     width: 700px !important;
+}
+
+#common-drawer,
+body.sm-mode-active #common-drawer,
+body.magickers-mode-active #common-drawer,
+body.striker-mode-active #common-drawer,
+body.simple-mode-active #common-drawer {
+    background-color: #2a2a4e !important;
+    border-color: #5a5a9a !important;
+    color: #e0e0e0 !important;
+}
+
+#common-drawer-header,
+body.sm-mode-active #common-drawer-header,
+body.magickers-mode-active #common-drawer-header,
+body.striker-mode-active #common-drawer-header,
+body.simple-mode-active #common-drawer-header {
+    background-color: #1a1a2e !important;
+    border-bottom-color: #5a5a9a !important;
+    color: #a0a0e0 !important;
+}
+
+#common-drawer .drawer-tabs,
+body.sm-mode-active #common-drawer .drawer-tabs,
+body.magickers-mode-active #common-drawer .drawer-tabs,
+body.striker-mode-active #common-drawer .drawer-tabs,
+body.simple-mode-active #common-drawer .drawer-tabs {
+    background-color: #1a1a2e !important;
+    border-bottom-color: #5a5a9a !important;
+}
+
+#common-drawer .drawer-tab-btn,
+body.sm-mode-active #common-drawer .drawer-tab-btn,
+body.magickers-mode-active #common-drawer .drawer-tab-btn,
+body.striker-mode-active #common-drawer .drawer-tab-btn,
+body.simple-mode-active #common-drawer .drawer-tab-btn {
+    color: #a0a0e0 !important;
+    border-right-color: #4a4a88 !important;
+    background-color: transparent !important;
+}
+
+#common-drawer .drawer-tab-btn:hover,
+body.sm-mode-active #common-drawer .drawer-tab-btn:hover,
+body.magickers-mode-active #common-drawer .drawer-tab-btn:hover,
+body.striker-mode-active #common-drawer .drawer-tab-btn:hover,
+body.simple-mode-active #common-drawer .drawer-tab-btn:hover {
+    background-color: #3a3a5e !important;
+}
+
+#common-drawer .drawer-tab-btn.active,
+body.sm-mode-active #common-drawer .drawer-tab-btn.active,
+body.magickers-mode-active #common-drawer .drawer-tab-btn.active,
+body.striker-mode-active #common-drawer .drawer-tab-btn.active,
+body.simple-mode-active #common-drawer .drawer-tab-btn.active {
+    background-color: #5a5a9a !important;
+    color: white !important;
+}
+
+#common-drawer .area-label,
+body.sm-mode-active #common-drawer .area-label,
+body.magickers-mode-active #common-drawer .area-label,
+body.striker-mode-active #common-drawer .area-label,
+body.simple-mode-active #common-drawer .area-label {
+    color: #a0a0e0 !important;
+    text-shadow: none !important;
+}
+
+#common-drawer .draw-btn,
+#common-drawer .counter-btn,
+body.sm-mode-active #common-drawer .draw-btn,
+body.sm-mode-active #common-drawer .counter-btn,
+body.magickers-mode-active #common-drawer .draw-btn,
+body.magickers-mode-active #common-drawer .counter-btn,
+body.striker-mode-active #common-drawer .draw-btn,
+body.striker-mode-active #common-drawer .counter-btn,
+body.simple-mode-active #common-drawer .draw-btn,
+body.simple-mode-active #common-drawer .counter-btn {
+    background-color: #f0f0f0 !important;
+    color: #333 !important;
+    box-shadow: 0 2px #b0b0b0 !important;
+    border: none !important;
+}
+
+#common-drawer .draw-btn:hover,
+#common-drawer .counter-btn:hover,
+body.sm-mode-active #common-drawer .draw-btn:hover,
+body.sm-mode-active #common-drawer .counter-btn:hover,
+body.magickers-mode-active #common-drawer .draw-btn:hover,
+body.magickers-mode-active #common-drawer .counter-btn:hover,
+body.striker-mode-active #common-drawer .draw-btn:hover,
+body.striker-mode-active #common-drawer .counter-btn:hover,
+body.simple-mode-active #common-drawer .draw-btn:hover,
+body.simple-mode-active #common-drawer .counter-btn:hover {
+    background-color: #d0d0d0 !important;
+}
+
+#common-drawer .draw-btn:active,
+#common-drawer .counter-btn:active,
+body.sm-mode-active #common-drawer .draw-btn:active,
+body.sm-mode-active #common-drawer .counter-btn:active,
+body.magickers-mode-active #common-drawer .draw-btn:active,
+body.magickers-mode-active #common-drawer .counter-btn:active,
+body.striker-mode-active #common-drawer .draw-btn:active,
+body.striker-mode-active #common-drawer .counter-btn:active,
+body.simple-mode-active #common-drawer .draw-btn:active,
+body.simple-mode-active #common-drawer .counter-btn:active {
+    box-shadow: 0 0 #997a00 !important;
+    background-color: #ffcc00 !important;
+    transform: translateY(2px) !important;
+}
+
+#common-drawer #common-decoration-mode-btn[data-active="true"],
+body.sm-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"],
+body.magickers-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"],
+body.striker-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"],
+body.simple-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"] {
+     background-color: #cc0000 !important;
+     box-shadow: 0 2px #800000 !important; 
+     color: white !important;
+}
+
+#common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"],
+body.sm-mode-active #common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"],
+body.magickers-mode-active #common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"],
+body.striker-mode-active #common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"],
+body.simple-mode-active #common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"] {
+     background-color: #cc0000 !important;
+     box-shadow: 0 2px #800000 !important; 
+     color: white !important;
+}
+
+#common-drawer .resize-handle,
+body.sm-mode-active #common-drawer .resize-handle,
+body.magickers-mode-active #common-drawer .resize-handle,
+body.striker-mode-active #common-drawer .resize-handle,
+body.simple-mode-active #common-drawer .resize-handle {
+    background: linear-gradient(135deg, transparent 50%, #5a5a9a 50%) !important;
+}
+
+#decoration-settings-modal,
+body.sm-mode-active #decoration-settings-modal,
+body.magickers-mode-active #decoration-settings-modal,
+body.striker-mode-active #decoration-settings-modal,
+body.simple-mode-active #decoration-settings-modal {
+    background-color: #3a3a5e !important;
+    border-color: #5a5a9a !important;
+    color: #e0e0e0 !important;
+}
+
+#decoration-settings-header,
+body.sm-mode-active #decoration-settings-header,
+body.magickers-mode-active #decoration-settings-header,
+body.striker-mode-active #decoration-settings-header,
+body.simple-mode-active #decoration-settings-header {
+    background-color: #2a2a4e !important;
+    border-bottom-color: #5a5a9a !important;
+    color: #a0a0e0 !important;
+}
+
+#decoration-settings-modal .column-header {
+    background-color: #3a3a5e !important;
+    color: #a0a0e0 !important;
+    border-bottom-color: #5a5a9a !important;
+}
+
+#decoration-settings-modal .decoration-drop-zone {
+    background-color: rgba(0,0,0,0.2) !important;
+    color: #a0a0e0 !important;
+    border-color: #7a7aa0 !important;
+}
+#decoration-settings-modal .decoration-drop-zone:hover {
+    background-color: #4a4a6e !important;
+}
+
+#decoration-settings-modal .decoration-stock-item {
+    border-color: #555 !important;
+    background-color: #000 !important;
+}
+
+#decoration-settings-close-btn {
+    color: #666 !important;
+    cursor: pointer;
+}
+#decoration-settings-close-btn:hover {
+    color: #fff !important;
+}
+
+#decoration-settings-modal .decoration-column {
+    background-color: #2a2a4e !important;
+    border-color: #5a5a9a !important;
 }

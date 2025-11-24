@@ -28,7 +28,16 @@ function initializeBoard(wrapperSelector, idPrefix) {
 
     const addDecorationWithErrorHandler = (path, zoneId) => {
         const container = document.getElementById(idPrefix + zoneId);
-        const slot = container?.querySelector('.card-slot');
+        
+        // 修正: コンテナ自体がスロットの場合、または子要素にスロットがある場合の両対応
+        let slot = container;
+        if (container && !container.classList.contains('card-slot')) {
+            const childSlot = container.querySelector('.card-slot');
+            if (childSlot) {
+                slot = childSlot;
+            }
+        }
+
         if (slot) {
             // 既存の装飾があれば削除（重複防止）
             const existing = slot.querySelector('.thumbnail[data-is-decoration="true"]');
@@ -58,14 +67,37 @@ function initializeBoard(wrapperSelector, idPrefix) {
         }
     };
 
-    addDecorationWithErrorHandler('./decoration/デッキ.png', 'deck');
-    addDecorationWithErrorHandler('./decoration/EXデッキ.png', 'side-deck');
-    addDecorationWithErrorHandler('./decoration/墓地エリア.png', 'grave');
-    addDecorationWithErrorHandler('./decoration/除外エリア.png', 'exclude');
+    // 初期画像の適用処理（ストックまたはデフォルトを参照）
+    const owner = idPrefix ? 'opponent' : 'player';
     
-    // アイコン初期設定
-    const defaultIconPath = idPrefix ? './decoration/サディスト.png' : './decoration/マゾヒスト.png';
-    addDecorationWithErrorHandler(defaultIconPath, 'icon-zone');
+    // デフォルトパスの定義（フォールバック用）
+    const defaultPaths = {
+        'deck': './decoration/デッキ.png',
+        'side-deck': './decoration/EXデッキ.png',
+        'grave': './decoration/墓地エリア.png',
+        'exclude': './decoration/除外エリア.png',
+        'icon': idPrefix ? './decoration/サディスト.png' : './decoration/マゾヒスト.png'
+    };
+
+    const applyInitialDecoration = (targetType, zoneId) => {
+        let path = defaultPaths[targetType];
+        
+        // customIconStocksが定義されており、該当の画像があればその先頭を使用
+        if (typeof customIconStocks !== 'undefined' && 
+            customIconStocks[owner] && 
+            customIconStocks[owner][targetType] && 
+            customIconStocks[owner][targetType].length > 0) {
+            path = customIconStocks[owner][targetType][0];
+        }
+
+        addDecorationWithErrorHandler(path, zoneId);
+    };
+
+    applyInitialDecoration('deck', 'deck');
+    applyInitialDecoration('side-deck', 'side-deck');
+    applyInitialDecoration('grave', 'grave');
+    applyInitialDecoration('exclude', 'exclude');
+    applyInitialDecoration('icon', 'icon-zone');
 
     ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => syncMainZoneImage(zone, idPrefix));
 
@@ -164,6 +196,19 @@ function setupBoardButtons(idPrefix) {
         }
     });
     
+    // システムボタン (新規追加 + 修正: stopPropagation追加)
+    document.getElementById(idPrefix + 'system-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playSe('ボタン共通.mp3');
+        const commonDrawer = document.getElementById('common-drawer');
+        if (commonDrawer) {
+            commonDrawer.classList.add('open');
+            if (typeof activateDrawerTab === 'function') {
+                activateDrawerTab('common-spec-panel', commonDrawer);
+            }
+        }
+    });
+    
     document.getElementById(idPrefix + 'export-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');
         const defaultName = (idPrefix ? 'opponent' : 'player') + '_deck';
@@ -183,6 +228,7 @@ function setupCounters(idPrefix) {
     let lpDecreaseTimer = null, manaDecreaseTimer = null;
     const lpCounter = document.getElementById(idPrefix + 'counter-value');
     const manaCounter = document.getElementById(idPrefix + 'mana-counter-value');
+    const hyphenCounter = document.getElementById(idPrefix + 'hyphen-counter-value');
 
     const attachAutoDecreaseLogic = (btnId, counter, intervalInputId) => {
         const btn = document.getElementById(btnId);
@@ -254,7 +300,8 @@ function setupCounters(idPrefix) {
     
     counterWrapper?.querySelectorAll('.counter-btn[data-value]').forEach(button => {
         const value = parseInt(button.dataset.value);
-        const targetCounter = button.closest('.hand-counter-group').querySelector('input');
+        const group = button.closest('.hand-counter-group');
+        const targetCounter = group.querySelector('input[type="number"]') || group.querySelector('.hyphen-counter-input');
         
         let repeatTimer = null;
         let initialTimer = null;
@@ -264,12 +311,20 @@ function setupCounters(idPrefix) {
             if(!targetCounter) return;
             
             const updateVal = () => {
-                const newVal = Math.max(0, (parseInt(targetCounter.value) || 0) + value);
-                targetCounter.value = newVal;
-                // LP手動操作時の敗北判定
-                if (newVal === 0 && targetCounter.classList.contains('lp-counter-input') && autoConfig.autoGameEnd) {
-                    const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
-                    if (typeof window.showGameResult === 'function') window.showGameResult(msg);
+                let currentVal;
+                if (targetCounter.isContentEditable) {
+                    currentVal = parseInt(targetCounter.textContent) || 0;
+                    const newVal = Math.max(0, currentVal + value);
+                    targetCounter.textContent = newVal;
+                } else {
+                    currentVal = parseInt(targetCounter.value) || 0;
+                    const newVal = Math.max(0, currentVal + value);
+                    targetCounter.value = newVal;
+                    // LP手動操作時の敗北判定
+                    if (newVal === 0 && targetCounter.classList.contains('lp-counter-input') && autoConfig.autoGameEnd) {
+                        const msg = idPrefix ? 'YOU WIN!' : 'YOU LOSE...';
+                        if (typeof window.showGameResult === 'function') window.showGameResult(msg);
+                    }
                 }
             };
             
@@ -891,7 +946,7 @@ window.resolveBattle = function(attackerBP, targetBP) {
     };
 
     const playDestructEffect = (element, callback) => {
-        playSe('破壊.mp3');
+        
         element.classList.add('attack-active');
         setTimeout(() => {
             element.classList.remove('attack-active');

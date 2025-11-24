@@ -345,8 +345,7 @@ function handleCardContextMenu(e) {
     currentMemoHandler = () => {
         currentMemoTarget = thumbnailElement;
         memoTextarea.value = thumbnailElement.dataset.memo || '';
-        memoEditorModal.style.display = 'flex';
-        memoTextarea.focus();
+        openMemoEditor();
     };
     currentFlipHandler = () => flipCard(thumbnailElement, idPrefix);
 
@@ -425,6 +424,9 @@ function handleCardContextMenu(e) {
 
     const setAsTopItem = document.getElementById('context-menu-set-as-top');
     if (setAsTopItem) setAsTopItem.style.display = 'none';
+    
+    const duplicateItem = document.getElementById('context-menu-duplicate');
+    if (duplicateItem) duplicateItem.style.display = 'block';
 
     if (!isIconZone && thumbnailElement.dataset.isDecoration === 'true') {
         if (changeStyleMenuItem) changeStyleMenuItem.style.display = 'block';
@@ -443,6 +445,7 @@ function handleCardContextMenu(e) {
         
         if (masturbateMenuItem) masturbateMenuItem.style.display = 'none';
         if (exportCardMenuItem) exportCardMenuItem.style.display = 'none';
+        if (duplicateItem) duplicateItem.style.display = 'none';
         
         deleteMenuItem.style.display = 'none'; 
     } else if (isIconZone) {
@@ -450,6 +453,9 @@ function handleCardContextMenu(e) {
     } else {
         if (changeStyleMenuItem) changeStyleMenuItem.style.display = 'none';
     }
+    
+    // プレビューエクスポート項目はカード上では非表示
+    if(typeof exportPreviewMenuItem !== 'undefined') exportPreviewMenuItem.style.display = 'none';
     
     contextMenu.style.top = '0px';
     contextMenu.style.left = '0px';
@@ -906,6 +912,23 @@ window.modifyCardBP = function(thumbnailElement, amount, isAuto = false) {
         let newBP = currentBP + amount;
         if (newBP < 0) newBP = 0; 
         
+        // SEとエフェクト
+        const enableBpEffect = typeof effectConfig === 'undefined' || effectConfig.bpChange !== false;
+
+        if (amount > 0) {
+            playSe('BPプラス.mp3');
+            if (enableBpEffect) {
+                thumbnailElement.classList.add('bp-increase-active');
+                setTimeout(() => thumbnailElement.classList.remove('bp-increase-active'), 800);
+            }
+        } else if (amount < 0) {
+            playSe('BPマイナス.mp3');
+            if (enableBpEffect) {
+                thumbnailElement.classList.add('bp-decrease-active');
+                setTimeout(() => thumbnailElement.classList.remove('bp-decrease-active'), 800);
+            }
+        }
+        
         const newMemo = memo.replace(bpMatch[0], `[BP:${newBP}]`);
         thumbnailElement.dataset.memo = newMemo;
         
@@ -957,7 +980,7 @@ function checkBpDestruction(thumbnailElement) {
         thumbnailElement.classList.add('target-active');
         
         setTimeout(() => {
-            playSe('破壊.mp3');
+            
             thumbnailElement.classList.remove('target-active');
             thumbnailElement.classList.add('attack-active');
             

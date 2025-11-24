@@ -39,6 +39,14 @@
                             <button class="counter-btn" id="opponent-mana-btn-plus" data-value="1">▲</button>
                         </div>
                     </div>
+                    <div class="hand-counter-group" id="opponent-hyphen-counter-group">
+                        <input type="text" class="area-label header-input opponent-text-flip" value="-" maxlength="5">
+                        <div class="counter-buttons simple-counter-buttons">
+                            <button class="counter-btn" data-value="-1">▼</button>
+                            <div contenteditable="true" id="opponent-hyphen-counter-value" class="hyphen-counter-input">0</div>
+                            <button class="counter-btn" data-value="1">▲</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -89,6 +97,14 @@
                             <button class="counter-btn" id="mana-btn-minus" data-value="-1">▼</button>
                             <input type="number" id="mana-counter-value" class="mana-counter-input" value="0" min="0">
                             <button class="counter-btn" id="mana-btn-plus" data-value="1">▲</button>
+                        </div>
+                    </div>
+                    <div class="hand-counter-group" id="hyphen-counter-group">
+                        <input type="text" class="area-label header-input" value="-" maxlength="5">
+                        <div class="counter-buttons simple-counter-buttons">
+                             <button class="counter-btn" data-value="-1">▼</button>
+                             <div contenteditable="true" id="hyphen-counter-value" class="hyphen-counter-input">0</div>
+                             <button class="counter-btn" data-value="1">▲</button>
                         </div>
                     </div>
                 </div>
@@ -203,6 +219,7 @@
                                     <button class="draw-btn" id="opponent-draw-card">1ドロー</button>
                                     <button class="draw-btn" id="opponent-draw-5-card">5ドロー</button> 
                                     <button class="draw-btn" id="opponent-sm-toggle-btn" data-mode="simple">シンプル</button>
+                                    <button class="draw-btn" id="opponent-system-btn">システム</button>
                                     <button class="draw-btn" id="opponent-surrender-btn">降参</button>
                                 </div>
                             </div>
@@ -351,6 +368,7 @@
                                     <button class="draw-btn" id="draw-card">1ドロー</button>
                                     <button class="draw-btn" id="draw-5-card">5ドロー</button> 
                                     <button class="draw-btn" id="sm-toggle-btn" data-mode="simple">シンプル</button>
+                                    <button class="draw-btn" id="system-btn">システム</button>
                                     <button class="draw-btn" id="surrender-btn">降参</button>
                                 </div>
                             </div>
@@ -424,8 +442,10 @@
             <li id="context-menu-masturbate" style="display:none;">オナニーする</li>
             <li id="context-menu-export">カードをエクスポート</li>
             <li id="context-menu-import">カードをインポート</li>
+            <li id="context-menu-duplicate">カードを複製</li>
             <li id="context-menu-delete">削除</li>
             <li id="context-menu-set-as-top" style="display:none;">この画像に設定する</li>
+            <li id="context-menu-export-preview" style="display:none;">画像としてエクスポート</li>
         </ul>
     </div>
     
@@ -433,8 +453,8 @@
         <div class="memo-editor-header" id="memo-editor-header">メモ編集</div>
         <textarea id="memo-editor-textarea" rows="5" placeholder="カードメモ..."></textarea>
         <div class="memo-editor-buttons">
-            <button id="memo-editor-cancel">キャンセル</button>
             <button id="memo-editor-save">保存</button>
+            <button id="memo-editor-cancel">キャンセル</button>
         </div>
     </div>
     
@@ -467,6 +487,7 @@
             </div>
             </div>
         <div class="flavor-editor-buttons">
+            <button id="flavor-editor-save-btn">保存</button>
             <button id="flavor-editor-cancel">閉じる</button>
         </div>
     </div>
@@ -488,6 +509,7 @@
             </div>
         </div>
         <div class="custom-counter-footer">
+            <button id="custom-counter-save-btn" class="draw-btn" style="margin-right: 10px;">保存</button>
             <button id="custom-counter-close-btn" class="draw-btn">閉じる</button>
         </div>
     </div>
@@ -827,6 +849,7 @@
                 <button class="drawer-tab-btn" data-target="common-auto-config-panel">自動処理</button>
                 <button class="drawer-tab-btn" data-target="common-spec-panel">仕様説明</button>
                 <button class="drawer-tab-btn" data-target="common-about-panel">S＆Mとは</button>
+                <button class="drawer-tab-btn" data-target="common-credit-panel">クレジット</button>
             </div>
 
             <div class="drawer-main-area">
@@ -1043,6 +1066,10 @@
                         
                         <div class="drawer-panel" id="common-about-panel">
                             <div class="text-content-area" id="about-text-content">読み込み中...</div>
+                        </div>
+                        
+                        <div class="drawer-panel" id="common-credit-panel">
+                            <div class="text-content-area" id="credit-text-content">読み込み中...</div>
                         </div>
 
                     </div>
