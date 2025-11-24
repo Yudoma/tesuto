@@ -741,7 +741,6 @@ body.nav-hidden .zone-header {
     height: 100%;
     position: relative;
     padding: 5px;
-    overflow-y: auto;
     box-sizing: border-box;
 }
 
