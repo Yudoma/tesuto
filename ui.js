@@ -139,6 +139,11 @@ function closeContextMenu() {
         hasSubmenus.forEach(li => {
             li.style.display = ''; 
         });
+
+        // プレビューエクスポート項目を確実に非表示にする
+        if (exportPreviewMenuItem) {
+            exportPreviewMenuItem.style.display = 'none';
+        }
     }
     currentDeleteHandler = null;
     currentMoveToGraveHandler = null;
@@ -1098,10 +1103,12 @@ function exportCardPreviewAsImage() {
         ctx.drawImage(img, 0, 0);
 
         // プレビューエリアの表示サイズと元画像のスケール比率を計算
-        // プレビューエリアはCSSでサイズが決まっているため、その矩形を取得
         const previewRect = previewArea.getBoundingClientRect();
         const scaleX = canvas.width / previewRect.width;
         const scaleY = canvas.height / previewRect.height;
+        
+        // フォントサイズ用のスケールは、縦横の小さい方に合わせる（文字が極端に変形するのを防ぐ）
+        const fontScale = Math.min(scaleX, scaleY);
 
         // 描画対象の要素IDリスト
         const elementIds = [
@@ -1120,13 +1127,13 @@ function exportCardPreviewAsImage() {
             const style = window.getComputedStyle(el);
             const rect = el.getBoundingClientRect();
 
-            // 相対位置計算
+            // 相対位置計算（位置はスケール通りに配置）
             const x = (rect.left - previewRect.left) * scaleX;
             const y = (rect.top - previewRect.top) * scaleY;
             const w = rect.width * scaleX;
             const h = rect.height * scaleY;
 
-            // 背景描画 (不透明度、色を反映)
+            // 背景描画 (不透明度、色を反映) - 枠のサイズはスケール通り
             if (style.backgroundColor !== 'rgba(0, 0, 0, 0)' && style.backgroundColor !== 'transparent') {
                 ctx.save();
                 ctx.fillStyle = style.backgroundColor;
@@ -1136,7 +1143,7 @@ function exportCardPreviewAsImage() {
                 
                 if (ctx.roundRect) {
                     ctx.beginPath();
-                    ctx.roundRect(x, y, w, h, parseFloat(style.borderRadius) * scaleX || 0);
+                    ctx.roundRect(x, y, w, h, parseFloat(style.borderRadius) * fontScale || 0);
                     ctx.fill();
                 } else {
                     ctx.fillRect(x, y, w, h);
@@ -1150,7 +1157,7 @@ function exportCardPreviewAsImage() {
             ctx.textAlign = style.textAlign === 'center' ? 'center' : (style.textAlign === 'right' ? 'right' : 'left');
             ctx.textBaseline = 'middle';
 
-            const fontSize = parseFloat(style.fontSize) * scaleY; 
+            const fontSize = parseFloat(style.fontSize) * fontScale; // 修正: scaleY -> fontScale
             const fontWeight = style.fontWeight;
             const fontFamily = style.fontFamily;
             ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
@@ -1171,13 +1178,15 @@ function exportCardPreviewAsImage() {
             const textContent = el.textContent;
             const lineHeight = fontSize * 1.2; 
             
+            // maxWidthを設定して描画（枠内に収めるため）
+            const maxTextWidth = w - (paddingLeft + paddingRight);
+
             if (id === 'preview-flavor-text' || id === 'preview-effect-text') {
                 ctx.textBaseline = 'top';
-                const maxWidth = w - (paddingLeft + paddingRight);
-                wrapText(ctx, textContent, textX, y + paddingTop, maxWidth, lineHeight);
+                wrapText(ctx, textContent, textX, y + paddingTop, maxTextWidth, lineHeight);
             } else {
                 ctx.textBaseline = 'middle';
-                ctx.fillText(textContent, textX, y + h / 2);
+                ctx.fillText(textContent, textX, y + h / 2, maxTextWidth);
             }
 
             ctx.restore();
@@ -1256,12 +1265,16 @@ function setupUI() {
     duplicateMenuItem = document.getElementById('context-menu-duplicate');
     setAsTopMenuItem = document.getElementById('context-menu-set-as-top');
     
-    // プレビューエクスポート用メニューアイテムの作成
-    exportPreviewMenuItem = document.createElement('li');
-    exportPreviewMenuItem.id = 'context-menu-export-preview';
-    exportPreviewMenuItem.textContent = '画像としてエクスポート';
-    exportPreviewMenuItem.style.display = 'none';
-    contextMenu.querySelector('ul').appendChild(exportPreviewMenuItem);
+    // HTML側で定義された要素を取得
+    exportPreviewMenuItem = document.getElementById('context-menu-export-preview');
+    // 万が一HTMLに無い場合のみ作成（整合性のため）
+    if (!exportPreviewMenuItem && contextMenu) {
+        exportPreviewMenuItem = document.createElement('li');
+        exportPreviewMenuItem.id = 'context-menu-export-preview';
+        exportPreviewMenuItem.textContent = '画像としてエクスポート';
+        exportPreviewMenuItem.style.display = 'none';
+        contextMenu.querySelector('ul').appendChild(exportPreviewMenuItem);
+    }
 
     memoEditorModal = document.getElementById('memo-editor');
     memoEditorHeader = document.getElementById('memo-editor-header');
@@ -1281,12 +1294,16 @@ function setupUI() {
             e.preventDefault();
             e.stopPropagation();
             
-            // メニュー項目をリセット
+            // メニュー項目をリセット（全て非表示）
             const allItems = contextMenu.querySelectorAll('li');
             allItems.forEach(li => li.style.display = 'none');
+            const topItems = contextMenu.querySelectorAll('#custom-context-menu > ul > li');
+            topItems.forEach(li => li.style.display = 'none');
             
             // エクスポートのみ表示
-            exportPreviewMenuItem.style.display = 'block';
+            if (exportPreviewMenuItem) {
+                exportPreviewMenuItem.style.display = 'block';
+            }
             
             currentPreviewExportHandler = () => exportCardPreviewAsImage();
             
@@ -1782,11 +1799,13 @@ function setupUI() {
     });
     
     // プレビューエクスポート
-    exportPreviewMenuItem.addEventListener('click', () => {
-        playSe('ボタン共通.mp3');
-        if (typeof currentPreviewExportHandler === 'function') currentPreviewExportHandler();
-        closeContextMenu();
-    });
+    if (exportPreviewMenuItem) {
+        exportPreviewMenuItem.addEventListener('click', () => {
+            playSe('ボタン共通.mp3');
+            if (typeof currentPreviewExportHandler === 'function') currentPreviewExportHandler();
+            closeContextMenu();
+        });
+    }
 
     const bpModifyBtns = document.querySelectorAll('.bp-modify-btn');
     bpModifyBtns.forEach(btn => {
