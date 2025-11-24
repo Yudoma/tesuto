@@ -17,9 +17,13 @@ let currentBgmAudio = null;
 
 // BGMリスト: bgmフォルダに入れているファイル名をここに記述してください
 const bgmFileList = [
-    'Battle.mp3',
-    'Theme.mp3',
-    'Ending.wav'
+    '【通常戦闘】For The Glorious Achievement.mp3',
+    '6月の雨傘.mp3',
+    'イベント31.mp3'
+    'カジノ01.mp3',
+    '困惑.mp3',
+    '戦闘曲19.mp3',
+    '夢の終わり.mp3',
 ];
 
 // SE個別設定 (初期値は全てtrue)
