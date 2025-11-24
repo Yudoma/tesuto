@@ -1790,9 +1790,9 @@ function setupUI() {
     });
     masturbateMenuItem.addEventListener('click', () => { 
         if (masturbateMenuItem.textContent === 'オナニーする') {
-            playSe('オナニー.mp3', true);
+            playSe('オナニー.wav', true);
         } else {
-            stopSe('オナニー.mp3');
+            stopSe('オナニー.wav');
         }
         if (typeof currentMasturbateHandler === 'function') currentMasturbateHandler(); 
         closeContextMenu(); 
