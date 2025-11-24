@@ -1067,7 +1067,7 @@ html body #common-turn-counter .turn-btn:active {
 }
 
 html body #common-card-preview {
-    background-color: #444;
+    background-color: #ffffff;
     border-color: #777;
 }
 html body #common-card-preview p { color: #f0f0f0; }

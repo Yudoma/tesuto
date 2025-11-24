@@ -20,6 +20,9 @@ let customCounterModal, customCounterCloseBtn, customCounterSaveBtn, createCount
 let currentCustomCounterTarget = null; 
 let newCounterImageSrc = null; 
 
+// ファイルダイアログ用のグローバルフラグ
+let isFileDialogOpen = false;
+
 // 装飾＆アイコン設定モーダル用
 let decorationSettingsModal, decorationSettingsHeader, decorationSettingsCloseBtn;
 
@@ -425,8 +428,10 @@ function setupDecorationDropZones() {
                 }
             };
             document.body.appendChild(fileInput);
+            isFileDialogOpen = true;
             fileInput.click();
             document.body.removeChild(fileInput);
+            setTimeout(() => { isFileDialogOpen = false; }, 100);
         });
     });
 }
@@ -948,7 +953,9 @@ function openFlavorFileInput(slotNumber) {
          }
     });
     document.body.appendChild(fileInput);
+    isFileDialogOpen = true;
     fileInput.click();
+    setTimeout(() => { isFileDialogOpen = false; }, 100);
 }
 
 function updateStepUI() {
@@ -1587,6 +1594,9 @@ function setupUI() {
     });
 
     document.addEventListener('click', (e) => {
+        if (isFileDialogOpen) {
+            return;
+        }
         if (isResizingDrawer) {
             return;
         }
@@ -1959,8 +1969,10 @@ function setupUI() {
             if (e.target.files.length > 0) handleNewCounterImageFile(e.target.files[0]);
         };
         document.body.appendChild(fileInput);
+        isFileDialogOpen = true;
         fileInput.click();
         document.body.removeChild(fileInput);
+        setTimeout(() => { isFileDialogOpen = false; }, 100);
     });
 
     decorationSettingsCloseBtn.addEventListener('click', (e) => {

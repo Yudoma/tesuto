@@ -243,8 +243,10 @@ function importCardToSlot(slot) {
     };
     
     document.body.appendChild(fileInput);
+    isFileDialogOpen = true;
     fileInput.click();
     document.body.removeChild(fileInput);
+    setTimeout(() => { isFileDialogOpen = false; }, 100);
 }
 
 function handleSlotClick(e) {
@@ -382,7 +384,11 @@ function handleSlotClick(e) {
             }
         };
         document.body.appendChild(fileInput);
+        
+        isFileDialogOpen = true;
         fileInput.click();
+        setTimeout(() => { isFileDialogOpen = false; }, 100);
+
         e.stopPropagation();
     }
 }
