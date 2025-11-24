@@ -895,14 +895,14 @@ function toggleMasturbation(thumbnailElement, newState) {
             }, 1000);
             masturbateTimers.set(thumbnailElement, timerId);
         }
-        playSe('オナニー.mp3', true);
+        playSe('オナニー.wav', true);
     } else {
         const timerId = masturbateTimers.get(thumbnailElement);
         if (timerId) {
             clearInterval(timerId);
             masturbateTimers.delete(thumbnailElement);
         }
-        stopSe('オナニー.mp3');
+        stopSe('オナニー.wav');
     }
 }
 
