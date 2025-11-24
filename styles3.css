@@ -2091,7 +2091,6 @@ body.simple-mode-active #decoration-settings-header {
 #about-text-content {
     white-space: pre-wrap;
     padding: 15px;
-    height: 500px;
     overflow-y: auto;
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
