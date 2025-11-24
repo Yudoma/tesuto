@@ -491,7 +491,7 @@ body.nav-hidden .zone-header {
     height: 134.676px;
 }
 .deck-zone .slot-container,
-.side-deck-zone .slot-container {
+.side-deck-zone .slot-slot-container {
     justify-content: center;
     align-items: center;
     height: 100%; 
@@ -589,7 +589,7 @@ body.nav-hidden .zone-header {
     right: 10px;      
     z-index: 501;     
     writing-mode: vertical-rl;
-    text-orientation: upright; /* 修正: mixed -> upright (文字を正立させる) */
+    text-orientation: upright;
     padding: 10px 5px;
     background-color: #f0f0f0;
     color: #333;
@@ -1295,35 +1295,31 @@ body.opponent-sadist-active #opponent-drawer .drawer-token-space .token-slot-con
 }
 
 .hyphen-counter-input {
-    width: 70px; /* Match lp-counter-input's likely width */
+    width: 70px;
     text-align: center;
-    font-size: 1.1em; /* Match turn-input's font size */
+    font-size: 1.1em;
     font-weight: bold;
     background-color: #3a3a5e;
     border: 1px solid #5a5a9a;
     color: #e0e0e0;
-    padding: 2px; /* Match turn-input's padding */
+    padding: 2px;
     border-radius: 3px;
-    /* -moz-appearance: textfield; removed as it's for input, not div */
-    line-height: normal; /* Ensure proper vertical alignment for editable content */
-    display: flex; /* Use flex to center content vertically */
-    align-items: center; /* Center content vertically */
-    justify-content: center; /* Center content horizontally */
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    min-height: 28px; /* Give it a minimum height similar to an input */
-    cursor: text; /* Indicate it's editable */
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 28px;
+    cursor: text;
     
-    /* Enable user selection and editing */
     -webkit-user-select: text; 
     -moz-user-select: text;    
     -ms-user-select: text;     
     user-select: text;         
 }
 
-/* Ensure the counter buttons and input/div align nicely */
 .counter-buttons.simple-counter-buttons {
     display: flex;
-    align-items: center; /* Align all items in the counter group */
-    gap: 2px; /* Small gap between buttons and input/div */
+    align-items: center;
+    gap: 2px;
 }
-
