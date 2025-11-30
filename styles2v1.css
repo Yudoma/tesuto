@@ -781,17 +781,29 @@ body.common-decoration-mode-active .opponent-wrapper .exclude-zone .card-slot {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    background-color: #f0f0f0; 
+    color: #333;
+    box-shadow: 0 2px #b0b0b0; 
+    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
+}
+.flavor-delete-btn:hover {
+    background-color: #d0d0d0;
+}
+.flavor-delete-btn:active {
+    box-shadow: 0 0 #b0b0b0; 
+    transform: translateY(2px); 
+}
+
+.flavor-delete-btn {
     background-color: #cc0000;
     box-shadow: 0 2px #800000;
     color: white;
-    transition: background-color 0.1s, box-shadow 0.1s, transform 0.1s, color 0.1s; 
 }
 .flavor-delete-btn:hover {
     background-color: #e60000;
 }
 .flavor-delete-btn:active {
-    box-shadow: 0 0 #800000; 
-    transform: translateY(2px); 
+    box-shadow: 0 0 #800000;
 }
 
 .flavor-drop-zone {
@@ -1101,14 +1113,14 @@ body.opponent-simple-active #opponent-drawer .drawer-token-space .token-slot-con
     background-color: #cd5c5c; color: #fff; box-shadow: 0 2px #8b0000;
 }
 .player-wrapper.player-striker-mode .draw-btn:hover, .player-wrapper.player-striker-mode .counter-btn:hover { background-color: #f08080; }
-.player-wrapper.player-striker-mode .draw-btn:active, .player-wrapper.player-striker-mode .counter-btn:active { box-shadow: 0 0 #8b0000; }
+.player-wrapper.player-striker-mode .draw-btn:active, .opponent-wrapper.opponent-striker-mode .counter-btn:active { box-shadow: 0 0 #8b0000; }
 
 .player-wrapper.player-simple-mode .draw-btn, .player-wrapper.player-simple-mode .counter-btn,
 .opponent-wrapper.opponent-simple-mode .draw-btn, .opponent-wrapper.opponent-simple-mode .counter-btn {
     background-color: #eee; color: #000; box-shadow: 0 1px #ccc; border: 1px solid #999;
 }
 .player-wrapper.player-simple-mode .draw-btn:hover, .player-wrapper.player-simple-mode .counter-btn:hover { background-color: #ddd; }
-.player-wrapper.player-simple-mode .draw-btn:active, .player-wrapper.player-simple-mode .counter-btn:active { box-shadow: none; transform: translateY(1px); }
+.player-wrapper.player-simple-mode .draw-btn:active, .opponent-wrapper.opponent-simple-mode .counter-btn:active { box-shadow: none; transform: translateY(1px); }
 
 @keyframes masturbate-glow {
     0% { filter: brightness(1) drop-shadow(0 0 2px #ff69b4); }
@@ -1159,6 +1171,24 @@ body.opponent-simple-active #opponent-drawer .drawer-token-space .token-slot-con
 
 .target-active .card-image {
     animation: target-lock 0.8s ease-in-out;
+}
+
+@keyframes bp-increase-flash {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5) drop-shadow(0 0 10px #00ff00); } 
+    100% { filter: brightness(1); }
+}
+.bp-increase-active .card-image {
+    animation: bp-increase-flash 0.8s ease-out;
+}
+
+@keyframes bp-decrease-flash {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(0.7) drop-shadow(0 0 10px #ff0000) sepia(1) hue-rotate(-50deg); } 
+    100% { filter: brightness(1); }
+}
+.bp-decrease-active .card-image {
+    animation: bp-decrease-flash 0.8s ease-out;
 }
 
 .player-wrapper.auto-decrease-active,
@@ -1548,7 +1578,6 @@ body.board-flipped .opponent-wrapper .counter-badge {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     overflow: hidden;
-    flex-direction: column;
 }
 
 .custom-counter-header {
@@ -1822,7 +1851,7 @@ body.simple-mode-active #common-drawer .counter-btn:hover {
 body.sm-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"],
 body.magickers-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"],
 body.striker-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"],
-body.simple-mode-active #common-drawer #common-decoration-mode-btn[data-active="true"] {
+body.simple-mode-active #common-drawer .counter-btn[id$="auto-decrease-btn"][style*="rgb(204, 0, 0)"] {
      background-color: #cc0000 !important;
      box-shadow: 0 2px #800000 !important; 
      color: white !important;
@@ -1846,175 +1875,6 @@ body.simple-mode-active #common-drawer .resize-handle {
     background: linear-gradient(135deg, transparent 50%, #5a5a9a 50%) !important;
 }
 
-#decoration-settings-modal,
-body.sm-mode-active #decoration-settings-modal,
-body.magickers-mode-active #decoration-settings-modal,
-body.striker-mode-active #decoration-settings-modal,
-body.simple-mode-active #decoration-settings-modal {
-    background-color: #3a3a5e !important;
-    border-color: #5a5a9a !important;
-    color: #e0e0e0 !important;
-}
-
-#decoration-settings-header,
-body.sm-mode-active #decoration-settings-header,
-body.magickers-mode-active #decoration-settings-header,
-body.striker-mode-active #decoration-settings-header,
-body.simple-mode-active #decoration-settings-header {
-    background-color: #2a2a4e !important;
-    border-bottom-color: #5a5a9a !important;
-    color: #a0a0e0 !important;
-}
-
-#decoration-settings-modal .column-header {
-    background-color: #3a3a5e !important;
-    color: #a0a0e0 !important;
-    border-bottom-color: #5a5a9a !important;
-}
-
-#decoration-settings-modal .decoration-drop-zone {
-    background-color: rgba(0,0,0,0.2) !important;
-    color: #a0a0e0 !important;
-    border-color: #7a7aa0 !important;
-}
-#decoration-settings-modal .decoration-drop-zone:hover {
-    background-color: #4a4a6e !important;
-}
-
-#decoration-settings-modal .decoration-stock-item {
-    border-color: #555 !important;
-    background-color: #000 !important;
-}
-
-#decoration-settings-close-btn {
-    color: #666 !important;
-    cursor: pointer;
-}
-#decoration-settings-close-btn:hover {
-    color: #fff !important;
-}
-
-#decoration-settings-modal .decoration-column {
-    background-color: #2a2a4e !important;
-    border-color: #5a5a9a !important;
-}
-
-#credit-text-content,
-#spec-text-content,
-#about-text-content {
-    white-space: pre-wrap;
-    padding: 15px;
-    overflow-y: auto;
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    border: 1px solid #5a5a9a;
-    color: #e0e0e0;
-}
-
-.extra-area-wrapper {
-    display: flex;
-    flex-direction: column;
-    width: 220px; 
-    min-width: 180px;
-    height: 100%;
-    background-color: rgba(51, 51, 51, 0.8);
-    border: 1px solid #555;
-    border-radius: 5px;
-    padding: 2px;
-    box-sizing: border-box;
-    flex-shrink: 0;
-    margin-right: 1px;
-}
-
-.extra-header-input {
-    width: 100%;
-    box-sizing: border-box;
-    margin-bottom: 2px;
-    text-align: center;
-    background-color: #444;
-    border: 1px solid #666;
-    color: #e0e0e0;
-    font-size: 1.4em;
-    font-weight: bold;
-    padding: 4px;
-    border-radius: 3px;
-    line-height: 1.2;
-    flex-shrink: 0;
-}
-
-.extra-grid {
-    display: flex;
-    flex-direction: row;
-    gap: 2px;
-    flex-grow: 1;
-    height: 100%;
-    min-height: 0;
-}
-
-.extra-column {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    width: 50%;
-    height: 100%;
-    justify-content: space-between;
-}
-
-.extra-row {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    flex-grow: 1;
-    min-height: 0;
-}
-
-.extra-text {
-    width: 100%;
-    height: 100%;
-    background-color: transparent;
-    border: 1px solid rgba(128, 128, 128, 0.3);
-    color: #fff;
-    font-size: 1.3em;
-    font-weight: bold;
-    padding: 0 2px;
-    box-sizing: border-box;
-    border-radius: 4px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.extra-text:focus, .extra-header-input:focus {
-    background-color: rgba(0, 0, 0, 0.5);
-    border-color: #888;
-    color: #fff;
-    outline: none;
-}
-
-.extra-text::placeholder {
-    color: #555;
-    font-size: 0.8em;
-}
-
-.extra-image-zone {
-    flex-shrink: 0;
-    flex-grow: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1px;
-    box-sizing: border-box;
-    width: 140px; 
-}
-
-.extra-image-zone .card-slot {
-    width: 120px !important; 
-    height: 68px !important; 
-    border-radius: 5px;
-}
-
 /* --- Decoration Settings UI Logic Fixes --- */
 
 #decoration-settings-modal {
@@ -2032,6 +1892,8 @@ body.simple-mode-active #decoration-settings-header {
     flex-direction: column;
     gap: 20px;
     padding: 20px;
+    /* --- 修正点 3. モーダルコンテンツ全体からの横スクロールの無効化 (追加) --- */
+    overflow-x: hidden; 
 }
 
 .decoration-settings-section {
@@ -2045,13 +1907,15 @@ body.simple-mode-active #decoration-settings-header {
     display: flex;
     flex-direction: row;
     gap: 10px;
-    overflow-x: auto;
+    /* --- 修正点 2. カラムコンテナの横スクロール無効化 (修正) --- */
+    overflow-x: hidden; 
     padding-bottom: 10px;
 }
 
 .decoration-column {
-    min-width: 130px;
-    width: 130px;
+    /* --- 修正点 1. カラム幅の調整 (修正: 130px -> 110px) --- */
+    min-width: 110px;
+    width: 110px;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
@@ -2070,6 +1934,15 @@ body.simple-mode-active #decoration-settings-header {
     margin-bottom: 5px;
     padding-bottom: 3px;
     border-bottom: 1px solid #5a5a9a;
+}
+
+#decoration-settings-modal .decoration-drop-zone {
+    background-color: rgba(0,0,0,0.2) !important;
+    color: #a0a0e0 !important;
+    border-color: #7a7aa0 !important;
+}
+#decoration-settings-modal .decoration-drop-zone:hover {
+    background-color: #4a4a6e !important;
 }
 
 .decoration-drop-zone {
@@ -2091,12 +1964,11 @@ body.simple-mode-active #decoration-settings-header {
 }
 
 .decoration-stock-container {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 5px;
     max-height: 300px;
     overflow-y: auto;
-    overflow-x: hidden;
     padding-right: 2px;
 }
 
@@ -2107,10 +1979,15 @@ body.simple-mode-active #decoration-settings-header {
     border-radius: 4px;
     overflow: hidden;
     cursor: grab;
+    /* --- 修正点 4. ホバー設定の削除 (修正) --- */
     transition: transform 0.1s;
     background-color: #000;
 }
-
+.decoration-stock-item:hover {
+    /* --- 修正点 4. ホバー設定の削除 (修正) --- */
+    transform: none; 
+    z-index: 10;
+}
 .decoration-stock-item img {
     width: 100%;
     height: auto;

@@ -1,3 +1,148 @@
+window.resolveBattle = function(attackerBP, targetBP) {
+    if (!currentAttacker || !currentBattleTarget) {
+        if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
+        return;
+    }
+
+    const isInvalidZone = (element) => {
+        if (!element) return true;
+        const zoneId = getParentZoneId(element.classList.contains('thumbnail') ? element.parentNode : element);
+        const baseId = getBaseId(zoneId);
+        return ['hand-zone', 'side-deck', 'side-deck-back-slots', 'grave', 'grave-back-slots', 'exclude', 'exclude-back-slots', 'deck', 'deck-back-slots', 'token-zone-slots', 'c-free-space'].includes(baseId);
+    };
+
+    if (isInvalidZone(currentAttacker) || isInvalidZone(currentBattleTarget)) {
+        if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
+        return;
+    }
+
+    let targetThumbnail = null;
+    const isPlayerIcon = currentBattleTarget.id === 'icon-zone' || currentBattleTarget.id === 'opponent-icon-zone';
+    if (!isPlayerIcon) {
+        targetThumbnail = currentBattleTarget.querySelector('.thumbnail');
+        if (!targetThumbnail) {
+             if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
+             return;
+        }
+    }
+
+    const playHitEffect = (element) => {
+        // playSe('被弾.mp3'); // 削除
+        element.classList.add('target-active');
+        setTimeout(() => element.classList.remove('target-active'), 1000);
+    };
+
+    const playDestructEffect = (element, callback) => {
+        
+        element.classList.add('attack-active');
+        setTimeout(() => {
+            element.classList.remove('attack-active');
+            if (callback) callback();
+        }, 800);
+    };
+
+    playSe('アタック.mp3');
+    currentAttacker.classList.add('attack-active');
+    setTimeout(() => {
+        currentAttacker.classList.remove('attack-active');
+    }, 1000);
+
+    if (isPlayerIcon) {
+        playHitEffect(currentBattleTarget);
+    } else {
+        triggerEffect(targetThumbnail, 'target');
+    }
+
+    let attackerDestructed = false;
+
+    if (isPlayerIcon) {
+        if (typeof autoConfig !== 'undefined' && autoConfig.autoBattleCalc && !isNaN(attackerBP)) {
+            const damage = Math.ceil(attackerBP / 1000);
+            const targetIdPrefix = currentBattleTarget.id.includes('opponent') ? 'opponent-' : '';
+            const lpInput = document.getElementById(targetIdPrefix + 'counter-value');
+            
+            if (lpInput) {
+                const currentLP = parseInt(lpInput.value) || 0;
+                const newLP = Math.max(0, currentLP - damage);
+                lpInput.value = newLP;
+                
+                if (isRecording && typeof recordAction === 'function') {
+                    recordAction({
+                        type: 'counterChange',
+                        inputId: targetIdPrefix + 'counter-value',
+                        change: -damage
+                    });
+                }
+                
+                if (newLP === 0 && autoConfig.autoGameEnd) {
+                    const msg = targetIdPrefix ? 'YOU WIN!' : 'YOU LOSE...';
+                    setTimeout(() => window.showGameResult(msg), 1000);
+                }
+            }
+        }
+    } else {
+        if (typeof autoConfig !== 'undefined' && autoConfig.autoBattleCalc && !isNaN(attackerBP) && !isNaN(targetBP)) {
+            
+            if (attackerBP <= 0 && targetBP <= 0) {
+            } 
+            else if (attackerBP > targetBP) {
+                playDestructEffect(targetThumbnail, () => {
+                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(targetThumbnail, 'grave');
+                });
+            } else if (attackerBP < targetBP) {
+                attackerDestructed = true;
+                playDestructEffect(currentAttacker, () => {
+                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(currentAttacker, 'grave');
+                });
+            } else {
+                attackerDestructed = true;
+                playDestructEffect(targetThumbnail, () => {
+                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(targetThumbnail, 'grave');
+                });
+                playDestructEffect(currentAttacker, () => {
+                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(currentAttacker, 'grave');
+                });
+            }
+        } else {
+            playHitEffect(targetThumbnail);
+        }
+    }
+
+    if (typeof autoConfig !== 'undefined' && autoConfig.autoAttackTap) {
+        if (!attackerDestructed) {
+            setTimeout(() => {
+                if (document.body.contains(currentAttacker) && !isInvalidZone(currentAttacker)) {
+                    const imgElement = currentAttacker.querySelector('.card-image');
+                    const slotElement = currentAttacker.parentNode;
+                    if (imgElement && slotElement) {
+                        const currentRotation = parseInt(imgElement.dataset.rotation) || 0;
+                        if (currentRotation === 0) {
+                            const newRotation = 90;
+                            slotElement.classList.add('rotated-90');
+                            const { width, height } = getCardDimensions();
+                            const scaleFactor = height / width;
+                            imgElement.style.transform = `rotate(${newRotation}deg) scale(${scaleFactor})`;
+                            imgElement.dataset.rotation = newRotation;
+                            playSe('タップ.mp3');
+                            
+                            if (isRecording && typeof recordAction === 'function') {
+                                recordAction({
+                                    type: 'rotate',
+                                    zoneId: getParentZoneId(slotElement),
+                                    slotIndex: Array.from(slotElement.parentNode.children).indexOf(slotElement),
+                                    rotation: newRotation
+                                });
+                            }
+                        }
+                    }
+                }
+            }, 900); 
+        }
+    }
+
+    if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
+};
+
 function initializeBoard(wrapperSelector, idPrefix) {
     const wrapperElement = document.querySelector(wrapperSelector);
     if (!wrapperElement) return;
@@ -108,6 +253,11 @@ function initializeBoard(wrapperSelector, idPrefix) {
         initialMode = idPrefix ? 'striker' : 'magickers';
     }
     updateSmTheme(idPrefix, initialMode);
+
+    // プレイマット状態の更新
+    if (typeof window.updatePlaymatState === 'function') {
+        window.updatePlaymatState();
+    }
 }
 
 function setupBoardUI(idPrefix) {
@@ -439,7 +589,7 @@ function resetBoard(idPrefix) {
 
     allSlots.forEach(slot => {
         const baseParentZoneId = getBaseId(getParentZoneId(slot));
-        if (['free-space-slots', 'icon-zone', 'side-deck', 'side-deck-back-slots', 'token-zone-slots'].includes(baseParentZoneId)) return;
+        if (['free-space-slots', 'icon-zone', 'side-deck', 'side-deck-back-slots', 'token-zone-slots', 'extra-image-zone'].includes(baseParentZoneId)) return;
         slot.querySelectorAll('.thumbnail:not([data-is-decoration="true"])').forEach(t => {
             cardThumbnails.push(slot.removeChild(t));
             resetCardFlipState(t);
@@ -466,6 +616,11 @@ function resetBoard(idPrefix) {
     
     const drawerId = idPrefix ? 'opponent-drawer' : 'player-drawer';
     document.getElementById(drawerId)?.classList.remove('open');
+
+    // プレイマット状態の更新
+    if (typeof window.updatePlaymatState === 'function') {
+        window.updatePlaymatState();
+    }
 }
 
 function deleteDeck(idPrefix) {
@@ -492,6 +647,10 @@ function clearAllBoard(idPrefix) {
         slot.classList.remove('stacked');
     });
     ['deck', 'grave', 'exclude', 'side-deck'].forEach(zone => syncMainZoneImage(zone, idPrefix));
+
+    if (typeof window.updatePlaymatState === 'function') {
+        window.updatePlaymatState();
+    }
 }
 
 
@@ -667,7 +826,7 @@ function getAllBoardState() {
             'deck', 'grave', 'exclude', 'side-deck', 'icon-zone',
             'deck-back-slots', 'grave-back-slots', 'exclude-back-slots', 'side-deck-back-slots',
             'free-space-slots', 'token-zone-slots', 'hand-zone',
-            'mana-left', 'mana-right', 'battle', 'spell', 'special1', 'special2'
+            'mana-left', 'mana-right', 'battle', 'spell', 'special1', 'special2', 'extra-image-zone'
         ];
         
         const state = {};
@@ -808,6 +967,10 @@ function restoreAllBoardState(state) {
             if(typeof updateBgmVolume === 'function') updateBgmVolume();
         }
     }
+    
+    if (typeof window.updatePlaymatState === 'function') {
+        window.updatePlaymatState();
+    }
 }
 
 function extractZoneData(containerId, singleSlot = false) {
@@ -908,153 +1071,50 @@ function applyDataToZone(containerId, zoneData) {
     }
 }
 
-window.executeBattle = function(attackerThumbnail, targetSlot) {
-    if (typeof openBattleConfirmModal === 'function') {
-        openBattleConfirmModal(attackerThumbnail, targetSlot);
-    }
-};
+window.updatePlaymatState = function() {
+    const playmatBackground = document.getElementById('playmat-background');
+    if (!playmatBackground) return;
 
-window.resolveBattle = function(attackerBP, targetBP) {
-    if (!currentAttacker || !currentBattleTarget) {
-        if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
-        return;
-    }
-
-    const isInvalidZone = (element) => {
-        if (!element) return true;
-        const zoneId = getParentZoneId(element.classList.contains('thumbnail') ? element.parentNode : element);
-        const baseId = getBaseId(zoneId);
-        return ['hand-zone', 'side-deck', 'side-deck-back-slots', 'grave', 'grave-back-slots', 'exclude', 'exclude-back-slots', 'deck', 'deck-back-slots', 'token-zone-slots', 'c-free-space'].includes(baseId);
-    };
-
-    if (isInvalidZone(currentAttacker) || isInvalidZone(currentBattleTarget)) {
-        if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
-        return;
-    }
-
-    let targetThumbnail = null;
-    const isPlayerIcon = currentBattleTarget.id === 'icon-zone' || currentBattleTarget.id === 'opponent-icon-zone';
-    if (!isPlayerIcon) {
-        targetThumbnail = currentBattleTarget.querySelector('.thumbnail');
-        if (!targetThumbnail) {
-             if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
-             return;
-        }
-    }
-
-    const playHitEffect = (element) => {
-        // playSe('被弾.mp3'); // 削除
-        element.classList.add('target-active');
-        setTimeout(() => element.classList.remove('target-active'), 1000);
-    };
-
-    const playDestructEffect = (element, callback) => {
+    // ヘルパー関数: ゾーンIDから画像情報{src, timestamp}を取得
+    const getPlaymatImageInfo = (zoneId) => {
+        const zone = document.getElementById(zoneId);
+        if (!zone) return null;
+        const slot = zone.querySelector('.card-slot');
+        if (!slot) return null;
+        const thumbnail = slot.querySelector('.thumbnail');
+        if (!thumbnail) return null;
+        const img = thumbnail.querySelector('.card-image');
+        if (!img || !img.src) return null;
         
-        element.classList.add('attack-active');
-        setTimeout(() => {
-            element.classList.remove('attack-active');
-            if (callback) callback();
-        }, 800);
+        return {
+            src: img.src,
+            timestamp: parseInt(thumbnail.dataset.timestamp) || 0
+        };
     };
 
-    playSe('アタック.mp3');
-    currentAttacker.classList.add('attack-active');
-    setTimeout(() => {
-        currentAttacker.classList.remove('attack-active');
-    }, 1000);
+    const opponentInfo = getPlaymatImageInfo('opponent-extra-image-zone');
+    const playerInfo = getPlaymatImageInfo('extra-image-zone');
 
-    if (isPlayerIcon) {
-        playHitEffect(currentBattleTarget);
-    } else {
-        triggerEffect(targetThumbnail, 'target');
-    }
+    let targetSrc = null;
 
-    let attackerDestructed = false;
-
-    if (isPlayerIcon) {
-        if (typeof autoConfig !== 'undefined' && autoConfig.autoBattleCalc && !isNaN(attackerBP)) {
-            const damage = Math.ceil(attackerBP / 1000);
-            const targetIdPrefix = currentBattleTarget.id.includes('opponent') ? 'opponent-' : '';
-            const lpInput = document.getElementById(targetIdPrefix + 'counter-value');
-            
-            if (lpInput) {
-                const currentLP = parseInt(lpInput.value) || 0;
-                const newLP = Math.max(0, currentLP - damage);
-                lpInput.value = newLP;
-                
-                if (isRecording && typeof recordAction === 'function') {
-                    recordAction({
-                        type: 'counterChange',
-                        inputId: targetIdPrefix + 'counter-value',
-                        change: -damage
-                    });
-                }
-                
-                if (newLP === 0 && autoConfig.autoGameEnd) {
-                    const msg = targetIdPrefix ? 'YOU WIN!' : 'YOU LOSE...';
-                    setTimeout(() => window.showGameResult(msg), 1000);
-                }
-            }
-        }
-    } else {
-        if (typeof autoConfig !== 'undefined' && autoConfig.autoBattleCalc && !isNaN(attackerBP) && !isNaN(targetBP)) {
-            
-            if (attackerBP <= 0 && targetBP <= 0) {
-            } 
-            else if (attackerBP > targetBP) {
-                playDestructEffect(targetThumbnail, () => {
-                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(targetThumbnail, 'grave');
-                });
-            } else if (attackerBP < targetBP) {
-                attackerDestructed = true;
-                playDestructEffect(currentAttacker, () => {
-                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(currentAttacker, 'grave');
-                });
-            } else {
-                attackerDestructed = true;
-                playDestructEffect(targetThumbnail, () => {
-                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(targetThumbnail, 'grave');
-                });
-                playDestructEffect(currentAttacker, () => {
-                    if (typeof moveCardToMultiZone === 'function') moveCardToMultiZone(currentAttacker, 'grave');
-                });
-            }
+    if (opponentInfo && playerInfo) {
+        // 両方ある場合はタイムスタンプ比較（新しい方を優先）
+        if (playerInfo.timestamp > opponentInfo.timestamp) {
+            targetSrc = playerInfo.src;
         } else {
-            playHitEffect(targetThumbnail);
+            targetSrc = opponentInfo.src;
         }
+    } else if (opponentInfo) {
+        targetSrc = opponentInfo.src;
+    } else if (playerInfo) {
+        targetSrc = playerInfo.src;
     }
 
-    if (typeof autoConfig !== 'undefined' && autoConfig.autoAttackTap) {
-        if (!attackerDestructed) {
-            setTimeout(() => {
-                if (document.body.contains(currentAttacker) && !isInvalidZone(currentAttacker)) {
-                    const imgElement = currentAttacker.querySelector('.card-image');
-                    const slotElement = currentAttacker.parentNode;
-                    if (imgElement && slotElement) {
-                        const currentRotation = parseInt(imgElement.dataset.rotation) || 0;
-                        if (currentRotation === 0) {
-                            const newRotation = 90;
-                            slotElement.classList.add('rotated-90');
-                            const { width, height } = getCardDimensions();
-                            const scaleFactor = height / width;
-                            imgElement.style.transform = `rotate(${newRotation}deg) scale(${scaleFactor})`;
-                            imgElement.dataset.rotation = newRotation;
-                            playSe('タップ.mp3');
-                            
-                            if (isRecording && typeof recordAction === 'function') {
-                                recordAction({
-                                    type: 'rotate',
-                                    zoneId: getParentZoneId(slotElement),
-                                    slotIndex: Array.from(slotElement.parentNode.children).indexOf(slotElement),
-                                    rotation: newRotation
-                                });
-                            }
-                        }
-                    }
-                }
-            }, 900); 
-        }
+    if (targetSrc) {
+        playmatBackground.style.backgroundImage = `url("${targetSrc}")`;
+        document.body.classList.add('playmat-active');
+    } else {
+        playmatBackground.style.backgroundImage = '';
+        document.body.classList.remove('playmat-active');
     }
-
-    if(typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
 };

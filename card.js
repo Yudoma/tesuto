@@ -299,7 +299,6 @@ function handleCardContextMenu(e) {
             const newState = !isPermanent;
             thumbnailElement.dataset.isPermanent = newState;
             
-            // 常時発動ON時のみSEを再生（OFF時はUI側の共通音のみにする）
             if (newState) {
                 playSe('常時発動.mp3');
             }
@@ -316,6 +315,7 @@ function handleCardContextMenu(e) {
     }
 
     currentAddFlavorHandler = () => openFlavorEditor(thumbnailElement);
+    currentViewIllustrationHandler = () => openIllustrationViewer(thumbnailElement);
     currentDeleteHandler = () => deleteCard(thumbnailElement);
     
     const wrapMoveHandler = (handler) => {
@@ -386,7 +386,6 @@ function handleCardContextMenu(e) {
     toSideDeckMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
     flipMenuItem.style.display = hideMoveFlip ? 'none' : 'block';
     
-    // サブメニューを持つ親要素の取得方法を堅牢にする
     const moveItem = document.getElementById('context-menu-to-grave');
     const moveParentLi = moveItem ? moveItem.closest('.has-submenu') : null;
     
@@ -402,13 +401,15 @@ function handleCardContextMenu(e) {
     blockerMenuItem.style.display = 'block';
 
     memoMenuItem.style.display = 'block';
-    addFlavorMenuItem.style.display = 'block';
+    if (viewIllustrationMenuItem) viewIllustrationMenuItem.style.display = 'block';
+    if (addFlavorMenuItem) {
+        addFlavorMenuItem.textContent = 'フレーバーイラスト編集';
+        addFlavorMenuItem.style.display = 'block';
+    }
     
-    // カウンター操作の親liを特定
     const addCounterItem = document.getElementById('context-menu-add-counter');
     const counterParent = addCounterItem ? addCounterItem.closest('.has-submenu') : null;
     
-    // BP操作の親liを特定（クラスで取得）
     const bpItem = document.querySelector('.bp-modify-btn');
     const bpParent = bpItem ? bpItem.closest('.has-submenu') : null;
     
@@ -453,7 +454,6 @@ function handleCardContextMenu(e) {
         if (changeStyleMenuItem) changeStyleMenuItem.style.display = 'none';
     }
     
-    // プレビューエクスポート項目はカード上では非表示
     if(typeof exportPreviewMenuItem !== 'undefined') exportPreviewMenuItem.style.display = 'none';
     
     contextMenu.style.top = '0px';
@@ -684,6 +684,10 @@ function deleteCard(thumbnailElement) {
     } else if (thumbnailElement.dataset.isDecoration === 'true') {
         syncMainZoneImage(baseParentZoneId);
     }
+
+    if (typeof window.updatePlaymatState === 'function') {
+        window.updatePlaymatState();
+    }
 }
 
 function addCounterToCard(thumbnailElement) {
@@ -883,7 +887,6 @@ function toggleMasturbation(thumbnailElement, newState) {
                 }
                 modifyCardBP(thumbnailElement, -100, true);
                 
-                // BPが0以下になったら自動停止
                 const memo = thumbnailElement.dataset.memo || '';
                 const match = memo.match(/\[BP:(.*?)\]/);
                 if (match) {
@@ -921,7 +924,6 @@ window.modifyCardBP = function(thumbnailElement, amount, isAuto = false) {
         let newBP = currentBP + amount;
         if (newBP < 0) newBP = 0; 
         
-        // SEとエフェクト
         const enableBpEffect = typeof effectConfig === 'undefined' || effectConfig.bpChange !== false;
 
         if (amount > 0) {
@@ -985,7 +987,6 @@ function checkBpDestruction(thumbnailElement) {
              if (typeof closeBattleConfirmModal === 'function') closeBattleConfirmModal();
         }
         
-        // 「被弾.mp3」は削除
         thumbnailElement.classList.add('target-active');
         
         setTimeout(() => {

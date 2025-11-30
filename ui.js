@@ -1,5 +1,5 @@
 let contextMenu, deleteMenuItem, toGraveMenuItem, toExcludeMenuItem, toHandMenuItem, toDeckMenuItem, toSideDeckMenuItem, flipMenuItem, memoMenuItem, addCounterMenuItem, removeCounterMenuItem, masturbateMenuItem, blockerMenuItem, permanentMenuItem, attackMenuItem;
-let actionMenuItem, targetMenuItem, addFlavorMenuItem;
+let actionMenuItem, targetMenuItem, addFlavorMenuItem, viewIllustrationMenuItem;
 let customCounterMenuItem, changeStyleMenuItem, duplicateMenuItem; 
 let exportCardMenuItem, importCardMenuItem, setAsTopMenuItem;
 let exportPreviewMenuItem; // プレビューエクスポート用
@@ -123,6 +123,31 @@ function closeLightbox() {
     }
 }
 
+function openIllustrationViewer(thumbnailElement) {
+    if (!thumbnailElement || typeof lightboxContent === 'undefined' || typeof lightboxOverlay === 'undefined') {
+        return;
+    }
+
+    const previewImg = thumbnailElement.querySelector('img');
+    const mainImgSrc = (previewImg && previewImg.src) ? (thumbnailElement.dataset.originalSrc || previewImg.src) : null;
+    const flavor1Src = thumbnailElement.dataset.flavor1;
+    const flavor2Src = thumbnailElement.dataset.flavor2;
+
+    lightboxContent.innerHTML = '';
+    let imagesAdded = 0;
+    [mainImgSrc, flavor1Src, flavor2Src].forEach(src => {
+        if (src) {
+            const img = document.createElement('img');
+            img.src = src;
+            lightboxContent.appendChild(img);
+            imagesAdded++;
+        }
+    });
+    if (imagesAdded > 0) {
+        lightboxOverlay.classList.add('show');
+    }
+}
+
 function closeContextMenu() {
     if (contextMenu) {
         contextMenu.style.display = 'none';
@@ -163,6 +188,7 @@ function closeContextMenu() {
     currentTargetHandler = null;
     currentPermanentHandler = null;
     currentAddFlavorHandler = null;
+    currentViewIllustrationHandler = null;
     currentBlockerHandler = null;
     currentMasturbateHandler = null;
     currentExportCardHandler = null;
@@ -682,6 +708,14 @@ window.showGameResult = function(message) {
     if (typeof autoConfig !== 'undefined' && !autoConfig.autoGameEnd) return;
 
     gameResultMessage.textContent = message;
+    
+    // 負けの場合のスタイル適用
+    if (message.includes('LOSE')) {
+        gameResultMessage.classList.add('result-lose');
+    } else {
+        gameResultMessage.classList.remove('result-lose');
+    }
+
     gameResultOverlay.style.display = 'flex';
     
     if (message.includes('WIN')) {
@@ -745,15 +779,18 @@ window.updateBattleConfirmModal = function() {
     if (!battleConfirmModal || battleConfirmModal.style.display === 'none') return;
     
     const getBP = (element) => {
-        if (!element) return 0;
+        if (!element) return '0';
         const memo = element.dataset.memo || '';
         const match = memo.match(/\[BP:(.*?)\]/i);
-        let bp = 0;
-        if (match) {
-            bp = parseInt(match[1]);
-            if (isNaN(bp)) bp = 0;
+        if (match && match[1]) {
+            const bpValue = match[1].trim();
+            if (bpValue === '-') {
+                return '-';
+            }
+            const parsedBp = parseInt(bpValue);
+            return isNaN(parsedBp) ? '0' : parsedBp.toString();
         }
-        return bp;
+        return '0';
     };
 
     if (currentAttacker && battleConfirmAttackerBpInput) {
@@ -1263,6 +1300,7 @@ function setupUI() {
     addCounterMenuItem = document.getElementById('context-menu-add-counter');
     removeCounterMenuItem = document.getElementById('context-menu-remove-counter');
     addFlavorMenuItem = document.getElementById('context-menu-add-flavor');
+    viewIllustrationMenuItem = document.getElementById('context-menu-view-illustration');
     masturbateMenuItem = document.getElementById('context-menu-masturbate');
     blockerMenuItem = document.getElementById('context-menu-blocker');
     exportCardMenuItem = document.getElementById('context-menu-export');
@@ -1796,6 +1834,12 @@ function setupUI() {
     addFlavorMenuItem.addEventListener('click', () => { 
         playSe('ボタン共通.mp3');
         if (typeof currentAddFlavorHandler === 'function') currentAddFlavorHandler(); 
+        closeContextMenu(); 
+    });
+
+    viewIllustrationMenuItem.addEventListener('click', () => { 
+        playSe('ボタン共通.mp3');
+        if (typeof currentViewIllustrationHandler === 'function') currentViewIllustrationHandler(); 
         closeContextMenu(); 
     });
     masturbateMenuItem.addEventListener('click', () => { 
@@ -2399,6 +2443,14 @@ function setupUI() {
             }
         });
     }
+
+    // Extra Text Auto-Resize
+    const extraTexts = document.querySelectorAll('.extra-text');
+    extraTexts.forEach(el => {
+        el.addEventListener('input', () => adjustFontSize(el));
+        // 初期表示時やリロード時にも適用
+        adjustFontSize(el); 
+    });
 }
 
 function startBattleTargetSelection(attackerThumbnail) {
@@ -2632,6 +2684,143 @@ function duplicateCardToFreeSpace(sourceCard) {
         if (drawer) {
             drawer.classList.add('open');
             activateDrawerTab('free-space-slots', drawer);
+        }
+    }
+}
+
+window.updateCardPreview = function(thumbnailElement) {
+    if (!thumbnailElement) return;
+    const imgElement = thumbnailElement.querySelector('.card-image');
+    if (!imgElement) return;
+
+    const commonPreviewArea = document.getElementById('common-card-preview');
+    const previewImageContainer = commonPreviewArea.querySelector('#preview-image-container');
+    previewImageContainer.innerHTML = '';
+    const previewImg = document.createElement('img');
+    previewImg.src = thumbnailElement.dataset.isFlipped === 'true' ? (thumbnailElement.dataset.originalSrc || imgElement.src) : imgElement.src;
+    
+    previewImg.onerror = () => previewImg.remove();
+
+    previewImageContainer.appendChild(previewImg);
+
+    commonPreviewArea.dataset.flavor1 = thumbnailElement.dataset.flavor1 || '';
+    commonPreviewArea.dataset.flavor2 = thumbnailElement.dataset.flavor2 || '';
+
+    const memo = thumbnailElement.dataset.memo || '';
+
+    const extractData = (key, altKey = null) => {
+        let regex = new RegExp(`\\[${key}:([\\s\\S]*?)\\](?:\\/([^/]*)\\/([^/]*)\\/([^/]*)\\/([^/]*)\\/)?`, 'i');
+        let match = memo.match(regex);
+        
+        if (!match && altKey) {
+             regex = new RegExp(`\\[${altKey}:([\\s\\S]*?)\\](?:\\/([^/]*)\\/([^/]*)\\/([^/]*)\\/([^/]*)\\/)?`, 'i');
+             match = memo.match(regex);
+        }
+
+        if (match && match[1]) {
+            const value = match[1].trim();
+            if (value === '' || value === '-') return null;
+            
+            return {
+                value: value,
+                color: match[2] || null,
+                bg: match[3] || null,
+                opacity: match[4] || null,
+                display: match[5] || null
+            };
+        }
+        return null;
+    };
+
+    const cardInfo = {
+        attribute: extractData('属性'),
+        cost: extractData('マナ'),
+        bp: extractData('BP'),
+        spell: extractData('スペル'),
+        cardName: extractData('カード名'),
+        flavor: extractData('フレーバーテキスト'),
+        effect: extractData('効果'),
+    };
+
+    const applyStyles = (element, data) => {
+        if (!element) return;
+        
+        element.style.color = '';
+        element.style.backgroundColor = '';
+        element.style.opacity = '';
+        element.classList.remove('preview-hidden');
+
+        if (!data) {
+            element.style.display = 'none';
+            element.textContent = '';
+            return;
+        }
+
+        if (data.display === '非表示') {
+            element.style.display = 'none';
+            return;
+        }
+
+        element.style.display = 'block'; 
+        
+        if (data.color) element.style.color = data.color;
+        if (data.bg) element.style.backgroundColor = data.bg;
+        if (data.opacity) element.style.opacity = data.opacity;
+    };
+
+    const previewElements = {
+        'preview-attribute': cardInfo.attribute,
+        'preview-cost': cardInfo.cost,
+        'preview-card-name': cardInfo.cardName,
+        'preview-top-right-stat': cardInfo.spell || cardInfo.bp, 
+        'preview-flavor-text': cardInfo.flavor,
+        'preview-effect-text': cardInfo.effect,
+    };
+
+    const prefixMap = {
+        'preview-attribute': '属性: ',
+        'preview-cost': 'マナ: ',
+        'preview-top-right-stat': (cardInfo.spell) ? 'スペル: ' : 'BP: ',
+        'preview-card-name': '',
+        'preview-flavor-text': '',
+        'preview-effect-text': ''
+    };
+
+    Object.keys(previewElements).forEach(id => {
+        const el = commonPreviewArea.querySelector(`#${id}`);
+        const data = previewElements[id];
+        
+        if (el) {
+            applyStyles(el, data);
+            if (data && data.display !== '非表示') {
+                el.textContent = (prefixMap[id] || '') + data.value;
+            }
+        }
+    });
+
+    const memoTooltip = document.getElementById('memo-tooltip');
+    if (memo && memoTooltip) {
+        const displayMemo = memo.replace(/\]\/[^/]*\/[^/]*\/[^/]*\/[^/]*\//g, ']');
+        memoTooltip.textContent = displayMemo;
+        memoTooltip.style.display = 'block';
+    } else if (memoTooltip) {
+        memoTooltip.style.display = 'none';
+    }
+};
+
+// --- 文字サイズ自動調整関数 ---
+function adjustFontSize(element) {
+    if (!element) return;
+    const minSize = 8;
+    // CSSで設定された初期フォントサイズに戻す（空文字代入でスタイルシートの値を使用）
+    element.style.fontSize = ''; 
+    
+    // スクロール幅がクライアント幅より大きい場合のみ縮小処理
+    if (element.scrollWidth > element.clientWidth) {
+        let currentSize = parseFloat(window.getComputedStyle(element).fontSize);
+        while (element.scrollWidth > element.clientWidth && currentSize > minSize) {
+            currentSize -= 1; // 1pxずつ縮小
+            element.style.fontSize = currentSize + 'px';
         }
     }
 }

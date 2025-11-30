@@ -8,6 +8,7 @@ body.common-decoration-mode-active .opponent-wrapper .hand-area-container #oppon
 body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-draw-5-card,  
 body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-sm-toggle-btn,
 body.common-decoration-mode-active .opponent-wrapper .hand-area-container #opponent-surrender-btn,  
+body.common-decoration-mode-active .opponent-wrapper .hand-area-container .extra-area-wrapper,
 body.common-decoration-mode-active .player-wrapper .game-board .special-zone-1,
 body.common-decoration-mode-active .player-wrapper .game-board .battle-zone,
 body.common-decoration-mode-active .player-wrapper .game-board .special-zone-2,
@@ -17,7 +18,8 @@ body.common-decoration-mode-active .player-wrapper .hand-area-container .hand-zo
 body.common-decoration-mode-active .player-wrapper .hand-area-container #draw-card,
 body.common-decoration-mode-active .player-wrapper .hand-area-container #draw-5-card,  
 body.common-decoration-mode-active .player-wrapper .hand-area-container #sm-toggle-btn,
-body.common-decoration-mode-active .player-wrapper .hand-area-container #surrender-btn {  
+body.common-decoration-mode-active .player-wrapper .hand-area-container #surrender-btn,
+body.common-decoration-mode-active .player-wrapper .hand-area-container .extra-area-wrapper {  
     opacity: 0.4;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -78,7 +80,9 @@ body:not(.board-flipped) .common-preview-wrapper #opponent-counter-wrapper .oppo
 
 .opponent-wrapper .zone-header,
 .opponent-wrapper .hand-zone-wrapper .zone-header {
-    transform: translate(-50%, -50%) scaleY(-1);
+    transform: translate(-50%, -50%) scaleY(-1) translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
 }
 
 body.board-flipped .game-area-container {
@@ -208,8 +212,9 @@ body.board-flipped #opponent-drawer-toggle:active {
 
 body.board-flipped .opponent-wrapper .zone-header,
 body.board-flipped .opponent-wrapper .hand-zone-wrapper .zone-header {
-    transform: translate(-50%, -50%) scaleY(1);
+    transform: translate(-50%, -50%) scaleY(1) translateZ(0);
     z-index: 20;
+    backface-visibility: hidden;
 }
 
 body.board-flipped .player-wrapper .zone-header,
@@ -228,7 +233,7 @@ body.board-flipped .player-wrapper .hand-zone-wrapper .zone-header {
     border: 3px solid #5a5a9a;
 }
 .common-preview-wrapper .card-preview-area p {
-    color: #e0e0e0;
+    color: #000000 !important;
 }
 
 .common-preview-wrapper .card-preview-area .preview-stat {
@@ -695,6 +700,7 @@ body.opponent-sadist-active #opponent-drawer .sidebar-button-container .draw-btn
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     border-radius: 8px;
     overflow: hidden; 
+    flex-direction: column;
 }
 
 .memo-editor-header {
@@ -969,10 +975,6 @@ body.board-flipped .player-wrapper .thumbnail .card-counter-overlay {
 #common-drawer .counter-btn:active {
     box-shadow: 0 0 #b0b0b0;
     transform: translateY(2px);
-}
-
-#common-drawer #common-decoration-mode-btn:active {
-    box-shadow: 0 0 #997a00;
 }
 
 #common-drawer #common-decoration-mode-btn[data-active="true"] {
@@ -1998,7 +2000,6 @@ body.simple-mode-active #common-drawer .counter-btn:hover {
 }
 
 #common-drawer .draw-btn:active,
-
 #common-drawer .drawer-tab-btn:active {
     box-shadow: 0 0 #997a00 !important;
     background-color: #ffcc00 !important;
@@ -2096,4 +2097,162 @@ body.simple-mode-active #decoration-settings-header {
     border-radius: 5px;
     border: 1px solid #5a5a9a;
     color: #e0e0e0;
+}
+
+.player-sadist-mode .extra-area-wrapper,
+.opponent-sadist-mode .extra-area-wrapper {
+    background-color: rgba(255, 240, 245, 0.85); 
+    border-color: #FF69B4;
+}
+.player-sadist-mode .extra-header-input,
+.opponent-sadist-mode .extra-header-input {
+    background-color: rgba(255, 182, 193, 0.9); 
+    color: #8B008B;
+    border-color: #C71585;
+}
+.player-sadist-mode .extra-text,
+.opponent-sadist-mode .extra-text {
+    background-color: transparent;
+    border-color: rgba(255, 105, 180, 0.5); 
+    color: #333;
+}
+.player-sadist-mode .extra-text::placeholder,
+.opponent-sadist-mode .extra-text::placeholder {
+    color: rgba(255, 105, 180, 0.7);
+}
+
+.player-magickers-mode .extra-area-wrapper,
+.opponent-magickers-mode .extra-area-wrapper {
+    background-color: rgba(36, 0, 70, 0.85); 
+    border-color: #7b2cbf;
+}
+.player-magickers-mode .extra-header-input,
+.opponent-magickers-mode .extra-header-input {
+    background-color: rgba(60, 9, 108, 0.9); 
+    color: #e0aaff;
+    border-color: #9d4edd;
+}
+.player-magickers-mode .extra-text,
+.opponent-magickers-mode .extra-text {
+    background-color: transparent;
+    border-color: rgba(157, 78, 221, 0.5); 
+    color: #e0aaff;
+}
+.player-magickers-mode .extra-text::placeholder,
+.opponent-magickers-mode .extra-text::placeholder {
+    color: rgba(157, 78, 221, 0.7);
+}
+
+.player-striker-mode .extra-area-wrapper,
+.opponent-striker-mode .extra-area-wrapper {
+    background-color: rgba(43, 5, 5, 0.85); 
+    border-color: #8b0000;
+}
+.player-striker-mode .extra-header-input,
+.opponent-striker-mode .extra-header-input {
+    background-color: rgba(74, 10, 10, 0.9); 
+    color: #ffcccc;
+    border-color: #cd5c5c;
+}
+.player-striker-mode .extra-text,
+.opponent-striker-mode .extra-text {
+    background-color: transparent;
+    border-color: rgba(205, 92, 92, 0.5); 
+    color: #ffcccc;
+}
+.player-striker-mode .extra-text::placeholder,
+.opponent-striker-mode .extra-text::placeholder {
+    color: rgba(205, 92, 92, 0.7);
+}
+
+.player-simple-mode .extra-area-wrapper,
+.opponent-simple-mode .extra-area-wrapper {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: #000;
+}
+.player-simple-mode .extra-header-input,
+.opponent-simple-mode .extra-header-input {
+    background-color: #f0f0f0;
+    color: #000;
+    border-color: #ccc;
+}
+.player-simple-mode .extra-text,
+.opponent-simple-mode .extra-text {
+    background-color: transparent;
+    border-color: rgba(102, 102, 102, 0.5);
+    color: #000;
+}
+.player-simple-mode .extra-text::placeholder,
+.opponent-simple-mode .extra-text::placeholder {
+    color: #999;
+}
+
+#playmat-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: -1;
+    display: none;
+}
+
+body.playmat-active #playmat-background {
+    display: block;
+}
+
+body.playmat-active .main-container {
+    background-color: rgba(0, 0, 0, 0.1) !important; 
+}
+
+body.playmat-active .player-wrapper .game-board,
+body.playmat-active .opponent-wrapper .game-board,
+body.playmat-active .player-wrapper .zone,
+body.playmat-active .opponent-wrapper .zone,
+body.playmat-active .player-wrapper .hand-controls-frame,
+body.playmat-active .opponent-wrapper .hand-controls-frame,
+body.playmat-active .player-wrapper .hand-zone-slots,
+body.playmat-active .opponent-wrapper .hand-zone-slots,
+body.playmat-active .player-wrapper .extra-area-wrapper,
+body.playmat-active .opponent-wrapper .extra-area-wrapper {
+    background-color: rgba(40, 40, 60, 0.4) !important; 
+    box-shadow: none; 
+}
+
+body.playmat-active .card-slot,
+body.playmat-active .card-slot[data-has-card="false"] {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+body.playmat-active .zone-header {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    opacity: 1 !important;
+}
+
+body.playmat-active #opponent-extra-image-zone,
+body.playmat-active #extra-image-zone {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+body.playmat-active .common-preview-wrapper {
+    background-color: rgba(42, 42, 78, 0.9) !important; 
+}
+
+body.playmat-active .card-preview-area {
+    background-color: #2a2a4e !important; 
+    opacity: 1 !important;
+}
+
+/* 負け演出用のスタイル */
+.game-result-message.result-lose {
+    color: #5a0000; /* 暗い血のような赤 */
+    text-shadow: 
+        0 0 5px #000, 
+        0 0 15px #8b0000,
+        0 0 30px #000;
+    font-family: serif; 
+    letter-spacing: 2px;
 }

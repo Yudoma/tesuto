@@ -1,5 +1,3 @@
-// 汎用ユーティリティ関数
-
 function getBaseId(prefixedId) {
     if (!prefixedId) return null;
     return prefixedId.replace('opponent-', '');
@@ -52,7 +50,6 @@ function getParentZoneId(element) {
     return closestZone ? closestZone.id : null;
 }
 
-// 配置SE再生ヘルパー (リプレイなどでも使用)
 function playPlacementSe(baseZoneId) {
     if (baseZoneId === 'spell') {
         playSe('スペル配置.mp3');
@@ -67,29 +64,22 @@ function playPlacementSe(baseZoneId) {
     }
 }
 
-// --- オーディオ機能 (BGM/SE) ---
-
 const loopSeInstances = {};
 
-// SE再生 (フォールバック機能付き)
 function playSe(filename, isLoop = false) {
-    // SE個別設定のチェック (無効なら再生しない)
-    // リプレイ中もこの設定に従う
     if (typeof seConfig !== 'undefined' && seConfig[filename] === false) return;
 
-    // 音量チェック (0の場合は再生しない)
     if (typeof seVolume !== 'undefined' && seVolume <= 0) return;
 
     const path = `./se/${filename}`;
     const audio = new Audio(path);
     
-    // 音量適用 (0-10 -> 0.0-1.0)
     if (typeof seVolume !== 'undefined') {
         audio.volume = seVolume / 10;
     }
 
     if (isLoop) {
-        if (loopSeInstances[filename]) return; // 既に再生中なら何もしない
+        if (loopSeInstances[filename]) return;
         
         audio.loop = true;
         audio.play().catch(e => {
@@ -97,18 +87,14 @@ function playSe(filename, isLoop = false) {
         });
         loopSeInstances[filename] = audio;
     } else {
-        // エラーハンドリング（フォールバック）
         audio.onerror = () => {
-            // 指定ファイルがなく、かつそれが「ボタン共通」でない場合、ボタン共通を鳴らす
             if (filename !== 'ボタン共通.mp3') {
-                // console.log(`Fallback: ${filename} not found, playing common button sound.`);
                 playSe('ボタン共通.mp3');
             }
         };
 
         audio.currentTime = 0;
         audio.play().catch(e => {
-            // ユーザー操作なしの自動再生ブロックなどの対応
             console.warn(`SE Play Error (${filename}):`, e);
         });
     }
@@ -123,28 +109,25 @@ function stopSe(filename) {
     }
 }
 
-// BGM再生機能
 function playBgm(filename) {
     if (currentBgmAudio && !currentBgmAudio.paused && currentBgmAudio.src.includes(encodeURIComponent(filename))) {
-        return; // 同じ曲が再生中なら何もしない
+        return;
     }
 
-    stopBgm(); // 既存BGM停止
+    stopBgm();
 
     if (!filename) return;
     
-    // 音量チェック
     if (typeof bgmVolume !== 'undefined' && bgmVolume <= 0) return;
 
     const path = `./bgm/${filename}`;
     currentBgmAudio = new Audio(path);
     
-    // 音量適用 (0-10 -> 0.0-1.0) に 0.5倍を適用
     if (typeof bgmVolume !== 'undefined') {
         currentBgmAudio.volume = (bgmVolume / 10) * 0.5;
     }
     
-    currentBgmAudio.loop = true; // ループ再生
+    currentBgmAudio.loop = true;
 
     currentBgmAudio.play().catch(e => console.error("BGM Play Error:", e));
 }
@@ -164,14 +147,10 @@ function stopBgm() {
 }
 
 function updateBgmVolume() {
-    // 音量適用 (0-10 -> 0.0-1.0) に 0.5倍を適用
     if (currentBgmAudio && typeof bgmVolume !== 'undefined') {
         currentBgmAudio.volume = (bgmVolume / 10) * 0.5;
     }
 }
-
-
-// --- リプレイ機能 ---
 
 let replayInitialState = null;
 
@@ -182,7 +161,6 @@ function startReplayRecording() {
     replayStartTime = Date.now();
     replayInitialState = getAllBoardState(); 
     
-    // UI更新
     const startBtn = document.getElementById('record-start-btn');
     const stopBtn = document.getElementById('record-stop-btn');
     if(startBtn) startBtn.style.display = 'none';
@@ -195,13 +173,11 @@ function stopReplayRecording() {
     if (!isRecording) return;
     isRecording = false;
     
-    // UI更新
     const startBtn = document.getElementById('record-start-btn');
     const stopBtn = document.getElementById('record-stop-btn');
     if(startBtn) startBtn.style.display = 'inline-block';
     if(stopBtn) stopBtn.style.display = 'none';
 
-    // 即座に保存フローへ移行
     setTimeout(() => {
         exportReplayData();
     }, 100);
@@ -229,7 +205,6 @@ function exportReplayData() {
         return; 
     }
 
-    // SE音量設定などを保存するかは任意だが、現状は再生側の設定優先
     const replayData = {
         initialState: replayInitialState,
         log: actionLog,
@@ -270,7 +245,6 @@ function importReplayData() {
                     }
 
                     alert(`「${file.name}」を読み込みました。\n再生ボタンで開始します。`);
-                    // 読み込み完了時に停止状態のUIにする
                     updateReplayUI('stopped');
                 } else {
                     alert("無効なリプレイデータ形式です。");
@@ -284,8 +258,6 @@ function importReplayData() {
     };
     fileInput.click();
 }
-
-// --- 再生制御ロジック ---
 
 function updateReplayUI(state) {
     const playBtn = document.getElementById('replay-play-btn');
@@ -305,7 +277,7 @@ function updateReplayUI(state) {
         }
         if(pauseBtn) pauseBtn.style.display = 'none';
         if(stopBtn) stopBtn.style.display = 'inline-block';
-    } else { // stopped
+    } else {
         if(playBtn) {
             playBtn.style.display = 'inline-block';
             playBtn.textContent = '再生';
@@ -352,7 +324,6 @@ function resumeReplay() {
     isReplayPaused = false;
     updateReplayUI('playing');
     
-    // 再開時は少し待ってから実行
     processNextReplayStep(100);
 }
 
@@ -381,15 +352,12 @@ function processNextReplayStep(forceDelay = null) {
     if (forceDelay !== null) {
         delay = forceDelay;
     } else {
-        // 待機時間設定を確認
         const waitTimeInput = document.getElementById('replay-wait-time-input');
         const fixedWaitTime = waitTimeInput && waitTimeInput.value !== "" ? parseFloat(waitTimeInput.value) * 1000 : null;
 
         if (fixedWaitTime !== null && !isNaN(fixedWaitTime)) {
-            // 指定秒数を使用
             delay = fixedWaitTime;
         } else {
-            // 記録された時間を使用（最大2秒短縮ロジック）
             const currentActionTime = actionLog[currentReplayIndex].time;
             const prevActionTime = currentReplayIndex > 0 ? actionLog[currentReplayIndex - 1].time : 0;
             const rawDiff = currentActionTime - prevActionTime;
@@ -411,7 +379,6 @@ function processNextReplayStep(forceDelay = null) {
     replayTimerIds = [timerId];
 }
 
-// アクション実行ロジック
 function executeAction(action) {
     
     const updatePreviewForAction = (zoneId, slotIndex) => {
@@ -453,7 +420,7 @@ function executeAction(action) {
                     const toBase = getBaseId(getParentZoneId(toSlot));
                     if (toBase === 'grave' || toBase === 'grave-back-slots') playSe('墓地に送る.mp3');
                     else if (toBase === 'exclude' || toBase === 'exclude-back-slots') playSe('除外する.mp3');
-                    else playPlacementSe(toBase); // 変更: ゾーンに応じた配置SE
+                    else playPlacementSe(toBase);
 
                     updatePreviewForAction(action.toZone, action.toSlotIndex);
                 }
@@ -467,7 +434,6 @@ function executeAction(action) {
                 createCardThumbnail(action.cardData, slot, false, false, prefix);
                 updateSlotStackState(slot);
                 
-                // 配置SEをゾーンに応じて再生
                 const baseId = getBaseId(getParentZoneId(slot));
                 playPlacementSe(baseId);
                 
@@ -630,11 +596,9 @@ function executeAction(action) {
                     if(action.subType === 'attack') {
                         playSe('アタック.mp3');
                     } else if(action.subType === 'effect') {
-                        // 効果発動時のエリア別SE分岐
                         const zoneId = getParentZoneId(card.parentNode);
                         const baseZoneId = getBaseId(zoneId);
                         if (baseZoneId.startsWith('mana')) {
-                            // マナエリアはSEなし
                         } else if (baseZoneId === 'spell') {
                             playSe('スペル効果発動.mp3');
                         } else {
@@ -681,7 +645,6 @@ function executeAction(action) {
         case 'stepChange': {
             currentStepIndex = action.index;
             updateStepUI();
-            // ターン開始時のみ専用SE
             if (action.index === 0) {
                 playSe('ターン開始.mp3');
             } else {
@@ -702,7 +665,6 @@ function executeAction(action) {
             break;
         }
         case 'boardFlip': {
-            // リプレイ再生時の盤面反転は無視
             break; 
         }
         case 'autoDecreaseToggle': {
@@ -749,11 +711,9 @@ function executeAction(action) {
             break;
         }
         case 'effectAction':
-            console.log('Replay: Effect Action Triggered (Legacy)');
             playSe('効果発動.mp3');
             break;
         case 'target':
-             console.log('Replay: Target Action Triggered (Legacy)');
             playSe('対象に取る.mp3');
             break;
     }

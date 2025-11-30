@@ -10,6 +10,8 @@
 </head>
 <body>
     
+    <div id="playmat-background"></div>
+
     <div class="main-container"> 
         
         <div class="common-preview-wrapper"> 
@@ -194,6 +196,30 @@
                     
                     <div class="hand-area-container" id="opponent-hand-area-container">
                         <div class="hand-controls-top-wrapper" id="opponent-hand-controls-top-wrapper">
+                            
+                            <div class="extra-area-wrapper">
+                                <input type="text" class="extra-header-input opponent-text-flip" placeholder="-">
+                                <div class="extra-grid">
+                                    <div class="extra-column">
+                                        <div class="extra-row"><input type="text" class="extra-text opponent-text-flip"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text opponent-text-flip"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text opponent-text-flip"></div>
+                                    </div>
+                                    <div class="extra-column">
+                                        <div class="extra-row"><input type="text" class="extra-text opponent-text-flip"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text opponent-text-flip"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text opponent-text-flip"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="zone extra-image-zone" id="opponent-extra-image-zone">
+                                <div class="zone-header opponent-text-flip">フィールドエリア</div>
+                                <div class="slot-container">
+                                    <div class="card-slot"></div>
+                                </div>
+                            </div>
+
                             <div class="zone deck-zone side-deck-zone" id="opponent-side-deck">
                                 <div class="zone-header opponent-text-flip">EXデッキ</div>
                                 <div class="slot-container">
@@ -345,6 +371,30 @@
                     
                     <div class="hand-area-container">
                         <div class="hand-controls-top-wrapper">
+                            
+                            <div class="extra-area-wrapper">
+                                <input type="text" class="extra-header-input" placeholder="-">
+                                <div class="extra-grid">
+                                    <div class="extra-column">
+                                        <div class="extra-row"><input type="text" class="extra-text"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text"></div>
+                                    </div>
+                                    <div class="extra-column">
+                                        <div class="extra-row"><input type="text" class="extra-text"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text"></div>
+                                        <div class="extra-row"><input type="text" class="extra-text"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="zone extra-image-zone" id="extra-image-zone">
+                                <div class="zone-header">フィールドエリア</div>
+                                <div class="slot-container">
+                                    <div class="card-slot"></div>
+                                </div>
+                            </div>
+
                             <div class="zone deck-zone side-deck-zone" id="side-deck">
                                 <div class="zone-header">EXデッキ</div>
                                 <div class="slot-container">
@@ -441,7 +491,8 @@
             <li id="context-menu-flip">カードを反転させる</li>
             <li id="context-menu-change-style">スタイルの変更</li>
             <li id="context-menu-memo">メモ編集</li>
-            <li id="context-menu-add-flavor">フレーバーイラストを追加</li>
+            <li id="context-menu-view-illustration">イラストを詳細に確認する</li>
+            <li id="context-menu-add-flavor">フレーバーイラスト編集</li>
             <li id="context-menu-blocker">ブロッカー効果を付与</li>
             <li id="context-menu-masturbate" style="display:none;">オナニーする</li>
             <li id="context-menu-export">カードをエクスポート</li>
@@ -518,7 +569,7 @@
         </div>
     </div>
     
-    <div id="decoration-settings-modal" class="custom-counter-modal" style="display: none; width: 800px; max-width: 95vw;">
+    <div id="decoration-settings-modal" class="custom-counter-modal" style="display: none; width: 1000px; max-width: 95vw;">
         <div class="custom-counter-header" id="decoration-settings-header" style="display: flex; justify-content: space-between; align-items: center;">
             <span>装飾＆アイコン設定</span>
             <span class="drawer-close-hint" id="decoration-settings-close-btn">✕</span>
@@ -526,8 +577,7 @@
         <div class="custom-counter-content" style="max-height: 70vh; overflow-y: auto;">
             
             <div class="decoration-settings-section">
-                <div class="area-label" style="text-align: left; margin-bottom: 5px; border-bottom: 1px solid #555; padding-bottom: 2px;">Player (自分)</div>
-                <div class="decoration-columns-container" style="display: flex; gap: 5px; overflow-x: auto;">
+                <div class="decoration-columns-container" style="display: flex; gap: 5px; flex-wrap: wrap;">
                     <div class="decoration-column" data-target-type="deck" data-owner="player">
                         <div class="column-header">デッキ</div>
                         <div class="decoration-drop-zone">追加+</div>
@@ -558,7 +608,7 @@
 
             <div class="decoration-settings-section" style="margin-top: 15px;">
                 <div class="area-label" style="text-align: left; margin-bottom: 5px; border-bottom: 1px solid #555; padding-bottom: 2px;">Opponent (相手)</div>
-                <div class="decoration-columns-container" style="display: flex; gap: 5px; overflow-x: auto;">
+                <div class="decoration-columns-container" style="display: flex; gap: 5px; flex-wrap: wrap;">
                     <div class="decoration-column" data-target-type="deck" data-owner="opponent">
                         <div class="column-header">デッキ</div>
                         <div class="decoration-drop-zone">追加+</div>
@@ -599,7 +649,7 @@
                 <div id="battle-confirm-attacker-img" style="width: 100px; height: 140px; background-size: contain; background-repeat: no-repeat; background-position: center; border: 1px solid #555;"></div>
                 <div style="display: flex; align-items: center; gap: 5px;">
                     <span>BP:</span>
-                    <input type="number" id="battle-confirm-attacker-bp" class="lp-counter-input" style="width: 70px;">
+                    <input type="text" id="battle-confirm-attacker-bp" class="lp-counter-input" style="width: 70px;">
                 </div>
             </div>
             
@@ -610,7 +660,7 @@
                 <div id="battle-confirm-target-img" style="width: 100px; height: 140px; background-size: contain; background-repeat: no-repeat; background-position: center; border: 1px solid #555;"></div>
                 <div style="display: flex; align-items: center; gap: 5px;">
                     <span>BP:</span>
-                    <input type="number" id="battle-confirm-target-bp" class="lp-counter-input" style="width: 70px;">
+                    <input type="text" id="battle-confirm-target-bp" class="lp-counter-input" style="width: 70px;">
                 </div>
             </div>
         </div>
