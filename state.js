@@ -54,7 +54,7 @@ const seConfig = {
     '対象に取る.mp3': true,
     'アタック.mp3': true,
     '常時発動.mp3': true,
-    'ブロッカー.wav': true,
+    'ブロッカー.mp3': true,
     'オナニー.wav': true,
     'ターン開始.mp3': true,
     'BPプラス.mp3': true,
@@ -75,8 +75,8 @@ const effectConfig = {
 
 // 自動処理設定
 const autoConfig = {
-    'autoManaTap': true,       // マナエリアでタップ時にマナ+1
-    'autoManaPlacement': true, // マナエリアにカード配置時マナ+1
+    'autoManaTap': true,       // マナエリア1でタップ時にマナ+1
+    'autoManaPlacement': true, // マナエリア1にカード配置時マナ+1
     'autoBattleCalc': true,    // 「アタック/攻撃」時のBP計算
     'autoManaTapInZone': true, // マナゾーンに置いた際にタップ状態で置く
     'autoAttackTap': true,     // 「アタック/攻撃」後タップ状態にする

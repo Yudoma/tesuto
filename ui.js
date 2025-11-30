@@ -1070,8 +1070,8 @@ function initializeTokens() {
         }
     };
 
-    const token1Memo = '[属性:S]/#e0e0e0/#555/1.0/表示/\n[マナ:1]/#e0e0e0/#555/1.0/表示/\n[BP:1000]/#e0e0e0/#555/1.0/表示/\n[カード名:トークンカード（S）]/#e0e0e0/#555/1.0/表示/\n[フレーバーテキスト:女王]/#fff/#555/1.0/非表示/\n[効果:なし]/#e0e0e0/#555/1.0/表示/\n';
-    const token2Memo = '[属性:M]/#e0e0e0/#555/1.0/表示/\n[マナ:1]/#e0e0e0/#555/1.0/表示/\n[BP:1000]/#e0e0e0/#555/1.0/表示/\n[カード名:トークンカード（M）]/#e0e0e0/#555/1.0/表示/\n[フレーバーテキスト:奴隷]/#fff/#555/1.0/非表示/\n[効果:なし]/#e0e0e0/#555/1.0/表示/\n';
+    const token1Memo = '[カード名:トークンカード（S）]/#e0e0e0/#555/1.0/表示/\n[属性:S]/#e0e0e0/#555/1.0/表示/\n[マナ:1]/#e0e0e0/#555/1.0/表示/\n[BP:1000]/#e0e0e0/#555/1.0/表示/\n[フレーバーテキスト:女王]/#fff/#555/1.0/非表示/\n[効果:なし]/#e0e0e0/#555/1.0/表示/\n';
+    const token2Memo = '[カード名:トークンカード（M）]/#e0e0e0/#555/1.0/表示/\n[属性:M]/#e0e0e0/#555/1.0/表示/\n[マナ:1]/#e0e0e0/#555/1.0/表示/\n[BP:1000]/#e0e0e0/#555/1.0/表示/\n[フレーバーテキスト:奴隷]/#fff/#555/1.0/非表示/\n[効果:なし]/#e0e0e0/#555/1.0/表示/\n';
 
     initToken('token-zone-slots', 0, './decoration/トークン1.png', token1Memo);
     initToken('token-zone-slots', 1, './decoration/トークン2.png', token2Memo);
@@ -1720,7 +1720,7 @@ function setupUI() {
         }
         
         if (isMana) {
-            // マナエリアならSEなし
+            // マナエリア1ならSEなし
         } else if (isSpell) {
             playSe('スペル効果発動.mp3');
         } else {
@@ -1748,7 +1748,7 @@ function setupUI() {
         closeContextMenu(); 
     });
     blockerMenuItem.addEventListener('click', () => {
-        playSe('ブロッカー.wav');
+        playSe('ブロッカー.mp3');
         if (typeof currentBlockerHandler === 'function') currentBlockerHandler();
         closeContextMenu();
     });

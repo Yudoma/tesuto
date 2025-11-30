@@ -346,21 +346,7 @@ function setupBoardButtons(idPrefix) {
         }
     });
     
-    // システムボタン (stopPropagation追加)
-    document.getElementById(idPrefix + 'system-btn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        playSe('ボタン共通.mp3');
-        const commonDrawer = document.getElementById('common-drawer');
-        if (commonDrawer) {
-            // トグル動作はui.js側で制御するか、ここでもトグルにする
-            // ここではシンプルにopenクラスを付与するだけに留め、ui.js側で競合しないようにする
-            // ※ui.jsのトグル化対応に合わせて、ここでは単純な開く動作、またはui.jsのロジックに任せる
-            commonDrawer.classList.add('open');
-            if (typeof activateDrawerTab === 'function') {
-                activateDrawerTab('common-spec-panel', commonDrawer);
-            }
-        }
-    });
+
     
     document.getElementById(idPrefix + 'export-deck-btn')?.addEventListener('click', () => {
         playSe('ボタン共通.mp3');

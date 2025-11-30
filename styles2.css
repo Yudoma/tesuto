@@ -1926,6 +1926,30 @@ body.simple-mode-active #decoration-settings-header {
     margin-right: 1px;
 }
 
+.opponent-wrapper .extra-area-wrapper {
+    transform: scaleY(-1);
+}
+
+body.board-flipped .opponent-wrapper .extra-area-wrapper {
+    transform: scaleY(1);
+}
+
+body.board-flipped .player-wrapper .extra-area-wrapper {
+    transform: scaleY(-1);
+}
+
+.opponent-wrapper .hand-buttons {
+    transform: scaleY(-1);
+}
+
+body.board-flipped .opponent-wrapper .hand-buttons {
+    transform: scaleY(1);
+}
+
+body.board-flipped .player-wrapper .hand-buttons {
+    transform: scaleY(-1);
+}
+
 .extra-header-input {
     width: 100%;
     box-sizing: border-box;

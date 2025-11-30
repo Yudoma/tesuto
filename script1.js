@@ -575,7 +575,7 @@ function executeAction(action) {
                     if (action.isBlocker) {
                         card.dataset.isBlocker = 'true';
                         addBlockerOverlay(card);
-                        playSe('ブロッカー.wav');
+                        playSe('ブロッカー.mp3');
                     } else {
                         card.dataset.isBlocker = 'false';
                         removeBlockerOverlay(card);

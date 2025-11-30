@@ -1,3 +1,65 @@
+// --- PNGデータ抽出関連の関数 ---
+
+// PNGファイルからメタデータを非同期で抽出する関数
+async function extractCardDataFromPng(file) {
+    if (!file) return null;
+    
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+
+        // "smCardData"というキーを持つtEXtチャンクを探す
+        const textChunk = findPngChunk(bytes, 'tEXt');
+        if (!textChunk) return null;
+
+        // チャンクデータをデコード
+        const decoder = new TextDecoder('utf-8');
+        const chunkText = decoder.decode(textChunk);
+
+        // キーと値に分離 (null文字で区切られている)
+        const separatorIndex = chunkText.indexOf('\0');
+        if (separatorIndex === -1) return null;
+
+        const key = chunkText.substring(0, separatorIndex);
+        const value = chunkText.substring(separatorIndex + 1);
+
+        if (key === 'smCardData') {
+            return JSON.parse(value);
+        }
+
+        return null;
+    } catch (e) {
+        console.error("PNGメタデータの解析に失敗しました:", e);
+        return null;
+    }
+}
+
+// PNGのバイトデータから特定のチャンクを見つけるヘルパー関数
+function findPngChunk(bytes, type) {
+    // PNGシグネチャをスキップ
+    let offset = 8;
+    
+    while (offset < bytes.length) {
+        // チャンクの長さを読み込む (4バイト)
+        const view = new DataView(bytes.buffer);
+        const length = view.getUint32(offset, false);
+        
+        // チャンクタイプを読み込む (4バイト)
+        const chunkType = String.fromCharCode.apply(null, bytes.subarray(offset + 4, offset + 8));
+
+        if (chunkType === type) {
+            // チャンクデータを返す
+            return bytes.subarray(offset + 8, offset + 8 + length);
+        }
+        
+        // 次のチャンクへ移動 (Length + Type + Data + CRC = 4 + 4 + length + 4 = 12 + length)
+        offset += 12 + length;
+    }
+    
+    return null;
+}
+
+
 const DEFAULT_CARD_MEMO = `[カード名:-]/#e0e0e0/#555/1.0/非表示/
 [属性:-]/#e0e0e0/#555/1.0/非表示/
 [マナ:-]/#e0e0e0/#555/1.0/非表示/
@@ -480,229 +542,98 @@ function handleStockDecorationDrop(stockItem, targetSlot, idPrefix) {
     }
 }
 
-function handleFileDrop(e, targetSlot, idPrefix) {
+async function handleFileDrop(e, targetSlot, idPrefix) {
     const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
     if (files.length === 0) return;
 
-    const targetParentZoneId = getParentZoneId(targetSlot);
-    const targetParentBaseId = getBaseId(targetParentZoneId);
+    const processFile = async (file, currentSlot) => {
+        const cardData = await extractCardDataFromPng(file);
+        let memo = DEFAULT_CARD_MEMO;
 
-    if (targetParentBaseId === 'icon-zone') {
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const imageData = event.target.result;
-            const existingThumbnail = targetSlot.querySelector('.thumbnail[data-is-decoration="true"]');
+        if (cardData) {
+            // BP/スペルの判定
+            const isNumericBp = /^\d+$/.test(cardData.bp.trim());
+            const bpText = cardData.bp.trim() === '' ? '[BP:-]' : (isNumericBp ? `[BP:${cardData.bp}]` : `[スペル:${cardData.bp}]`);
+            
+            memo = `[カード名:${cardData.cardName}]////非表示/
+[属性:${cardData.attribute}]////非表示/
+[マナ:${cardData.mana}]////非表示/
+${bpText}////非表示/
+[効果:${cardData.effect}]////非表示/
+[フレーバーテキスト:${cardData.flavor}]////非表示/`;
+        }
+
+        const imageUrl = URL.createObjectURL(file);
+        const targetParentZoneId = getParentZoneId(currentSlot);
+        const targetParentBaseId = getBaseId(targetParentZoneId);
+
+        // --- 各ゾーンごとのカード作成処理 ---
+
+        if (targetParentBaseId === 'icon-zone') {
+            const existingThumbnail = currentSlot.querySelector('.thumbnail[data-is-decoration="true"]');
             if (existingThumbnail) {
                 const existingImg = existingThumbnail.querySelector('img');
-                if (existingImg) existingImg.src = imageData;
-                existingThumbnail.dataset.memo = DEFAULT_CARD_MEMO;
+                if (existingImg) existingImg.src = imageUrl;
+                existingThumbnail.dataset.memo = memo;
             } else {
-                const anyExistingThumbnail = getExistingThumbnail(targetSlot);
-                if (anyExistingThumbnail) targetSlot.removeChild(anyExistingThumbnail);
-                createCardThumbnail({
-                    src: imageData,
-                    isDecoration: true,
-                    memo: DEFAULT_CARD_MEMO,
-                    ownerPrefix: idPrefix
-                }, targetSlot, true, false, idPrefix);
+                createCardThumbnail({ src: imageUrl, isDecoration: true, memo: memo, ownerPrefix: idPrefix }, currentSlot, true, false, idPrefix);
             }
-            playSe('カードを配置する.mp3');
-
-            if (isRecording && typeof recordAction === 'function') {
-                recordAction({
-                    type: 'updateDecoration',
-                    zoneId: targetParentZoneId,
-                    imageData: imageData
-                });
-                recordAction({
-                    type: 'memoChange',
-                    zoneId: targetParentZoneId,
-                    cardIndex: 0,
-                    memo: DEFAULT_CARD_MEMO
-                });
-            }
-
-            if (typeof window.updatePlaymatState === 'function') {
-                window.updatePlaymatState();
-            }
-        };
-        reader.readAsDataURL(file);
-        return;
-    }
-
-    const pileZones = ['deck', 'grave', 'exclude', 'side-deck'];
-    const isPileZone = pileZones.includes(targetParentBaseId);
-
-    const isDirectBoardSlot = !targetParentBaseId.endsWith('-back-slots') 
-                              && targetParentBaseId !== 'hand-zone' 
-                              && targetParentBaseId !== 'free-space-slots'
-                              && targetParentBaseId !== 'token-zone-slots'
-                              && targetParentBaseId !== 'c-free-space'
-                              && !isPileZone;
-
-    if (isDirectBoardSlot) {
-        const file = files[0]; 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const isTargetStackable = stackableZones.includes(targetParentBaseId);
-                const existingThumbnail = getExistingThumbnail(targetSlot);
-                
-                if (!isTargetStackable && existingThumbnail) {
-                    targetSlot.removeChild(existingThumbnail);
-                    resetSlotToDefault(targetSlot);
-                }
-                
-                const imageData = event.target.result;
-                const thumb = createCardThumbnail({
-                    src: imageData,
-                    memo: DEFAULT_CARD_MEMO,
-                    ownerPrefix: idPrefix
-                }, targetSlot, false, false, idPrefix);
-                
-                // プレイマット用画像の場合はタイムスタンプを付与
-                if (targetParentBaseId === 'extra-image-zone') {
-                    thumb.dataset.timestamp = Date.now();
-                }
-                
-                if (isTargetStackable) {
-                    updateSlotStackState(targetSlot);
-                }
-                
-                const targetZonesForCost = ['special1', 'battle', 'special2', 'spell', 'mana', 'mana-left', 'mana-right'];
-                const isTargetZone = targetZonesForCost.some(z => targetParentBaseId.includes(z));
-                if (isTargetZone) {
-                    tryAutoManaCost(DEFAULT_CARD_MEMO, idPrefix);
-                }
-
-                const isMana = targetParentBaseId.startsWith('mana');
-                if (isMana) {
-                    playSe('マナ配置.mp3');
-                    const manaInput = document.getElementById(idPrefix + 'mana-counter-value');
-                    if (manaInput) {
-                        manaInput.value = parseInt(manaInput.value || 0) + 1;
-                        if (isRecording && typeof recordAction === 'function') {
-                            recordAction({
-                                type: 'counterChange',
-                                inputId: idPrefix + 'mana-counter-value',
-                                change: 1
-                            });
-                        }
-                    }
-                    tryAutoManaTapIn(targetSlot, idPrefix, targetParentZoneId);
-                } else {
-                    playPlacementSe(targetParentBaseId);
-                }
-
-                if (isRecording && typeof recordAction === 'function') {
-                    recordAction({
-                        type: 'newCard',
-                        zoneId: targetParentZoneId,
-                        slotIndex: Array.from(targetSlot.parentNode.children).indexOf(targetSlot),
-                        cardData: {
-                            src: imageData,
-                            memo: DEFAULT_CARD_MEMO
-                        }
-                    });
-                }
-
-                if (typeof window.updatePlaymatState === 'function') {
-                    window.updatePlaymatState();
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    } else {
-        
-        const addFilesToContainer = (fileList, containerId) => {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            
-            let slotsContainer = container.querySelector('.deck-back-slot-container, .free-space-slot-container, .token-slot-container') || container;
-            const allSlots = Array.from(slotsContainer.querySelectorAll('.card-slot'));
-            const availableSlots = allSlots.filter(s => !s.querySelector('.thumbnail'));
-            
-            fileList.forEach((file, index) => {
-                if (availableSlots[index]) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const imageData = event.target.result;
-                        const owner = (containerId === 'c-free-space') ? '' : idPrefix;
-                        createCardThumbnail({
-                            src: imageData,
-                            memo: DEFAULT_CARD_MEMO,
-                            ownerPrefix: owner
-                        }, availableSlots[index], false, false, owner);
-                        
-                        if (containerId === 'c-free-space') {
-                            const thumb = availableSlots[index].querySelector('.thumbnail');
-                            if (thumb) delete thumb.dataset.ownerPrefix;
-                        }
-                        
-                        if (isRecording && typeof recordAction === 'function') {
-                            const slotIndex = allSlots.indexOf(availableSlots[index]);
-                            recordAction({
-                                type: 'newCard',
-                                zoneId: containerId,
-                                slotIndex: slotIndex,
-                                cardData: {
-                                    src: imageData,
-                                    memo: DEFAULT_CARD_MEMO
-                                }
-                            });
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            if (fileList.length > 0) {
-                const baseId = getBaseId(containerId).replace('-back-slots', '');
-                playPlacementSe(baseId);
-            }
-
-            setTimeout(() => {
-                arrangeSlots(containerId);
-                const baseId = getBaseId(containerId).replace('-back-slots', '');
-                if (['deck', 'grave', 'exclude', 'side-deck'].includes(baseId)) {
-                    syncMainZoneImage(baseId, idPrefix);
-                }
-                
-                if (typeof window.updatePlaymatState === 'function') {
-                    window.updatePlaymatState();
-                }
-            }, 100);
-        };
-
-        if (targetParentBaseId === 'hand-zone') {
-            const handContainerId = idPrefix + 'hand-zone';
-            const handContainer = document.getElementById(handContainerId);
-            const availableHandSlots = Array.from(handContainer.querySelectorAll('.card-slot')).filter(s => !s.querySelector('.thumbnail'));
-            
-            const filesForHand = files.slice(0, availableHandSlots.length);
-            const filesForDeck = files.slice(availableHandSlots.length);
-            
-            if (filesForHand.length > 0) {
-                addFilesToContainer(filesForHand, handContainerId);
-            }
-            
-            if (filesForDeck.length > 0) {
-                addFilesToContainer(filesForDeck, idPrefix + 'deck-back-slots');
-            }
-            
         } else {
-            let destinationId;
-            
-            if (isPileZone) {
-                destinationId = idPrefix + targetParentBaseId + '-back-slots';
-            } else if (targetParentBaseId.endsWith('-back-slots') || targetParentBaseId === 'free-space-slots' || targetParentBaseId === 'token-zone-slots' || targetParentBaseId === 'c-free-space') {
-                destinationId = targetParentZoneId;
-            } else {
-                destinationId = idPrefix + 'deck-back-slots'; 
+            const isTargetStackable = stackableZones.includes(targetParentBaseId);
+            const existingThumbnail = getExistingThumbnail(currentSlot);
+            if (!isTargetStackable && existingThumbnail) {
+                currentSlot.removeChild(existingThumbnail);
+                resetSlotToDefault(currentSlot);
             }
-            
-            addFilesToContainer(files, destinationId);
+             createCardThumbnail({ src: imageUrl, memo: memo, ownerPrefix: idPrefix }, currentSlot, false, false, idPrefix);
+            if (isTargetStackable) {
+                updateSlotStackState(currentSlot);
+            }
+        }
+        
+        // --- 後処理 ---
+        playPlacementSe(targetParentBaseId);
+        if (targetParentBaseId.startsWith('mana')) {
+            tryAutoManaTapIn(currentSlot, idPrefix, targetParentZoneId);
+        }
+        if (['special1', 'battle', 'special2', 'spell', 'mana', 'mana-left', 'mana-right'].some(z => targetParentBaseId.includes(z))) {
+            tryAutoManaCost(memo, idPrefix);
+        }
+        if (typeof window.updatePlaymatState === 'function') {
+            window.updatePlaymatState();
+        }
+    };
+
+    const targetParentZoneId = getParentZoneId(targetSlot);
+    const targetParentBaseId = getBaseId(targetParentZoneId);
+    const isSlotSpecificDrop = targetSlot.classList.contains('card-slot');
+
+    if (isSlotSpecificDrop && !targetParentBaseId.endsWith('-back-slots') && !targetParentBaseId.includes('free-space')) {
+         // 個別のスロットへのドロップ (ただしドロワーの汎用エリアは除く)
+        await processFile(files[0], targetSlot);
+    } else {
+         // ドロワーなど、空きスロットに順番に配置するゾーンへのドロップ
+        const container = document.getElementById(targetParentZoneId);
+        if (!container) return;
+        
+        let slotsContainer = container.querySelector('.deck-back-slot-container, .free-space-slot-container, .token-slot-container');
+        if (!slotsContainer) return; // スロットコンテナがなければ何もしない
+
+        const allSlots = Array.from(slotsContainer.querySelectorAll('.card-slot'));
+        let availableSlots = allSlots.filter(s => !s.querySelector('.thumbnail'));
+
+        // ドロップ対象のスロットが空なら、そこを優先的に使う
+        if (targetSlot.classList.contains('card-slot') && !getExistingThumbnail(targetSlot)) {
+            const isTargetInAvailable = availableSlots.some(s => s === targetSlot);
+            if (isTargetInAvailable) {
+                availableSlots = [targetSlot, ...availableSlots.filter(s => s !== targetSlot)];
+            }
+        }
+        
+        for (let i = 0; i < files.length; i++) {
+            if (availableSlots[i]) {
+                await processFile(files[i], availableSlots[i]);
+            }
         }
     }
 }
