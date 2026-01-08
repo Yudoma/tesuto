@@ -1,0 +1,12 @@
+{
+  "name": "heretic",
+  "title": "Heretic",
+  "description": "Advanced debugging tools (hooks + SVD weight analysis). Content-agnostic infrastructure plugin.",
+  "frontend": {
+    "modes": [
+      "text"
+    ],
+    "module": "frontend_plugin.js",
+    "order": 900
+  }
+}
