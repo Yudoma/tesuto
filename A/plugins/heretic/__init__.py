@@ -1,1 +1,0 @@
-# heretic plugin package
